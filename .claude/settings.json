@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "language": "Indonesian",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(rtk git status:*)",
+      "Bash(rtk git diff:*)",
+      "Bash(rtk git log:*)",
+      "Bash(rtk grep:*)",
+      "Bash(rtk read:*)",
+      "Bash(rtk find:*)",
+      "Bash(rtk tree:*)",
+      "Bash(rtk uv run pytest:*)",
+      "Bash(rtk uv run ruff:*)",
+      "Bash(rtk uv run mypy:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)"
+    ]
+  }
+}

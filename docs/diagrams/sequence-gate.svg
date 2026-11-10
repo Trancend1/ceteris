@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 960 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="sequence-gate-ci-title sequence-gate-ci-desc" id="sequence-gate-root">
+        <title id="sequence-gate-ci-title">Sequence gate CI</title>
+        <desc id="sequence-gate-ci-desc">Pipeline CI meminta keputusan gate, API membuat job dan mengantrikannya, worker menghitung estimasi dan menulis hasil, lalu CI melakukan polling sampai API mengembalikan keputusan allow, warn, atau block.</desc>
+        <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #sequence-gate-root { --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace; }
+      #sequence-gate-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #sequence-gate-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#sequence-gate-root .diagram-container { overflow-x: visible; }
+}</style>
+<marker id="sequence-gate-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+<marker id="sequence-gate-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
+<marker id="sequence-gate-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+<marker id="sequence-gate-arrow-open" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polyline points="0 0, 8 3, 0 6" fill="none" stroke="#4f5d75" stroke-width="1.2"/></marker>
+</defs>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+<line x1="112" y1="112" x2="112" y2="580" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,4" stroke-opacity="0.30"/>
+<line x1="296" y1="112" x2="296" y2="580" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,4" stroke-opacity="0.30"/>
+<line x1="480" y1="112" x2="480" y2="580" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,4" stroke-opacity="0.30"/>
+<line x1="664" y1="112" x2="664" y2="580" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,4" stroke-opacity="0.30"/>
+<line x1="848" y1="112" x2="848" y2="580" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,4" stroke-opacity="0.30"/>
+<rect x="72" y="412" width="272" height="100" rx="4" fill="none" stroke="#2d3142" stroke-width="1" stroke-opacity="0.30"/>
+<rect x="72" y="412" width="44" height="16" rx="2" fill="#f5f5f5" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.30"/>
+<text x="94" y="424" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" font-weight="500" text-anchor="middle" letter-spacing="0.18em">LOOP</text>
+<text x="124" y="424" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">[status = berjalan]</text>
+<rect x="292" y="140" width="8" height="120" fill="#4f5d75" stroke="#4f5d75" stroke-width="0.8" fill-opacity="0.15"/>
+<rect x="660" y="280" width="8" height="116" fill="#4f5d75" stroke="#4f5d75" stroke-width="0.8" fill-opacity="0.15"/>
+<rect x="292" y="440" width="8" height="56" fill="#4f5d75" stroke="#4f5d75" stroke-width="0.8" fill-opacity="0.15"/>
+<rect x="292" y="528" width="8" height="24" fill="#4f5d75" stroke="#4f5d75" stroke-width="0.8" fill-opacity="0.15"/>
+<path d="M112 152 L292 152" fill="none" stroke="#2e5aa8" stroke-width="1" marker-end="url(#sequence-gate-arrow-link)"/>
+<path d="M300 184 L848 184" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#sequence-gate-arrow)"/>
+<path d="M300 216 L480 216" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#sequence-gate-arrow-open)"/>
+<path d="M292 248 L112 248" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#sequence-gate-arrow)"/>
+<path d="M480 288 L660 288" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#sequence-gate-arrow-open)"/>
+<path d="M668 316 L700 316 A8 8 0 0 1 708 324 L708 336 A8 8 0 0 1 700 344 L668 344" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#sequence-gate-arrow)"/>
+<path d="M668 380 L848 380" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#sequence-gate-arrow)"/>
+<path d="M112 452 L292 452" fill="none" stroke="#2e5aa8" stroke-width="1" marker-end="url(#sequence-gate-arrow-link)"/>
+<path d="M292 484 L112 484" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#sequence-gate-arrow)"/>
+<path d="M292 540 L112 540" fill="none" stroke="#bf4520" stroke-width="1.5" marker-end="url(#sequence-gate-arrow-accent)"/>
+<rect x="174.0" y="134" width="60" height="12" rx="2" fill="#f5f5f5"/><text x="204.0" y="143" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">GATE CHECK</text>
+<rect x="548.0" y="166" width="48" height="12" rx="2" fill="#f5f5f5"/><text x="572.0" y="175" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">BUAT JOB</text>
+<rect x="368.0" y="198" width="44" height="12" rx="2" fill="#f5f5f5"/><text x="390.0" y="207" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">ENQUEUE</text>
+<rect x="180.0" y="230" width="48" height="12" rx="2" fill="#f5f5f5"/><text x="204.0" y="239" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">202 + ID</text>
+<rect x="560.0" y="270" width="24" height="12" rx="2" fill="#f5f5f5"/><text x="572.0" y="279" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">JOB</text>
+<rect x="716" y="324" width="48" height="12" rx="2" fill="#f5f5f5"/><text x="740.0" y="333" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">ESTIMASI</text>
+<rect x="724.0" y="362" width="64" height="12" rx="2" fill="#f5f5f5"/><text x="756.0" y="371" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">TULIS HASIL</text>
+<rect x="164.0" y="434" width="80" height="12" rx="2" fill="#f5f5f5"/><text x="204.0" y="443" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">GET /GATE/{ID}</text>
+<rect x="170.0" y="466" width="68" height="12" rx="2" fill="#f5f5f5"/><text x="204.0" y="475" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">202 BERJALAN</text>
+<rect x="166.0" y="522" width="76" height="12" rx="2" fill="#f5f5f5"/><text x="204.0" y="531" fill="#bf4520" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">200 KEPUTUSAN</text>
+<text x="204" y="560" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">allow · warn · block + alasan</text>
+<rect x="40" y="72" width="144" height="40" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="72" width="144" height="40" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<text x="112.0" y="96.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Pipeline CI</text>
+<rect x="224" y="72" width="144" height="40" rx="6" fill="#f5f5f5"/>
+<rect x="224" y="72" width="144" height="40" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<text x="296.0" y="96.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">API</text>
+<rect x="408" y="72" width="144" height="40" rx="6" fill="#f5f5f5"/>
+<rect x="408" y="72" width="144" height="40" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<text x="480.0" y="96.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Antrian</text>
+<rect x="592" y="72" width="144" height="40" rx="6" fill="#f5f5f5"/>
+<rect x="592" y="72" width="144" height="40" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<text x="664.0" y="96.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Worker</text>
+<rect x="776" y="72" width="144" height="40" rx="6" fill="#f5f5f5"/>
+<rect x="776" y="72" width="144" height="40" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="848.0" y="96.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Postgres</text>
+<line x1="40" y1="592" x2="920" y2="592" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.10"/>
+<text x="40" y="612" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" font-weight="500" letter-spacing="0.18em">KETERANGAN</text>
+<line x1="152" y1="609" x2="172" y2="609" stroke="#2e5aa8" stroke-width="1"/>
+<text x="180" y="612" fill="#4f5d75" font-size="10" font-family="'Geist', system-ui, sans-serif">Panggilan dari luar</text>
+<line x1="328" y1="609" x2="348" y2="609" stroke="#4f5d75" stroke-width="1"/>
+<text x="356" y="612" fill="#4f5d75" font-size="10" font-family="'Geist', system-ui, sans-serif">Panggilan internal</text>
+<line x1="496" y1="609" x2="516" y2="609" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4"/>
+<text x="524" y="612" fill="#4f5d75" font-size="10" font-family="'Geist', system-ui, sans-serif">Balasan / async</text>
+<line x1="648" y1="609" x2="668" y2="609" stroke="#bf4520" stroke-width="1.5"/>
+<text x="676" y="612" fill="#4f5d75" font-size="10" font-family="'Geist', system-ui, sans-serif">Keputusan akhir</text>
+      </svg>

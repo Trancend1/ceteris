@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 960 504" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="pipeline-eksperimen-title pipeline-eksperimen-desc" id="alur-data-root">
+        <title id="pipeline-eksperimen-title">Alur data offline ke online</title>
+        <desc id="pipeline-eksperimen-desc">Data mengalir dari korpus OpenML-CC18 melalui korupsi terkontrol, pelatihan, dan quality profile ke run store dan evaluasi LODO yang menjawab RQ1–RQ3, lalu artefak model yang sama dipakai ceteris scan pada data kotor asli untuk RQ4.</desc>
+        <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #alur-data-root { --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace; }
+      #alur-data-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #alur-data-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#alur-data-root .diagram-container { overflow-x: visible; }
+}</style>
+<marker id="alur-data-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+<marker id="alur-data-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
+<marker id="alur-data-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+<marker id="alur-data-arrow-open" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polyline points="0 0, 8 3, 0 6" fill="none" stroke="#4f5d75" stroke-width="1.2"/></marker>
+</defs>
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+<rect x="24" y="72" width="912" height="228" rx="8" fill="#2d3142" stroke="rgba(45,49,66,0.20)" stroke-dasharray="4,4" fill-opacity="0.02"/><text x="36" y="88" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" font-weight="500" letter-spacing="0.18em">OFFLINE · PIPELINE RISET (NB01–NB09)</text>
+<rect x="24" y="332" width="432" height="104" rx="8" fill="#2d3142" stroke="rgba(45,49,66,0.20)" stroke-dasharray="4,4" fill-opacity="0.02"/><text x="36" y="348" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" font-weight="500" letter-spacing="0.18em">ONLINE · JALUR SCAN (RQ4)</text>
+<path d="M216 132 L264 132" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#alur-data-arrow)"/>
+<path d="M440 132 L488 132" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#alur-data-arrow)"/>
+<path d="M352 160 L352 224" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#alur-data-arrow)"/>
+<path d="M576 160 L576 224" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#alur-data-arrow)"/>
+<path d="M440 252 L488 252" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#alur-data-arrow)"/>
+<path d="M664 252 L712 252" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#alur-data-arrow)"/>
+<path d="M800 280 L800 380 A8 8 0 0 1 792 388 L664 388" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#alur-data-arrow)"/>
+<path d="M488 388 L440 388" fill="none" stroke="#bf4520" stroke-width="1.5" marker-end="url(#alur-data-arrow-accent)"/>
+<path d="M216 388 L264 388" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#alur-data-arrow)"/>
+<rect x="230.0" y="114" width="20" height="12" rx="2" fill="#f5f5f5"/><text x="240.0" y="123" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">D0</text>
+<rect x="442.0" y="114" width="44" height="12" rx="2" fill="#f5f5f5"/><text x="464.0" y="123" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">D0 + DK</text>
+<rect x="360" y="186" width="20" height="12" rx="2" fill="#f5f5f5"/><text x="370.0" y="195" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">DK</text>
+<rect x="584" y="186" width="28" height="12" rx="2" fill="#f5f5f5"/><text x="598.0" y="195" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">ΔAUC</text>
+<rect x="444.0" y="234" width="40" height="12" rx="2" fill="#f5f5f5"/><text x="464.0" y="243" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">PROFIL</text>
+<rect x="714.0" y="370" width="36" height="12" rx="2" fill="#f5f5f5"/><text x="732.0" y="379" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">RILIS</text>
+<rect x="450.0" y="370" width="28" height="12" rx="2" fill="#f5f5f5"/><text x="464.0" y="379" fill="#bf4520" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">MUAT</text>
+<rect x="228.0" y="370" width="24" height="12" rx="2" fill="#f5f5f5"/><text x="240.0" y="379" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">CSV</text>
+<rect x="40" y="104" width="176" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="104" width="176" height="56" rx="6" fill="#4f5d75" stroke="#5a6580" stroke-width="1" fill-opacity="0.10"/>
+<rect x="48" y="110" width="20" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.45" stroke-width="0.8"/><text x="58.0" y="119" fill="#4f5d75" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">E0</text>
+<text x="128.0" y="138.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Korpus D₀</text>
+<text x="128.0" y="152.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">OpenML-CC18 · split 80/20</text>
+<rect x="264" y="104" width="176" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="264" y="104" width="176" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="272" y="110" width="32" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.45" stroke-width="0.8"/><text x="288.0" y="119" fill="#4f5d75" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">F-S02</text>
+<text x="352.0" y="138.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Korupsi terkontrol</text>
+<text x="352.0" y="152.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">jenis · mekanisme · level</text>
+<rect x="488" y="104" width="176" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="488" y="104" width="176" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="496" y="110" width="32" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.45" stroke-width="0.8"/><text x="512.0" y="119" fill="#4f5d75" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">F-S03</text>
+<text x="576.0" y="138.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Latih + ukur ΔAUC</text>
+<text x="576.0" y="152.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">LightGBM · test bersih</text>
+<rect x="264" y="224" width="176" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="264" y="224" width="176" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="272" y="230" width="32" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.45" stroke-width="0.8"/><text x="288.0" y="239" fill="#4f5d75" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">F-S04</text>
+<text x="352.0" y="258.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">dqprofile v1</text>
+<text x="352.0" y="272.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">hanya dari data kotor</text>
+<rect x="488" y="224" width="176" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="488" y="224" width="176" height="56" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<rect x="496" y="230" width="32" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.45" stroke-width="0.8"/><text x="512.0" y="239" fill="#4f5d75" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+<text x="576.0" y="258.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Run store</text>
+<text x="576.0" y="272.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">corruption_run · ablation</text>
+<rect x="712" y="224" width="176" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="712" y="224" width="176" height="56" rx="6" fill="#bf4520" stroke="#bf4520" stroke-width="1.2" fill-opacity="0.08"/>
+<rect x="720" y="230" width="32" height="12" rx="2" fill="none" stroke="#bf4520" stroke-opacity="0.45" stroke-width="0.8"/><text x="736.0" y="239" fill="#bf4520" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">RQ1–3</text>
+<text x="800.0" y="258.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">LODO bersarang</text>
+<text x="800.0" y="272.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">meta-model + baseline a–d</text>
+<rect x="488" y="360" width="176" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="488" y="360" width="176" height="56" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<rect x="496" y="366" width="20" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.45" stroke-width="0.8"/><text x="506.0" y="375" fill="#4f5d75" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">G3</text>
+<text x="576.0" y="394.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Artefak rilis v1</text>
+<text x="576.0" y="408.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">model · kalibrator · OOD</text>
+<rect x="264" y="360" width="176" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="264" y="360" width="176" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="272" y="366" width="24" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.45" stroke-width="0.8"/><text x="284.0" y="375" fill="#4f5d75" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">RQ4</text>
+<text x="352.0" y="394.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">ceteris scan</text>
+<text x="352.0" y="408.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">ScanReport v1 · status</text>
+<rect x="40" y="360" width="176" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="40" y="360" width="176" height="56" rx="6" fill="#4f5d75" stroke="#5a6580" stroke-width="1" fill-opacity="0.10"/>
+<rect x="48" y="366" width="20" height="12" rx="2" fill="none" stroke="#4f5d75" stroke-opacity="0.45" stroke-width="0.8"/><text x="58.0" y="375" fill="#4f5d75" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">E4</text>
+<text x="128.0" y="394.0" fill="#2d3142" font-size="12" font-family="'Geist', system-ui, sans-serif" font-weight="600" text-anchor="middle">Data kotor asli</text>
+<text x="128.0" y="408.0" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">3–5 pasangan CleanML</text>
+<line x1="40" y1="456" x2="920" y2="456" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+<text x="40" y="476" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" font-weight="500" letter-spacing="0.18em">KETERANGAN</text>
+<rect x="152" y="467" width="20" height="12" rx="3" fill="#bf4520" stroke="#bf4520" stroke-width="1.2" fill-opacity="0.08"/>
+<text x="180" y="476" fill="#4f5d75" font-size="10" font-family="'Geist', system-ui, sans-serif">Komponen inti</text>
+<rect x="292" y="467" width="20" height="12" rx="3" fill="#4f5d75" stroke="#5a6580" stroke-width="1" fill-opacity="0.10"/>
+<text x="320" y="476" fill="#4f5d75" font-size="10" font-family="'Geist', system-ui, sans-serif">Masukan data</text>
+<rect x="424" y="467" width="20" height="12" rx="3" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="452" y="476" fill="#4f5d75" font-size="10" font-family="'Geist', system-ui, sans-serif">Store / artefak</text>
+<line x1="576" y1="473" x2="596" y2="473" stroke="#bf4520" stroke-width="1.5"/>
+<text x="604" y="476" fill="#4f5d75" font-size="10" font-family="'Geist', system-ui, sans-serif">Artefak dipakai online</text>
+<rect x="768" y="467" width="20" height="12" rx="3" fill="#2d3142" stroke="rgba(45,49,66,0.20)" stroke-dasharray="4,4" fill-opacity="0.02"/>
+<text x="796" y="476" fill="#4f5d75" font-size="10" font-family="'Geist', system-ui, sans-serif">Batas offline/online</text>
+      </svg>
