@@ -2,7 +2,7 @@
 
 Dokumen ini menurunkan roadmap di [product.md](product.md) bagian 5 menjadi **sprint dan phase** yang berurutan, lengkap dengan scope, deliverable, dan kriteria selesai. Ia tidak mengubah roadmap, aturan, atau arsitektur; bila bertentangan, dokumen sumber menang ([AGENTS.md](../AGENTS.md) bagian 2).
 
-Penanda: **[F]** fakta terverifikasi · **[K]** keputusan desain · **[T]** terbuka. **Status dokumen: usulan, menunggu persetujuan pemilik repo.** Sampai disetujui, seluruh isi di bawah berstatus usulan dan tidak boleh dijadikan alasan memulai phase berikutnya.
+Penanda: **[F]** fakta terverifikasi · **[K]** keputusan desain · **[T]** terbuka. **Status dokumen: disetujui pemilik repo pada 10/11/2026 [K].** Dua hal tetap **[T]**: mekanisme login R1 dan urutan G4 terhadap Sprint C (lihat Phase 6 dan bagian 5).
 
 ## 1. Prinsip
 
@@ -33,7 +33,7 @@ Sprint D  Web UI R1
   Phase 11 Implementasi F-L02             ──► G7  (gerbang terakhir)
 ```
 
-G1–G4 didefinisikan di [product.md](product.md) bagian 5.1. **[K]** G5–G7 diusulkan di dokumen ini; bila disetujui, tambahkan ke `product.md` bagian 5.1 dan glosarium, lalu hapus definisinya dari sini agar tidak ganda.
+Gerbang G1–G4 didefinisikan di [product.md](product.md) bagian 5.1 dan G5–G7 di bagian 5.3. Baris gerbang di bawah hanya mengaitkan gerbang dengan phase; definisinya tidak diulang.
 
 ## 3. Kriteria selesai yang berlaku di setiap phase
 
@@ -76,7 +76,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | Deliverable | `ceteris.dqprofile` v1 (satu implementasi untuk riset dan scan, AC-1); kontrak input dengan penolakan eksplisit (BR-10–BR-17); estimator label noise; harness probe noise floor |
 | Syarat masuk | **[T]** #6 daftar hal terbuka `business-rules.md` (definisi kolom ID dan kebocoran target) diputuskan; persetujuan pembimbing atas RQ2b dan H5 |
 | Kriteria selesai | Uji isolasi profil: `dqprofile` hanya menerima data kotor (BR-20, AC-2); uji impor AC-3 lulus; pelanggaran berat menghentikan scan tanpa estimasi parsial; spesifikasi learner acuan dan skema profil dibekukan sebagai versi |
-| **Gerbang G1** | Skema `dqprofile` v1 dan spesifikasi learner acuan dibekukan. Setelah ini perubahan berarti versi baru (AGENTS.md bagian 5) |
+| **Gerbang G1** | Lihat `product.md` 5.1. Setelah ini perubahan skema profil atau learner berarti versi baru (AGENTS.md bagian 5) |
 
 ---
 
@@ -90,7 +90,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | Deliverable | Rencana analisis bertanggal dan dibekukan (BR-86); meta-model pilot; baseline; `ScanReport` v1 (Pydantic) dan CLI; status menurut BR-30–BR-35; keputusan mesin komputasi untuk korpus penuh |
 | Keputusan yang harus ditutup | **[T]** BR #1 statistik noise floor dan jumlah seed probe; BR #4 kuantil conformal; BR #5 pemotongan interval di nol; arsitektur #7 mesin komputasi |
 | Kriteria selesai | Uji kontrak `ScanReport` (BR-60); uji tabel status: contoh 2 dan contoh 5 di `business-rules.md` lulus persis; uji konsistensi jalur riset dan scan (BR-16); seluruh keluaran berlabel eksperimental (BR-35); pemuat artefak dipisah dari kode pelatihan agar uji AC-3 mencakupnya |
-| **Gerbang G2** | Pilot lolos, rencana analisis dibekukan, meta-model pilot tersedia. Scan berjalan dengan label eksperimental |
+| **Gerbang G2** | Lihat `product.md` 5.1 |
 
 ### Phase 4 — Korpus penuh dan artefak v1
 
@@ -100,7 +100,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | Deliverable | Artefak v1 dengan metadata wajib (`profile_schema_version`, `learner_spec_version`, `corpus_snapshot`, tanggal latih, ringkasan coverage): meta-model, kalibrator, referensi OOD, laporan akurasi (MAE, coverage, Spearman per jenis korupsi, kondisi tidak andal); register klaim |
 | Keputusan yang harus ditutup | **[T]** BR #2 validitas noise floor estimasi (H5); BR #3 ambang OOD tinggi dan pelebaran interval |
 | Kriteria selesai | Hipotesis H1–H5 dilaporkan apa adanya, termasuk yang gagal; dataset uji LODO tidak dipakai melatih, men-tuning, atau mengkalibrasi (BR-81); versi profil dan versi artefak harus cocok, ketidakcocokan menghasilkan galat (AC-9); `ceteris scan` memuat artefak v1 tanpa melatih (AC-4); semua uji wajib AGENTS.md bagian 6 lulus |
-| **Gerbang G3** | Artefak v1 dirilis. Klaim angka dan interval boleh tampil; gate boleh *block* |
+| **Gerbang G3** | Lihat `product.md` 5.1 |
 
 ### Phase 5 — Validasi data kotor asli dan tinjauan H1
 
@@ -109,7 +109,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | Scope | E4 pada 3–5 pasangan data kotor-bersih nyata; uji konsistensi jalur akhir |
 | Deliverable | Laporan validasi eksternal; pembaruan laporan akurasi; `ScanReport` `schema_version` 1.0 yang dibekukan untuk dikonsumsi produk |
 | Kriteria selesai | Galat ≤ 2× MAE LODO pada pasangan nyata, atau hasil negatif dilaporkan apa adanya; jalur riset dan jalur scan konsisten (BR-16); klaim akurasi pada data nyata hanya tampil sesuai bukti |
-| **Gerbang G4** | Validasi pada data kotor asli (E4) |
+| **Gerbang G4** | Lihat `product.md` 5.1 |
 | **Tinjauan H1** | Bila H1 gagal, lakukan bagian 5.2 `product.md` (klaim diganti "indikasi risiko" tanpa angka) dan tinjau ulang urutan Sprint C–D sebelum melanjutkan |
 
 ---
@@ -141,7 +141,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | Scope | F-L03 histori dan perbandingan antar-scan, F-L05 login dan paket self-host |
 | Deliverable | `GET /datasets/{id}/scans`; login sesuai keputusan Phase 6; paket self-host (Docker Compose, Helm chart bila diputuskan); pipeline CI dengan SAST, pemindaian dependensi dan lisensi (NFR-6) |
 | Kriteria selesai | Uji beban: scan median ≤ 5 menit untuk 100.000 baris × 100 kolom (NFR-1); enkripsi dan TLS sesuai NFR-5; retensi sesuai NFR-7 bila hosted dibangun; kontrak API berversi (NFR-10, AC-10); perbandingan antar-scan hanya pada versi model yang sama dan scan lama tidak dihitung ulang otomatis (BR-61, BR-62) |
-| **Gerbang G5** | Platform R1 siap dikonsumsi UI: OpenAPI `/v1` dibekukan, API lolos uji kontrak, self-host berjalan dari repositori bersih |
+| **Gerbang G5** | Lihat `product.md` 5.3 |
 
 ---
 
@@ -155,7 +155,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | Deliverable | Dokumen desain UI di `docs/` (alur pengguna dari unggah sampai laporan; arsitektur informasi; wireframe low-fidelity; inventaris komponen shadcn/ui per layar sesuai ADR 0003; spesifikasi tiap grafik ECharts; keadaan kosong, memuat, galat, dan penolakan kontrak input; aturan tampil ketidakpastian dan status `tidak_yakin`; rencana aksesibilitas; rencana pengujian UI); ADR bila ada keputusan baru |
 | Keputusan yang harus ditutup | **[T]** label status UI terhadap BR-50/BR-51 dan presisi ΔAUC, tanda, koma desimal, format tanggal (ADR 0003, pedoman 7 dan 8); apakah tampilan histori (F-L03) masuk UI R1; kalimat kondisi (BR-06) dan label eksperimental (BR-35) selalu menyertai angka |
 | Kriteria selesai | Setiap layar punya daftar komponen dan keadaan; setiap grafik punya data masukan yang dipetakan ke field `ScanReport`; tidak ada kebutuhan UI yang menghitung status sendiri |
-| **Gerbang G6** | **Persetujuan tertulis pemilik repo atas dokumen desain.** Tanpa G6, Phase 10 dan 11 tidak dimulai |
+| **Gerbang G6** | Lihat `product.md` 5.3. **Tanpa G6, Phase 10 dan 11 tidak dimulai** |
 
 ### Phase 10 — Fondasi UI
 
@@ -172,7 +172,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | Scope | Halaman unggah, status scan, dan laporan; ekspor laporan HTML |
 | Deliverable | Unggah dan polling status; laporan dengan tabel temuan (shadcn + TanStack Table), grafik ECharts sesuai spesifikasi, status berupa ikon dan teks, kalimat kondisi dan label eksperimental; penanganan penolakan kontrak input; ekspor HTML |
 | Kriteria selesai | Alur unggah → laporan lulus uji Playwright; tampil benar mulai lebar 390 px; dapat dinavigasi dengan papan ketik; tidak ada angka tanpa interval dan kalimat kondisi (BR-06); keluaran sesuai `ScanReport` dengan label eksperimental bila berlaku (BR-35); kebijakan retensi data ditampilkan di layar unggah bila hosted dibangun (BR-72); tinjauan aksesibilitas dan tinjauan Critic selesai |
-| **Gerbang G7 (terakhir)** | Web UI R1 (F-L02) selesai dan tervalidasi. **Rencana ini berhenti di sini** |
+| **Gerbang G7 (terakhir)** | Lihat `product.md` 5.3. **Rencana ini berhenti di sini** |
 
 ---
 

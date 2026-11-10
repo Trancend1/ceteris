@@ -87,7 +87,7 @@ Istilah teknis berbahasa Inggris dipertahankan bila itu bentuk yang dipakai di k
 
 | Istilah | Definisi |
 | --- | --- |
-| **Gerbang G1–G4** | Titik sinkronisasi riset dan produk. G1: skema profil dan learner dibekukan. G2: pilot lolos. G3: artefak v1 dirilis, klaim angka dibuka. G4: validasi eksternal. |
+| **Gerbang G1–G7** | Titik sinkronisasi riset dan produk. G1: skema profil dan learner dibekukan. G2: pilot lolos. G3: artefak v1 dirilis, klaim angka dibuka. G4: validasi eksternal. G5: platform R1 siap. G6: desain UI disetujui. G7: Web UI R1 selesai. |
 | **Rilis R0–R5** | Tahap produk. R0 = bukti mode learned (Short-MVP); R1 scan untuk tim; R2 gate; R3 kontrol; R4 trust dan exact; R5 translate. |
 | **Short-MVP / Long-MVP** | Nama draft untuk R0 dan untuk R1–R5. |
 | **Design partner** | Organisasi yang memberi data nyata dan umpan balik untuk memvalidasi fitur di luar bukti skripsi. |

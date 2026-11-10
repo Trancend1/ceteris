@@ -20,7 +20,7 @@ Setiap dokumen punya satu tanggung jawab. Baca yang relevan sebelum bekerja; jan
 | Arti sebuah istilah | `docs/domain/glossary.md` |
 | Diagram dan sumbernya | `docs/diagrams/` (`src/*.html` adalah sumber) |
 | Alasan keputusan desain (ADR 0001–) | `docs/decisions/` |
-| Urutan sprint, phase, gerbang, dan kriteria selesai | `docs/execution-plan.md` (usulan sampai disetujui) |
+| Urutan sprint, phase, gerbang, dan kriteria selesai | `docs/execution-plan.md` |
 
 Urutan otoritas bila ada pertentangan: `business-rules.md` (angka dan keputusan) → `architecture.md` (struktur) → `product.md` (scope) → kode. Jika kode bertentangan dengan dokumen, laporkan; jangan diam-diam memilih salah satu.
 
@@ -45,7 +45,7 @@ Urutan otoritas bila ada pertentangan: `business-rules.md` (angka dan keputusan)
 - Satuan metrik. Tanggal DD/MM/YYYY. Desimal di dokumen memakai koma (0,01); di kode dan JSON memakai titik (0.01).
 - Pakai istilah persis seperti di glosarium. Lihat daftar "istilah yang dihindari" di sana; nama lama `dqimpact` tidak dipakai lagi.
 - Tandai pernyataan baru: **[F]** fakta terverifikasi, **[K]** keputusan desain, **[T]** terbuka. Jangan menulis asumsi sebagai fakta. Jangan mengarang angka hasil eksperimen; angka ilustrasi harus diberi label ilustrasi.
-- Roadmap tidak memakai tanggal atau durasi. Pakai rilis (R0–R5), gerbang (G1–G4), dan kriteria keluar.
+- Roadmap tidak memakai tanggal atau durasi. Pakai rilis (R0–R5), gerbang (G1–G7), dan kriteria keluar.
 
 ## 5. Cara bekerja pada kode
 

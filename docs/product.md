@@ -145,6 +145,16 @@ R0 berjalan lewat empat gerbang. Gerbang adalah titik di mana artefak dibekukan 
 
 Hasil negatif diterima. Jika hipotesis akurasi (H1) gagal, klaim "ΔAUC diperkirakan X ± Y" diganti menjadi "indikasi risiko" tanpa angka, dan baseline dose–response dipertimbangkan sebagai mekanisme estimasi yang lebih lambat. Urutan Next dan Later ditinjau ulang sebelum R1 dimulai.
 
+### 5.3 Gerbang R1 hingga Web UI
+
+**[K]** Disetujui pemilik repo pada 10/11/2026. Urutan phase dan kriteria selesainya ada di [execution-plan.md](execution-plan.md); rencana itu berhenti di G7.
+
+| Gerbang | Yang dibekukan atau dibuka | Akibat bagi produk |
+| --- | --- | --- |
+| **G5** | Platform R1 siap: OpenAPI `/v1` dibekukan, API lolos uji kontrak, self-host berjalan dari repositori bersih | UI boleh mengonsumsi API |
+| **G6** | Dokumen desain UI disetujui tertulis oleh pemilik repo | Kode UI dan implementasi visual boleh dimulai; sebelumnya dilarang |
+| **G7** | Web UI R1 (F-L02) selesai dan tervalidasi | Gerbang terakhir rencana eksekusi; R2 dan seterusnya di luar rencana |
+
 ## 6. Success metrics
 
 ### 6.1 R0 — kriteria bukti
