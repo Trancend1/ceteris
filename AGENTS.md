@@ -20,6 +20,7 @@ Setiap dokumen punya satu tanggung jawab. Baca yang relevan sebelum bekerja; jan
 | Arti sebuah istilah | `docs/domain/glossary.md` |
 | Diagram dan sumbernya | `docs/diagrams/` (`src/*.html` adalah sumber) |
 | Alasan keputusan desain (ADR 0001–) | `docs/decisions/` |
+| Urutan sprint, phase, gerbang, dan kriteria selesai | `docs/execution-plan.md` (usulan sampai disetujui) |
 
 Urutan otoritas bila ada pertentangan: `business-rules.md` (angka dan keputusan) → `architecture.md` (struktur) → `product.md` (scope) → kode. Jika kode bertentangan dengan dokumen, laporkan; jangan diam-diam memilih salah satu.
 
