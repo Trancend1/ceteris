@@ -44,7 +44,7 @@ Empat prinsip menurunkan semua keputusan di bawah:
 | Metadata store | Postgres | Dataset, scan, temuan, estimasi, kebijakan, audit | Menyimpan data mentah yang dipindai | R1 |
 | Object store | S3-compatible (MinIO untuk self-host) | Snapshot Parquet data yang dipindai, laporan HTML | — | R1 |
 | Model registry | Bucket object store + manifest | Artefak meta-model, kalibrator, referensi OOD, laporan akurasi | Menerima artefak tanpa metadata wajib | R1 |
-| Web UI | Next.js + ECharts | Laporan, dashboard, pengaturan kebijakan | Menghitung status sendiri | R1 |
+| Web UI | Next.js + shadcn/ui + ECharts | Laporan, dashboard, pengaturan kebijakan | Menghitung status sendiri | R1 |
 
 Pada **R0** hanya ada SDK/CLI. Model registry digantikan folder rilis, metadata store dan object store digantikan run store Parquet + DuckDB.
 
@@ -252,7 +252,7 @@ Untuk R0 berlaku tambahan **reprodusibilitas**: seed turunan ([BR-84](business-r
 | Notebook | Jupyter + papermill, nbstripout |
 | Lingkungan | uv (lock file), Docker |
 | Uji | pytest, hypothesis; mulai R1: schemathesis, Playwright, Locust, Semgrep, pip-audit, Trivy |
-| Server (R1+) | FastAPI, Redis Queue, Postgres, MinIO/S3, Next.js + ECharts |
+| Server (R1+) | FastAPI, Redis Queue, Postgres, MinIO/S3, Next.js + shadcn/ui + ECharts |
 
 **[F]** cleanlab berlisensi AGPL-3.0. Ini tidak menghalangi riset, tetapi harus diputuskan sebelum rilis produk.
 
@@ -280,3 +280,4 @@ AGENTS.md, CLAUDE.md
 | 5 | Batas ukuran unggahan dan strategi sampling untuk data di atas 100.000 baris | 5.1, NFR-1 | Sebelum R1 |
 | 6 | Alias endpoint draft awal (`POST /scan`, `GET /report/{id}`) dipertahankan atau tidak | 6.4 | Sebelum R1 |
 | 7 | Mesin komputasi untuk korpus penuh (perkiraan 62.000–72.000 fit LightGBM) | 5.1 | Pilot E0 |
+| 8 | Grafik Web UI: `chart` shadcn/ui (Recharts) atau ECharts ([ADR 0003](decisions/0003-web-ui-shadcn.md)) | 3, 10 | Sebelum R1 |
