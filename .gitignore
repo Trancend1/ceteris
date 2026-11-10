@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/
+
+# Secrets (jangan pernah di-commit)
+.env
+.env.*
+!.env.example
+secrets/
+
+# Notebook
+.ipynb_checkpoints/
+
+# Data dan hasil run (run store, artefak, korpus unduhan)
+data/
+runs/
+artifacts/
+*.duckdb
+*.duckdb.wal
+
+# Node (Web UI, R1+)
+node_modules/
+.next/
+
+# OS dan editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
