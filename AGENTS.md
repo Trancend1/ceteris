@@ -36,7 +36,7 @@ Urutan otoritas bila ada pertentangan: `business-rules.md` (angka dan keputusan)
 9. **Klaim mengikuti bukti.** Sebelum G3, semua angka mode learned berlabel eksperimental. Jangan menulis "akurat" atau "terbukti" di kode, laporan, atau dokumen (BR-35, BR-64).
 10. **Kalimat kondisi wajib** menyertai setiap ΔAUC yang ditampilkan (BR-06).
 11. **No AI trailer pada push/PR.** Pesan commit dan deskripsi PR tidak boleh memuat trailer atau atribusi AI (`Co-Authored-By: Claude`, "Generated with Claude Code", dan sejenisnya). Identitas author dan committer adalah pemilik repo (manusia). Bila pengungkapan bantuan AI diperlukan, tulis dalam prosa biasa di deskripsi PR, bukan di metadata git.
-12. **Web UI memakai shadcn/ui secara penuh** (ADR 0003). Setiap kali menulis atau mengubah kode UI, agent wajib menyebut komponen shadcn/ui yang akan dipakai beserta alasannya, sebelum atau bersama kodenya. Cari dan pasang komponen lewat MCP shadcn atau CLI (`npx shadcn@latest add <komponen>`); jangan membuat komponen sendiri bila ada padanannya. UI hanya menampilkan hasil dan tidak menghitung status sendiri.
+12. **Web UI memakai shadcn/ui secara penuh** (ADR 0003). Setiap kali menulis atau mengubah kode UI, agent wajib menyebut komponen shadcn/ui yang akan dipakai beserta alasannya, sebelum atau bersama kodenya. Cari dan pasang komponen lewat MCP shadcn atau CLI (`npx shadcn@latest add <komponen>`); jangan membuat komponen sendiri bila ada padanannya. Semua grafik memakai ECharts lewat satu pembungkus `<CeterisChart>`; komponen `chart` bawaan shadcn/ui tidak dipakai. UI hanya menampilkan hasil dan tidak menghitung status sendiri.
 
 ## 4. Bahasa dan penulisan
 
