@@ -108,7 +108,7 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | BR-72 | Pada mode hosted, data mentah dihapus paling lambat 24 jam setelah scan selesai. | Uji retensi otomatis |
 | BR-73 | Profil hanya dikirim keluar bila diaktifkan pengguna; kolom yang terdeteksi sebagai PII tidak pernah ikut. | Uji unit ekspor profil |
 
-**[F]** cleanlab, pustaka estimasi label noise, berlisensi AGPL-3.0 (dicek 04/11/2026). **[T]** Pilihan untuk rilis produk: implementasi confident learning sendiri, lisensi komersial, atau komponen opsional.
+**[F]** cleanlab, pustaka estimasi label noise, berlisensi Apache-2.0 sejak versi 2.8.0 (08/01/2026); versi sampai 2.7.1 berlisensi AGPL-3.0 (dicek 12/11/2026 di PyPI dan GitHub; catatan 04/11/2026 sebelumnya hanya menyebut AGPL-3.0). **[T]** Pilihan untuk F-S05 dan rilis produk: cleanlab ≥ 2.8.0 atau implementasi confident learning sendiri.
 
 ## 9. Aturan eksperimen
 
@@ -205,5 +205,5 @@ Keputusan gate untuk scan yang sama:
 | 7 | Batas ukuran input vs rentang korpus | BR-10 | Sebelum R1 |
 | 8 | Keputusan gate untuk scan yang ditolak; `fail_mode` | BR-51 | Sebelum R2 |
 | 9 | Tabel effort per `issue_type` | BR-43 | Sebelum R2 |
-| 10 | Lisensi cleanlab untuk rilis produk | — (fitur F-S05) | Sebelum R1 |
+| 10 | Estimator label noise untuk rilis produk: cleanlab ≥ 2.8.0 (Apache-2.0) atau implementasi sendiri | — (fitur F-S05) | Sebelum R1 |
 | 11 | Sumber keacakan learner acuan agar noise floor terukur tidak selalu 0 (misalnya bagging atau `feature_fraction` < 1), atau definisi noise floor lain ([ADR 0008](decisions/0008-protokol-korpus-dan-semantik-korupsi.md)) | BR-03, BR-04 | G1 |

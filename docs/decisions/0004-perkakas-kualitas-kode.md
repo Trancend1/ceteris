@@ -14,7 +14,7 @@ Dokumen stack menyebut pytest dan hypothesis untuk uji, serta cakupan ≥ 80% (N
 1. Linter dan formatter: **ruff** (aturan `E`, `F`, `I`, `B`, `UP`, panjang baris 100).
 2. Pemeriksa tipe: **mypy** mode `strict` pada paket `ceteris`.
 3. Uji: **pytest**, **hypothesis**, dan **pytest-cov** (untuk laporan cakupan NFR-11).
-4. Dependensi runtime R0 mengikuti `architecture.md` bagian 10 (Polars, pandas, PyArrow, LightGBM, scikit-learn, SciPy, statsmodels, DuckDB, Typer, Pydantic v2). cleanlab **tidak** dimasukkan karena lisensi AGPL-3.0 masih **[T]**.
+4. Dependensi runtime R0 mengikuti `architecture.md` bagian 10 (Polars, pandas, PyArrow, LightGBM, scikit-learn, SciPy, statsmodels, DuckDB, Typer, Pydantic v2). cleanlab **tidak** dimasukkan karena lisensi AGPL-3.0 masih **[T]**. Pembaruan 12/11/2026: cleanlab berlisensi Apache-2.0 sejak 2.8.0, jadi alasan lisensi tidak berlaku lagi; penambahannya menunggu keputusan estimator F-S05.
 5. Notebook (JupyterLab, ipykernel, papermill, nbstripout) berada di grup dependensi `notebook` terpisah, bukan bagian runtime.
 6. Build backend: hatchling, tata letak datar (`ceteris/` di root) sesuai AGENTS.md bagian 5.
 

@@ -124,7 +124,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | --- | --- |
 | Scope | Menutup semua hal terbuka berbatas "Sebelum R1"; menulis backlog R1 |
 | Deliverable | ADR untuk tiap keputusan di bawah (dengan nomor ADR berikutnya yang tersedia); user story F-L01–F-L05 beserta acceptance criteria dipindahkan dari draf Long-MVP ke backlog |
-| Keputusan yang harus ditutup | **[T]** satu repository atau dipisah (arsitektur #1); penanganan cleanlab AGPL-3.0 (arsitektur #2, BR #10); versi hosted di R1 atau tidak (arsitektur #3); batas ukuran unggahan dan strategi sampling (arsitektur #5, BR #7); alias endpoint draf awal (arsitektur #6); model distribusi (product 7.2 #1) |
+| Keputusan yang harus ditutup | **[T]** satu repository atau dipisah (arsitektur #1); estimator label noise: cleanlab ≥ 2.8.0 (Apache-2.0) atau implementasi sendiri (arsitektur #2, BR #10); versi hosted di R1 atau tidak (arsitektur #3); batas ukuran unggahan dan strategi sampling (arsitektur #5, BR #7); alias endpoint draf awal (arsitektur #6); model distribusi (product 7.2 #1) |
 | Ketidaksesuaian dokumen | **[T]** F-L05 menyebut login di R1, sedangkan `architecture.md` bagian 2 menempatkan OIDC di R2. Tentukan mekanisme login R1 dan perbaiki dokumen yang keliru |
 | Kriteria selesai | Tidak ada hal terbuka berbatas "Sebelum R1" yang tersisa; ADR tersimpan; dokumen yang terdampak diperbarui dalam satu tempat yang bertanggung jawab |
 
