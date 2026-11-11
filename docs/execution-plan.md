@@ -74,7 +74,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | --- | --- |
 | Scope | F-S04 `dqprofile` v1 dan praproses kontrak input, F-S05 estimator label noise, kerangka pengukuran noise floor terukur (sisi `train`, F-S06) |
 | Deliverable | `ceteris.dqprofile` v1 (satu implementasi untuk riset dan scan, AC-1); kontrak input dengan penolakan eksplisit (BR-10–BR-17); estimator label noise; harness probe noise floor |
-| Syarat masuk | **[T]** #6 daftar hal terbuka `business-rules.md` (definisi kolom ID dan kebocoran target) diputuskan; persetujuan pembimbing atas RQ2b dan H5 |
+| Syarat masuk | Ambang kolom ID dan kebocoran target sudah diputuskan ([ADR 0005](decisions/0005-ambang-kolom-id-dan-kebocoran-target.md)); **[T]** persetujuan pembimbing atas RQ2b dan H5 |
 | Kriteria selesai | Uji isolasi profil: `dqprofile` hanya menerima data kotor (BR-20, AC-2); uji impor AC-3 lulus; pelanggaran berat menghentikan scan tanpa estimasi parsial; spesifikasi learner acuan dan skema profil dibekukan sebagai versi |
 | **Gerbang G1** | Lihat `product.md` 5.1. Setelah ini perubahan skema profil atau learner berarti versi baru (AGENTS.md bagian 5) |
 
@@ -121,7 +121,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | | |
 | --- | --- |
 | Scope | Menutup semua hal terbuka berbatas "Sebelum R1"; menulis backlog R1 |
-| Deliverable | ADR untuk tiap keputusan di bawah (berurutan mulai 0005); user story F-L01–F-L05 beserta acceptance criteria dipindahkan dari draf Long-MVP ke backlog |
+| Deliverable | ADR untuk tiap keputusan di bawah (berurutan mulai 0006); user story F-L01–F-L05 beserta acceptance criteria dipindahkan dari draf Long-MVP ke backlog |
 | Keputusan yang harus ditutup | **[T]** satu repository atau dipisah (arsitektur #1); penanganan cleanlab AGPL-3.0 (arsitektur #2, BR #10); versi hosted di R1 atau tidak (arsitektur #3); batas ukuran unggahan dan strategi sampling (arsitektur #5, BR #7); alias endpoint draf awal (arsitektur #6); model distribusi (product 7.2 #2) |
 | Ketidaksesuaian dokumen | **[T]** F-L05 menyebut login di R1, sedangkan `architecture.md` bagian 2 menempatkan OIDC di R2. Tentukan mekanisme login R1 dan perbaiki dokumen yang keliru |
 | Kriteria selesai | Tidak ada hal terbuka berbatas "Sebelum R1" yang tersisa; ADR tersimpan; dokumen yang terdampak diperbarui dalam satu tempat yang bertanggung jawab |
@@ -180,7 +180,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 
 | Hal terbuka **[T]** | Ditutup di |
 | --- | --- |
-| Definisi kolom ID dan kebocoran target (BR #6); persetujuan RQ2b dan H5 | Sebelum Phase 2 (G1) |
+| Persetujuan pembimbing atas RQ2b dan H5; mekanik probe kebocoran target (BR #6) | Phase 2 (G1) |
 | Statistik noise floor dan seed probe (BR #1); kuantil conformal (BR #4); pemotongan interval (BR #5); mesin komputasi (arsitektur #7) | Phase 3 (G2) |
 | Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | Phase 4 (G3) |
 | Repository tunggal atau dipisah; cleanlab; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |

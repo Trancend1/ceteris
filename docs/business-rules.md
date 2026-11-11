@@ -29,13 +29,13 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | BR-10 | Format CSV atau Parquet; ≤ 1.000.000 baris dan ≤ 500 kolom. | Ditolak |
 | BR-11 | Target satu kolom kategorikal, 2–20 kelas, tiap kelas ≥ 20 baris. | Ditolak |
 | BR-12 | Probe dan estimator label noise memakai sampel ≤ 100.000 baris dengan seed tetap; ukuran sampel dicatat. | Dicatat di laporan |
-| BR-13 | Kolom dengan nilai unik hampir per baris (kolom ID) dikeluarkan sebelum probe. | Peringatan |
+| BR-13 | Kolom non-float (integer, string, kategorikal) dengan rasio nilai unik ≥ 0,95 terhadap jumlah baris dianggap kolom ID dan dikeluarkan sebelum probe. Kolom float tidak diperiksa. | Peringatan |
 | BR-14 | Kolom datetime diubah menjadi fitur numerik sederhana atau dikeluarkan; kolom teks bebas dikeluarkan. | Peringatan |
-| BR-15 | Fitur yang sendirian hampir sempurna memprediksi target ditandai sebagai kebocoran target; status scan menjadi **tidak yakin**. | Peringatan + status |
+| BR-15 | Fitur yang sendirian memprediksi target dengan AUC macro one-vs-rest ≥ 0,99 (validasi silang pada sampel BR-12, seed tetap, hanya dari data kotor) ditandai sebagai kebocoran target; status scan menjadi **tidak yakin**. | Peringatan + status |
 | BR-16 | Praproses BR-13 sampai BR-15 adalah bagian dari `ceteris.dqprofile`, sehingga korpus riset dan scan pengguna diproses dengan kode yang sama. | Uji konsistensi jalur (E4): profil identik |
 | BR-17 | Hanya partisi latih yang dipindai; laporan menyatakan ΔAUC relatif terhadap test set bersih hipotetis. | Teks laporan |
 
-**[T]** Definisi operasional "hampir per baris" (BR-13) dan "hampir sempurna" (BR-15) belum ditetapkan. **[T]** Korpus riset hanya berisi 2.000–50.000 baris dengan split acak, sedangkan BR-10 menerima sampai 1 juta baris; data di luar rentang korpus diperkirakan sering berstatus tidak yakin (lihat BR-33).
+**[K]** Ambang BR-13 dan BR-15 ditetapkan di [ADR 0005](decisions/0005-ambang-kolom-id-dan-kebocoran-target.md) sebagai usulan awal, dikalibrasi pada prototipe Phase 2 dan dibekukan di G1. **[T]** Mekanik probe kebocoran (jumlah lipatan validasi silang dan model satu fitur) ditetapkan di prototipe dan dibekukan di G1. **[T]** Korpus riset hanya berisi 2.000–50.000 baris dengan split acak, sedangkan BR-10 menerima sampai 1 juta baris; data di luar rentang korpus diperkirakan sering berstatus tidak yakin (lihat BR-33).
 
 ## 3. Estimasi dan interval
 
@@ -201,7 +201,7 @@ Keputusan gate untuk scan yang sama:
 | 3 | Ambang "OOD tinggi" dan besar pelebaran interval | BR-24, BR-33 | G3 |
 | 4 | Kuantil conformal: seluruh run atau dibobot per dataset | BR-22 | G2 |
 | 5 | Interval dipotong di nol atau tidak | BR-22 | G2 |
-| 6 | Definisi kolom ID dan kebocoran target | BR-13, BR-15 | G1 |
+| 6 | Mekanik probe kebocoran target: jumlah lipatan validasi silang dan model satu fitur | BR-15 | G1 |
 | 7 | Batas ukuran input vs rentang korpus | BR-10 | Sebelum R1 |
 | 8 | Keputusan gate untuk scan yang ditolak; `fail_mode` | BR-51 | Sebelum R2 |
 | 9 | Tabel effort per `issue_type` | BR-43 | Sebelum R2 |
