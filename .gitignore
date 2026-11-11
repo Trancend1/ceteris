@@ -28,6 +28,9 @@ artifacts/
 *.duckdb
 *.duckdb.wal
 
+# Workspace skripsi: repository git terpisah, tidak pernah di-commit ke repo ini
+.skripsi/
+
 # Node (Web UI, R1+)
 node_modules/
 .next/
