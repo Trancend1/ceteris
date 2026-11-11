@@ -53,7 +53,7 @@ Struktur yang direncanakan (lihat `docs/architecture.md` bagian 10):
 
 ```text
 ceteris/     corpus, corrupt, train, dqprofile, store, metamodel,
-             uncertainty, evaluate, recovery, scan
+             uncertainty, evaluate, recovery, scan, seeding, experiment
 configs/     experiment.yaml, learner.yaml, corruption.yaml
 notebooks/   NB00–NB10 (papermill)
 tests/       unit, properti, determinisme, kontrak, konsistensi jalur

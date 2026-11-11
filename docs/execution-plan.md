@@ -61,6 +61,8 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 
 ### Phase 1 — Data, korupsi, run store, learner acuan
 
+**Status: selesai; gate disetujui pemilik repo pada 11/11/2026.** Keputusan: [ADR 0008](decisions/0008-protokol-korpus-dan-semantik-korupsi.md). Hal yang dibawa ke Phase 2: sumber keacakan learner acuan (`business-rules.md` bagian 11, #11).
+
 | | |
 | --- | --- |
 | Scope | F-S01 `corpus`, F-S02 `corrupt`, F-S03 `train`, F-S07 `store` |
@@ -121,7 +123,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | | |
 | --- | --- |
 | Scope | Menutup semua hal terbuka berbatas "Sebelum R1"; menulis backlog R1 |
-| Deliverable | ADR untuk tiap keputusan di bawah (berurutan mulai 0008); user story F-L01–F-L05 beserta acceptance criteria dipindahkan dari draf Long-MVP ke backlog |
+| Deliverable | ADR untuk tiap keputusan di bawah (dengan nomor ADR berikutnya yang tersedia); user story F-L01–F-L05 beserta acceptance criteria dipindahkan dari draf Long-MVP ke backlog |
 | Keputusan yang harus ditutup | **[T]** satu repository atau dipisah (arsitektur #1); penanganan cleanlab AGPL-3.0 (arsitektur #2, BR #10); versi hosted di R1 atau tidak (arsitektur #3); batas ukuran unggahan dan strategi sampling (arsitektur #5, BR #7); alias endpoint draf awal (arsitektur #6); model distribusi (product 7.2 #1) |
 | Ketidaksesuaian dokumen | **[T]** F-L05 menyebut login di R1, sedangkan `architecture.md` bagian 2 menempatkan OIDC di R2. Tentukan mekanisme login R1 dan perbaiki dokumen yang keliru |
 | Kriteria selesai | Tidak ada hal terbuka berbatas "Sebelum R1" yang tersisa; ADR tersimpan; dokumen yang terdampak diperbarui dalam satu tempat yang bertanggung jawab |
@@ -181,6 +183,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 | Hal terbuka **[T]** | Ditutup di |
 | --- | --- |
 | Hiperparameter probe kebocoran dan pilihan ambang tetap atau adaptif (BR #6, [ADR 0007](decisions/0007-opsi-ambang-kebocoran-adaptif.md)) | Phase 2 (G1) |
+| Sumber keacakan learner acuan untuk noise floor terukur (BR #11) | Phase 2 (G1) |
 | Statistik noise floor dan seed probe (BR #1); kuantil conformal (BR #4); pemotongan interval (BR #5); mesin komputasi (arsitektur #7) | Phase 3 (G2) |
 | Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | Phase 4 (G3) |
 | Repository tunggal atau dipisah; cleanlab; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |

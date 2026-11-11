@@ -10,7 +10,8 @@ import sys
 from pathlib import Path
 
 SCAN_PATH = ["scan", "dqprofile", "uncertainty", "recovery"]
-EXPERIMENT = ["corpus", "corrupt", "evaluate"]
+# `experiment` mengimpor corpus dan corrupt, sehingga jalur scan juga tidak boleh mengimpornya.
+EXPERIMENT = ["corpus", "corrupt", "evaluate", "experiment"]
 PACKAGE_DIR = Path(__file__).resolve().parent.parent / "ceteris"
 
 

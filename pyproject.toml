@@ -15,6 +15,7 @@ dependencies = [
     "duckdb>=1.0",
     "typer>=0.12",
     "pydantic>=2.7",
+    "pyyaml>=6.0",
 ]
 
 [dependency-groups]
@@ -41,11 +42,24 @@ packages = ["ceteris"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers"
+pythonpath = ["."]
+addopts = "-ra --strict-markers -m 'not network'"
+markers = ["network: uji yang menghubungi OpenML; jalankan manual dengan -m network"]
+
+[tool.coverage.run]
+source = ["ceteris"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[tool.ruff.format]
+line-ending = "lf"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
@@ -54,3 +68,8 @@ select = ["E", "F", "I", "B", "UP"]
 python_version = "3.11"
 strict = true
 files = ["ceteris"]
+
+[[tool.mypy.overrides]]
+# Pustaka tanpa anotasi tipe; diperlakukan sebagai Any (ADR 0004).
+module = ["pandas.*", "sklearn.*", "lightgbm.*", "pyarrow.*", "yaml.*", "scipy.*"]
+ignore_missing_imports = true

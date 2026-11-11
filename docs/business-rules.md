@@ -206,3 +206,4 @@ Keputusan gate untuk scan yang sama:
 | 8 | Keputusan gate untuk scan yang ditolak; `fail_mode` | BR-51 | Sebelum R2 |
 | 9 | Tabel effort per `issue_type` | BR-43 | Sebelum R2 |
 | 10 | Lisensi cleanlab untuk rilis produk | — (fitur F-S05) | Sebelum R1 |
+| 11 | Sumber keacakan learner acuan agar noise floor terukur tidak selalu 0 (misalnya bagging atau `feature_fraction` < 1), atau definisi noise floor lain ([ADR 0008](decisions/0008-protokol-korpus-dan-semantik-korupsi.md)) | BR-03, BR-04 | G1 |

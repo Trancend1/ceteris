@@ -18,6 +18,12 @@ Dokumen stack menyebut pytest dan hypothesis untuk uji, serta cakupan ≥ 80% (N
 5. Notebook (JupyterLab, ipykernel, papermill, nbstripout) berada di grup dependensi `notebook` terpisah, bukan bagian runtime.
 6. Build backend: hatchling, tata letak datar (`ceteris/` di root) sesuai AGENTS.md bagian 5.
 
+## Pembaruan 11/11/2026 (Phase 1)
+
+- **PyYAML** (MIT) ditambahkan sebagai dependensi runtime untuk membaca `configs/*.yaml` yang diwajibkan `architecture.md` 6.2 (persetujuan pemilik repo).
+- mypy strict memperlakukan pandas, scikit-learn, LightGBM, PyArrow, PyYAML, dan SciPy sebagai `Any` (`ignore_missing_imports`), karena pustaka itu tidak membawa anotasi tipe; paket stub tidak ditambahkan.
+- Ambang cakupan 80% (NFR-11) ditegakkan lewat `[tool.coverage.report] fail_under`.
+
 ## Konsekuensi
 
 - Perintah standar: `uv sync`, `uv run pytest`, `uv run ruff check .`, `uv run mypy`.
