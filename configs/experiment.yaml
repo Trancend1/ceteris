@@ -1,0 +1,14 @@
+# Konfigurasi korpus dan split (F-S01). DRAF Phase 1; dibekukan di G1.
+# Saringan: glosarium "Korpus" + kontrak input scan BR-10 dan BR-11 (ADR 0008).
+suite_id: 99            # OpenML-CC18
+filter:
+  min_rows: 2000
+  max_rows: 50000
+  max_missing_cell_frac: 0.05   # missing asli diukur per sel (ADR 0008)
+  max_features: 500             # BR-10
+  min_classes: 2                # BR-11
+  max_classes: 20               # BR-11
+  min_class_count: 20           # BR-11
+split:
+  test_frac: 0.2        # DRAF: mengikuti ilustrasi Contoh 4 business-rules.md
+  stratified: true

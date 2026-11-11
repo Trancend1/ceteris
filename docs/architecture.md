@@ -64,6 +64,8 @@ Paket `ceteris` adalah isi worker dan CLI. Draft memakai nama kerja `dqimpact`; 
 | `ceteris.evaluate` | F-S11 | LODO bersarang, uji statistik | Riset | Uji regresi sebelum rilis artefak |
 | `ceteris.recovery` | F-S12 | Potensi pemulihan per temuan | Riset **dan** scan | Prioritizer (F-L08) |
 | `ceteris.scan` | F-S13, F-S14 | Orkestrasi scan, status, `ScanReport` (Pydantic), CLI | Scan | Worker scan + REST API |
+| `ceteris.seeding` | F-S07 | Turunan seed deterministik (BR-84) | Riset **dan** scan | Dipakai worker tanpa perubahan |
+| `ceteris.experiment` | F-S01–F-S03, F-S07 | Orkestrasi satu run riset: korpus → korupsi → ΔAUC → run store; ikut dilarang di jalur scan karena mengimpor `corpus` dan `corrupt` | Riset | Pipeline retrain |
 
 Komponen yang ditambahkan di worker sesudah R0: **adapter** (membaca CSV, Parquet, atau tabel warehouse ke format standar; F-L10), **reporter** (laporan HTML; F-L02), dan **exact engine** (hitung ulang metrik dengan dan tanpa temuan; F-L12).
 
@@ -256,11 +258,12 @@ Untuk R0 berlaku tambahan **reprodusibilitas**: seed turunan ([BR-84](business-r
 
 **[F]** cleanlab berlisensi AGPL-3.0. Ini tidak menghalangi riset, tetapi harus diputuskan sebelum rilis produk.
 
-Struktur repository yang direncanakan (**[F]** belum ada di repository mana pun):
+Struktur repository (**[F]** per 11/11/2026: `corpus`, `corrupt`, `train`, `store`, `seeding`, dan `experiment` sudah berisi kode Phase 1; modul lain masih kosong):
 
 ```text
 ceteris/            paket Python: corpus, corrupt, train, dqprofile, store,
-                    metamodel, uncertainty, evaluate, recovery, scan
+                    metamodel, uncertainty, evaluate, recovery, scan,
+                    seeding, experiment
 configs/            experiment.yaml, learner.yaml, corruption.yaml
 notebooks/          NB00–NB10, dijalankan lewat papermill
 tests/              unit, properti, determinisme, kontrak, konsistensi jalur

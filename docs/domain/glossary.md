@@ -33,7 +33,7 @@ Istilah teknis berbahasa Inggris dipertahankan bila itu bentuk yang dipakai di k
 | **Noise floor** | Variasi AUC yang muncul hanya karena seed berbeda. **Terukur**: dari dua model versi bersih (riset). **Estimasi**: dari probe pada data kotor (scan). | BR-04 |
 | **Ambang kerugian material (T)** | Batas di atasnya ΔAUC dianggap berarti. | BR-05 |
 | **Level nominal** | Tingkat korupsi yang diminta (misalnya "10%"); artinya berbeda antar-jenis korupsi. | BR-82 |
-| **`affected_row_frac`** | Proporsi baris latih yang benar-benar berubah akibat korupsi; satuan pembanding antar-jenis korupsi. | BR-82 |
+| **`affected_row_frac`** | Proporsi baris latih kotor yang benar-benar berubah akibat korupsi, termasuk baris tambahan dari korupsi duplikat; satuan pembanding antar-jenis korupsi. | BR-82 |
 
 ## 3. Profil dan estimasi
 
@@ -72,7 +72,7 @@ Istilah teknis berbahasa Inggris dipertahankan bila itu bentuk yang dipakai di k
 
 | Istilah | Definisi | Aturan |
 | --- | --- | --- |
-| **Korpus** | Kumpulan dataset tabular klasifikasi dari OpenML-CC18 yang lolos saringan (2.000–50.000 baris, missing asli ≤ 5%); sasaran 30–50 dataset. | — |
+| **Korpus** | Kumpulan dataset tabular klasifikasi dari OpenML-CC18 yang lolos saringan (2.000–50.000 baris, missing asli ≤ 5% per sel, ditambah kontrak input scan BR-10 dan BR-11; [ADR 0008](../decisions/0008-protokol-korpus-dan-semantik-korupsi.md)); sasaran 30–50 dataset. | BR-10, BR-11 |
 | **Korupsi** | Kekotoran yang disuntikkan secara terkontrol: missing (MCAR, MAR), label noise (uniform, class-conditional), outlier, duplikat (eksak, konflik label), dan campuran. | BR-80, BR-83 |
 | **MCAR / MAR** | Missing completely at random: hilang tanpa pola. Missing at random: peluang hilang bergantung pada nilai kolom lain. | — |
 | **Run** | Satu kombinasi (dataset, konfigurasi korupsi, seed) yang menghasilkan satu pasangan profil dan ΔAUC. | BR-84 |
