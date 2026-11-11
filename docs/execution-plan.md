@@ -61,7 +61,7 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 
 ### Phase 1 — Data, korupsi, run store, learner acuan
 
-**Status: kriteria selesai terpenuhi pada 11/11/2026; menunggu persetujuan gate oleh pemilik repo.** Keputusan: [ADR 0008](decisions/0008-protokol-korpus-dan-semantik-korupsi.md). Hal yang dibawa ke Phase 2: sumber keacakan learner acuan (`business-rules.md` bagian 11, #11).
+**Status: selesai; gate disetujui pemilik repo pada 11/11/2026.** Keputusan: [ADR 0008](decisions/0008-protokol-korpus-dan-semantik-korupsi.md). Hal yang dibawa ke Phase 2: sumber keacakan learner acuan (`business-rules.md` bagian 11, #11).
 
 | | |
 | --- | --- |
