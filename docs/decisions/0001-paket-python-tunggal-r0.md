@@ -21,7 +21,7 @@ R0 membuktikan mode *learned* (F-S01–F-S14) tanpa server. Seluruh logika perhi
 
 - Worker R1 membungkus paket yang sama; tidak ada port ulang logika.
 - Struktur repository awal cukup satu paket; pemisahan paket inti dan server tetap **[T]** (`architecture.md` bagian 11, butir 1).
-- Dependensi baru diperiksa lisensinya. cleanlab (AGPL-3.0) tetap **[T]** (butir 2).
+- Dependensi baru diperiksa lisensinya. cleanlab tetap **[T]** (butir 2). Pembaruan 12/11/2026: cleanlab berlisensi Apache-2.0 sejak 2.8.0; yang masih terbuka adalah pilihan pustaka, bukan lisensinya.
 
 ## Alternatif yang ditolak
 
