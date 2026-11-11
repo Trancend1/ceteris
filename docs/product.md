@@ -166,10 +166,10 @@ Target di bawah adalah kriteria hipotesis skripsi; rinciannya ada di rencana ana
 | MAE estimasi ΔAUC per dataset | Lebih rendah dari baseline (a) rata-rata, (b) skor gabungan, (c) meta-fitur saja | H1a |
 | Dibanding baseline (d) dose–response | Tidak lebih buruk dari margin 0,005 MAE, dengan biaya komputasi ≥ 10× lebih murah | H1b |
 | Urutan dampak per jenis korupsi | Label noise paling merusak, MCAR paling ringan, pada proporsi baris terdampak yang sama | H2 |
-| Urutan temuan | Urutan potensi pemulihan lebih baik daripada urutan volume | H2b **[T]** |
+| Urutan temuan | Kendall τ antara urutan temuan dan keuntungan AUC nyata per jenis korupsi lebih tinggi untuk urutan potensi pemulihan daripada urutan volume (Wilcoxon berpasangan antar dataset); eksploratif | H2b **[K]** |
 | Coverage interval 90% | 85–95% pada ≥ 80% dataset | H3 |
 | Skor OOD | Berkorelasi positif dengan galat estimasi | H4 |
-| Noise floor estimasi | Selisih median dengan noise floor terukur ≤ 0,005; kappa status ≥ 0,6 | H5 **[T]** |
+| Noise floor estimasi | Selisih median dengan noise floor terukur ≤ 0,005; kappa status ≥ 0,6, dilaporkan untuk seluruh dataset dan subset dengan noise floor dekat 0,01; bias dilaporkan; fallback `T` = 0,01 bila gagal ([ADR 0006](decisions/0006-kerangka-pengujian-rq2b-dan-h5.md)) | H5 **[K]** |
 | Data kotor asli | Galat ≤ 2× MAE LODO pada 3–5 pasangan kotor-bersih; jalur riset dan jalur scan konsisten | RQ4 (eksploratif) |
 
 ### 6.2 R1 dan sesudahnya — KPI produk
@@ -205,12 +205,11 @@ Tingkat OOD adalah KPI yang paling menentukan nilai produk: bila sebagian besar 
 
 | # | Hal terbuka **[T]** | Diputuskan paling lambat |
 | --- | --- | --- |
-| 1 | Persetujuan pembimbing atas RQ2b dan H5 | G1 |
-| 2 | Model distribusi: open-core, self-host berlisensi, atau keduanya | Sebelum R1 |
-| 3 | Lisensi cleanlab: implementasi sendiri, lisensi komersial, atau komponen opsional | Sebelum R1 |
-| 4 | Apakah R1 memerlukan versi hosted | Sebelum R1 |
-| 5 | Design partner warehouse untuk R3–R4 | Pencarian dimulai saat R1 |
-| 6 | Tabel effort per jenis temuan: ditetapkan tim atau dipelajari dari umpan balik | Sebelum R2 |
-| 7 | Laporan HTML untuk demo sidang (diambil dari F-L02 setelah G4, bukan dibangun di R0) | G4 |
+| 1 | Model distribusi: open-core, self-host berlisensi, atau keduanya | Sebelum R1 |
+| 2 | Lisensi cleanlab: implementasi sendiri, lisensi komersial, atau komponen opsional | Sebelum R1 |
+| 3 | Apakah R1 memerlukan versi hosted | Sebelum R1 |
+| 4 | Design partner warehouse untuk R3–R4 | Pencarian dimulai saat R1 |
+| 5 | Tabel effort per jenis temuan: ditetapkan tim atau dipelajari dari umpan balik | Sebelum R2 |
+| 6 | Laporan HTML untuk demo sidang (diambil dari F-L02 setelah G4, bukan dibangun di R0) | G4 |
 
 Hal terbuka yang menyangkut aturan angka ada di [business-rules.md](business-rules.md#11-daftar-hal-terbuka); yang menyangkut teknis ada di [architecture.md](architecture.md#11-hal-terbuka).

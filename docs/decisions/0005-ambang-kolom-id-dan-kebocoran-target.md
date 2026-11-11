@@ -13,11 +13,13 @@
 
 1. **Kolom ID (BR-13).** Kolom non-float (integer, string, kategorikal) dengan rasio nilai unik ≥ **0,95** terhadap jumlah baris dikeluarkan sebelum probe. Kolom float tidak diperiksa, karena kolom kontinu wajar hampir unik. Akibatnya peringatan, bukan penolakan.
 2. **Kebocoran target (BR-15).** Fitur tunggal dengan AUC macro one-vs-rest ≥ **0,99** (validasi silang pada sampel BR-12, seed tetap) ditandai sebagai kebocoran target dan status scan menjadi `tidak_yakin`. Dihitung hanya dari data kotor.
-3. Kedua ambang adalah usulan awal. Keduanya dikalibrasi pada prototipe Phase 2 terhadap korpus, lalu dibekukan di G1 bersama skema `dqprofile` v1. Perubahan sesudahnya berarti versi profil baru.
+3. **Mekanik probe (diputuskan 11/11/2026).** Model satu fitur adalah pohon keputusan dangkal, bukan LightGBM, agar biaya tetap kecil (hingga ratusan kolom × lipatan; NFR-1). Validasi silang 5 lipatan berstrata dengan seed turunan BR-84. Fitur kategorikal dikodekan sebagai integer yang dipelajari di lipatan latih; nilai baru dan missing punya kode sendiri.
+4. Kedua ambang adalah usulan awal. Keduanya dikalibrasi pada prototipe Phase 2 terhadap korpus, lalu dibekukan di G1 bersama skema `dqprofile` v1. Perubahan sesudahnya berarti versi profil baru.
 
 ## Hal terbuka
 
-- **[T]** Mekanik probe kebocoran: jumlah lipatan validasi silang dan model satu fitur. Ditetapkan di prototipe, dibekukan di G1.
+- **[T]** `max_depth` dan `min_samples_leaf` pohon probe. Ditetapkan lewat kalibrasi pada kebocoran sintetis di berbagai level label noise dan di korpus, lalu dibekukan di G1.
+- **[T]** Ambang tetap atau adaptif terhadap label noise: lihat [ADR 0007](0007-opsi-ambang-kebocoran-adaptif.md). Probe berjalan pada data kotor, sehingga kebocoran bisa lolos dari ambang 0,99 bila label noise tinggi.
 
 ## Konsekuensi
 

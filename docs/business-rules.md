@@ -18,7 +18,7 @@ Dokumen ini adalah satu-satunya sumber untuk aturan yang menentukan **angka dan 
 | BR-06 | Setiap angka ΔAUC yang ditampilkan disertai **kalimat kondisi**: "dibanding model yang dilatih pada versi bersih dan dievaluasi pada data bersih". | Contract test: field `condition` wajib ada di `ScanReport` |
 | BR-07 | Satu metrik untuk riset dan produk: ΔAUC. ΔF1 tidak dipakai. | Pencarian kode: tidak ada field `delta_f1` |
 
-**[T]** Statistik pasti untuk noise floor (rentang, simpangan baku, atau persentil selisih antar-seed) dan jumlah seed probe belum ditetapkan; diputuskan di pilot E0 dan dibekukan di G2.
+**[T]** Statistik pasti untuk noise floor (rentang, simpangan baku, atau persentil selisih antar-seed) dan jumlah seed probe belum ditetapkan; diputuskan di pilot E0 dan dibekukan di G2. **[K]** Bila H5 gagal menurut kriteria rencana analisis G2, `T` tetap 0,01 dan noise floor estimasi hanya informatif; BR-05 diubah lewat revisi dokumen ini pada saat itu ([ADR 0006](decisions/0006-kerangka-pengujian-rq2b-dan-h5.md)).
 
 ## 2. Kontrak input scan
 
@@ -31,11 +31,11 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | BR-12 | Probe dan estimator label noise memakai sampel ≤ 100.000 baris dengan seed tetap; ukuran sampel dicatat. | Dicatat di laporan |
 | BR-13 | Kolom non-float (integer, string, kategorikal) dengan rasio nilai unik ≥ 0,95 terhadap jumlah baris dianggap kolom ID dan dikeluarkan sebelum probe. Kolom float tidak diperiksa. | Peringatan |
 | BR-14 | Kolom datetime diubah menjadi fitur numerik sederhana atau dikeluarkan; kolom teks bebas dikeluarkan. | Peringatan |
-| BR-15 | Fitur yang sendirian memprediksi target dengan AUC macro one-vs-rest ≥ 0,99 (validasi silang pada sampel BR-12, seed tetap, hanya dari data kotor) ditandai sebagai kebocoran target; status scan menjadi **tidak yakin**. | Peringatan + status |
+| BR-15 | Fitur yang sendirian memprediksi target dengan AUC macro one-vs-rest ≥ 0,99 (pohon keputusan satu fitur, validasi silang 5 lipatan berstrata pada sampel BR-12, seed tetap, hanya dari data kotor) ditandai sebagai kebocoran target; status scan menjadi **tidak yakin**. | Peringatan + status |
 | BR-16 | Praproses BR-13 sampai BR-15 adalah bagian dari `ceteris.dqprofile`, sehingga korpus riset dan scan pengguna diproses dengan kode yang sama. | Uji konsistensi jalur (E4): profil identik |
 | BR-17 | Hanya partisi latih yang dipindai; laporan menyatakan ΔAUC relatif terhadap test set bersih hipotetis. | Teks laporan |
 
-**[K]** Ambang BR-13 dan BR-15 ditetapkan di [ADR 0005](decisions/0005-ambang-kolom-id-dan-kebocoran-target.md) sebagai usulan awal, dikalibrasi pada prototipe Phase 2 dan dibekukan di G1. **[T]** Mekanik probe kebocoran (jumlah lipatan validasi silang dan model satu fitur) ditetapkan di prototipe dan dibekukan di G1. **[T]** Korpus riset hanya berisi 2.000–50.000 baris dengan split acak, sedangkan BR-10 menerima sampai 1 juta baris; data di luar rentang korpus diperkirakan sering berstatus tidak yakin (lihat BR-33).
+**[K]** Ambang BR-13 dan BR-15 ditetapkan di [ADR 0005](decisions/0005-ambang-kolom-id-dan-kebocoran-target.md) sebagai usulan awal, dikalibrasi pada prototipe Phase 2 dan dibekukan di G1. **[T]** `max_depth` dan `min_samples_leaf` pohon probe ditetapkan lewat kalibrasi pada kebocoran sintetis dan dibekukan di G1. **[T]** Ambang tetap atau adaptif terhadap label noise: [ADR 0007](decisions/0007-opsi-ambang-kebocoran-adaptif.md). **[T]** Korpus riset hanya berisi 2.000–50.000 baris dengan split acak, sedangkan BR-10 menerima sampai 1 juta baris; data di luar rentang korpus diperkirakan sering berstatus tidak yakin (lihat BR-33).
 
 ## 3. Estimasi dan interval
 
@@ -74,7 +74,7 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | BR-43 | Urutan temuan di laporan memakai potensi pemulihan, bukan volume (`rows_affected_pct`). | E2 (hipotesis H2b) |
 | BR-44 | Setiap hasil simulator what-if melewati cek OOD dan berlabel "simulasi". Simulator berada di luar klaim yang dibuktikan skripsi. | Field `ood_score` wajib di respons simulasi |
 
-**[T]** Tabel effort per `issue_type` untuk urutan potensi/effort (fitur F-L08) belum ada. **[T]** Nilai "tanpa temuan" untuk setiap fitur profil (nol, atau nilai profil dataset dasar) ditetapkan saat implementasi F-S12.
+**[T]** Tabel effort per `issue_type` untuk urutan potensi/effort (fitur F-L08) belum ada. **[K]** Nilai "tanpa temuan" bersifat struktural dan tidak bergantung data (misalnya fraksi missing, duplikat, dan label noise estimasi = 0); fitur tanpa nilai ideal struktural tidak ikut dinormalkan, dan daftar akhirnya dibekukan di G1 ([ADR 0006](decisions/0006-kerangka-pengujian-rq2b-dan-h5.md)).
 
 ## 6. Gate
 
@@ -201,7 +201,7 @@ Keputusan gate untuk scan yang sama:
 | 3 | Ambang "OOD tinggi" dan besar pelebaran interval | BR-24, BR-33 | G3 |
 | 4 | Kuantil conformal: seluruh run atau dibobot per dataset | BR-22 | G2 |
 | 5 | Interval dipotong di nol atau tidak | BR-22 | G2 |
-| 6 | Mekanik probe kebocoran target: jumlah lipatan validasi silang dan model satu fitur | BR-15 | G1 |
+| 6 | Hiperparameter probe kebocoran target dan pilihan ambang tetap atau adaptif | BR-15 | G1 |
 | 7 | Batas ukuran input vs rentang korpus | BR-10 | Sebelum R1 |
 | 8 | Keputusan gate untuk scan yang ditolak; `fail_mode` | BR-51 | Sebelum R2 |
 | 9 | Tabel effort per `issue_type` | BR-43 | Sebelum R2 |
