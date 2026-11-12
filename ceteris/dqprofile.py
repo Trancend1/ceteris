@@ -206,6 +206,32 @@ def compute_profile(
     )
 
 
+NoiseFloorStatistic = Literal["range", "std", "pairwise_mean", "pairwise_p95"]
+
+
+def noise_floor_value(aucs: Sequence[float], statistic: NoiseFloorStatistic) -> float:
+    """Ringkasan noise floor dari AUC per seed (BR-04, BR-05).
+
+    Kandidat statistik (`business-rules.md` hal terbuka #1, diputuskan di G2): rentang
+    (maks − min), simpangan baku sampel, rata-rata |selisih| antar-pasangan seed, atau persentil
+    ke-95 |selisih| antar-pasangan seed. Jalur riset dan scan memakai fungsi yang sama.
+    """
+    values = np.asarray(aucs, dtype="float64")
+    if values.size < 2:
+        raise ValueError("noise floor butuh minimal dua seed")
+    if statistic == "range":
+        return float(values.max() - values.min())
+    if statistic == "std":
+        return float(values.std(ddof=1))
+    i, j = np.triu_indices(values.size, k=1)
+    diffs = np.abs(values[i] - values[j])
+    if statistic == "pairwise_mean":
+        return float(diffs.mean())
+    if statistic == "pairwise_p95":
+        return float(np.percentile(diffs, 95))
+    raise ValueError(f"statistik noise floor tidak dikenal: {statistic!r}")
+
+
 def noise_floor_seeds(n: int) -> list[int]:
     """Seed probe tetap untuk noise floor estimasi, sama di jalur riset dan scan (BR-16, AC-12)."""
     if n < 2:

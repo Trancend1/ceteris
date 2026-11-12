@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from ceteris.corpus import RawDataset
-from ceteris.store import Provenance
+from ceteris.corpus import PreparedDataset, RawDataset
+from ceteris.store import Provenance, RunStore
 from ceteris.train import LearnerSpec, load_learner_spec
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +75,60 @@ def fake_provenance() -> Provenance:
         python_version="3.11",
         lightgbm_version="test",
     )
+
+
+@dataclass(frozen=True)
+class SmallPilot:
+    """Run store kecil dua dataset sintetis dan artefak yang dilatih darinya."""
+
+    store: RunStore
+    runs: pd.DataFrame
+    prepared: dict[int, PreparedDataset]
+    learner: LearnerSpec
+    artifact_dir: Path
+
+
+@pytest.fixture(scope="session")
+def small_pilot(tmp_path_factory: pytest.TempPathFactory) -> SmallPilot:
+    """Dua dataset × lima konfigurasi × dua seed; dipakai uji meta-model, scan, dan BR-16."""
+    from ceteris.corpus import CorpusFilter, prepare_dataset
+    from ceteris.corrupt import DuplicateExact, LabelUniform, MissingMCAR, Outlier
+    from ceteris.experiment import run_corruption
+    from ceteris.metamodel import build_artifact
+
+    root = tmp_path_factory.mktemp("pilot")
+    fast = load_learner_spec(CONFIGS / "learner.yaml").model_copy(
+        update={"num_boost_round": 20, "version": "test-fast"}
+    )
+    small = CorpusFilter(min_rows=100, max_rows=5000, min_class_count=5)
+    frames = {42: make_frame(n=500, seed=0), 43: make_frame(n=500, n_classes=3, seed=1)}
+    fetcher = FakeFetcher(frames)
+    store = RunStore(root / "runs")
+    prepared = {d: prepare_dataset(d, fetcher, root / "corpus", small) for d in frames}
+    configs = [
+        [LabelUniform(level=0.1)],
+        [LabelUniform(level=0.3)],
+        [MissingMCAR(level=0.2)],
+        [DuplicateExact(level=0.2)],
+        [Outlier(level=0.1)],
+    ]
+    for dataset in prepared.values():
+        for specs in configs:
+            for seed_index in range(2):
+                run_corruption(dataset, specs, seed_index, fast, store, fake_provenance)
+    runs = store.read("corruption_run").sort_values("run_id").reset_index(drop=True)
+    artifact_dir = root / "artifact"
+    build_artifact(
+        runs,
+        fast,
+        artifact_dir,
+        version="0.0.1-test",
+        corpus_snapshot="test:2",
+        noise_floor_statistic="range",
+        noise_floor_seeds=3,
+        ood_k=3,
+    )
+    return SmallPilot(store, runs, prepared, fast, artifact_dir)
 
 
 @pytest.fixture
