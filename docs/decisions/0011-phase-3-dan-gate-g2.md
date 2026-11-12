@@ -1,6 +1,6 @@
 # ADR 0011: Phase 3 — desain pilot E0, kalibrator, scan eksperimental, dan gate G2
 
-- **Status:** Diusulkan. K1–K7 dan G2-1 sampai G2-9 sudah diputuskan pemilik repo pada 12/11/2026. Yang menunggu hanya persetujuan gate G2; sebelum itu, rencana analisis belum dibekukan.
+- **Status:** Diterima **[K]**. Gate G2 disetujui pemilik repo pada 12/11/2026; rencana analisis dibekukan dan grid korupsi naik ke versi 1.0.0.
 - **Tanggal:** 12/11/2026
 - **Rilis terdampak:** R0, Phase 3
 - **Rujukan:** `execution-plan.md` Phase 3; BR-04, BR-05, BR-22, BR-24, BR-30–BR-35, BR-60, BR-86; ADR 0006, 0010; [analysis-plan.md](../analysis-plan.md)
@@ -233,8 +233,17 @@ Semua rekomendasi di bawah disetujui pemilik repo pada 12/11/2026. G2-2 juga dib
 
   Baris gate Contoh 5 (kebijakan ditolak saat disimpan, BR-50 dan BR-51) adalah fitur R2.
 
-## Setelah G2 disetujui
+## Tindak lanjut persetujuan (12/11/2026, selesai)
 
-1. Status `analysis-plan.md` menjadi "Dibekukan" dengan tanggal (BR-86). Nilai G2-1 sampai G2-9 sudah tertulis di bagian 7.
-2. Campuran final masuk `configs/corruption.yaml`, yang naik ke versi `1.0.0`.
+1. `analysis-plan.md` berstatus "Dibekukan 12/11/2026" (BR-86). Nilai G2-1 sampai G2-9 ada di bagian 7.
+2. Kesepuluh campuran final masuk `configs/corruption.yaml`, yang naik ke versi `1.0.0`. Uji memastikan isinya sama dengan kandidat pilot.
 3. Status ADR ini dan Phase 3 di `execution-plan.md` menjadi selesai, sehingga Phase 4 bisa dimulai.
+
+## Dibawa ke Phase 4
+
+- **LODO bersarang (F-S11):** tuning (G2-9) dan kalibrasi proper-train/kalibrasi per fold.
+- **Skor OOD penuh dan ambang OOD final:** hal terbuka #3 di G3.
+- **Potensi pemulihan per temuan (F-S12):** termasuk isi `findings` di `ScanReport` dan `ablation_run` untuk H2b.
+- **ΔAUC relatif saat scan (K7):** meta-model terpisah sesuai rencana skripsi, atau tetap null.
+- **Korpus penuh E1:** 31 dataset, sekitar 68 jam CPU di mesin lokal.
+- **Hal terbuka #12** (tipe kolom CSV), sebelum E4.

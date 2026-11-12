@@ -103,7 +103,19 @@ Hal yang dibawa ke Phase 3:
 
 ### Phase 3 — Pilot dan scan eksperimental
 
-**Status: implementasi, pilot E0, dan baseline (a)–(d) selesai; keputusan G2 disetujui pemilik repo pada 12/11/2026. Menunggu persetujuan gate G2 untuk membekukan rencana analisis.** Bukti dan keputusan ada di [ADR 0011](decisions/0011-phase-3-dan-gate-g2.md).
+**Status: selesai; gate G2 disetujui pemilik repo pada 12/11/2026.** Bukti dan keputusan ada di [ADR 0011](decisions/0011-phase-3-dan-gate-g2.md).
+
+- **Dibekukan:** [rencana analisis](analysis-plan.md) dan grid korupsi `1.0.0`, termasuk 10 campuran.
+- **Diserahkan:**
+  - meta-model pilot `0.1.0-pilot` (eksperimental);
+  - `ScanReport` 1.0;
+  - perintah `ceteris scan`.
+- **Dibawa ke Phase 4:**
+  - LODO bersarang;
+  - OOD penuh;
+  - potensi pemulihan;
+  - ΔAUC relatif saat scan;
+  - E1 korpus penuh.
 
 | | |
 | --- | --- |

@@ -1,7 +1,7 @@
 # Rencana analisis R0
 
-- **Status:** DRAF, belum dibekukan. Dibekukan saat gate G2 disetujui (BR-86). Sesudah dibekukan, setiap analisis yang tidak tertulis di sini berlabel **eksploratif**, dan perubahan dicatat sebagai revisi bertanggal di bagian 9.
-- **Tanggal draf:** 12/11/2026
+- **Status:** **Dibekukan 12/11/2026** (gate G2 disetujui pemilik repo, BR-86). Setiap analisis yang tidak tertulis di sini berlabel **eksploratif**, dan perubahan dicatat sebagai revisi bertanggal di bagian 9.
+- **Tanggal:** 12/11/2026
 - **Rujukan:**
   - `product.md` 6.1 (kriteria bukti H1–H5);
   - `business-rules.md` BR-04, BR-05, BR-22, BR-81, BR-85, BR-86;
@@ -97,3 +97,4 @@ Ukuran pendukung H1a, dilaporkan tanpa uji: RMSE, bias, Spearman prediksi vs akt
 | Tanggal | Perubahan |
 | --- | --- |
 | 12/11/2026 | Draf pertama untuk gate G2 |
+| 12/11/2026 | Nilai P1–P9 diisi dari keputusan G2 (ADR 0011); rencana dibekukan saat G2 disetujui |
