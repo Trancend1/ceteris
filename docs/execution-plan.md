@@ -72,6 +72,23 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 
 ### Phase 2 — Profil kualitas data dan G1
 
+**Status: selesai; gate G1 disetujui pemilik repo pada 12/11/2026.** Keputusan dan bukti: [ADR 0010](decisions/0010-gate-g1.md). Yang dibekukan:
+
+- learner acuan `1.0.0`;
+- skema profil v1;
+- parameter kontrak input;
+- probe kebocoran;
+- semantik korupsi K3a–K3e;
+- `PROFILE_SEED`.
+
+Hal yang dibawa ke Phase 3:
+
+- grid level korupsi dan konfigurasi campuran (E0);
+- evaluasi ambang kebocoran berbasis prior (Opsi B') pada noise class-conditional;
+- bias estimator label noise pada dataset sulit;
+- biaya profil per run;
+- jumlah run yang gagal karena kelas kecil.
+
 | | |
 | --- | --- |
 | Scope | F-S04 `dqprofile` v1 dan praproses kontrak input, F-S05 estimator label noise, kerangka pengukuran noise floor terukur (sisi `train`, F-S06); penerapan [ADR 0009](decisions/0009-paket-keputusan-g1.md): bagging di learner acuan dan probe, cleanlab untuk F-S05, mekanisme korupsi K3a–K3e pada F-S02 |
@@ -182,8 +199,8 @@ Selain kriteria khusus phase, setiap phase menunggu hal berikut:
 
 | Hal terbuka **[T]** | Ditutup di |
 | --- | --- |
-| Hiperparameter probe kebocoran dan pilihan ambang tetap atau adaptif (BR #6, [ADR 0007](decisions/0007-opsi-ambang-kebocoran-adaptif.md)) | Phase 2 (G1) |
-| Nilai `bagging_fraction` learner acuan (BR #11; jenis keacakan diputuskan di [ADR 0009](decisions/0009-paket-keputusan-g1.md)) | Phase 2 (G1) |
+| **Ditutup [K] 12/11/2026:** hiperparameter probe kebocoran dan ambang tetap 0,99 (BR #6, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
+| **Ditutup [K] 12/11/2026:** `bagging_fraction` 0,8 untuk learner acuan (BR #11, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
 | Statistik noise floor dan seed probe (BR #1); kuantil conformal (BR #4); pemotongan interval (BR #5); mesin komputasi (arsitektur #7) | Phase 3 (G2) |
 | Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | Phase 4 (G3) |
 | Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |

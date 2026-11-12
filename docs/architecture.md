@@ -184,6 +184,37 @@ Semua endpoint di bawah `/v1`, memakai bearer token (pengguna) atau token layana
 | `POST /scans/{id}/feedback` | Melaporkan hasil aktual | F-L14 | R4 |
 | `GET /trust/{table_ref}` | Trust signal per tabel | F-L13 | R4 |
 
+### 6.5 Quality profile v1
+
+Skema profil yang dihitung `ceteris.dqprofile` dari data kotor saja (BR-20), dipakai identik oleh jalur riset dan scan (AC-1). Urutan fitur di kode (`dqprofile.FEATURES`) adalah urutan resmi. Menambah, menghapus, atau mengubah definisi fitur berarti `profile_schema_version` baru (BR-23). Status: **[K]** diimplementasikan di Phase 2; dibekukan di G1.
+
+| Fitur | Grup | Sifat | Definisi | Tanpa temuan |
+| --- | --- | --- | --- | --- |
+| `n_rows` | Konteks | Terobservasi | Jumlah baris setelah kontrak input | — |
+| `n_features` | Konteks | Terobservasi | Jumlah kolom fitur setelah kontrak input | — |
+| `frac_numeric` | Konteks | Terobservasi | Proporsi kolom fitur numerik | — |
+| `n_classes` | Konteks | Terobservasi | Jumlah kelas target | — |
+| `class_imbalance` | Konteks | Terobservasi | Jumlah baris kelas terkecil dibagi kelas terbesar | — |
+| `cat_cardinality_ratio_mean` | Konteks | Terobservasi | Rata-rata (nilai unik ÷ baris) atas kolom kategorikal; 0 bila tidak ada | — |
+| `probe_auc` | Probe | Terobservasi | AUC out-of-fold learner acuan (5 lipatan berstrata) pada data apa adanya | — |
+| `importance_top1_share` | Probe | Terobservasi | Bagian importance gain terbesar satu fitur | — |
+| `missing_rate` | Missing | Terobservasi | Proporsi sel fitur yang kosong | 0 |
+| `missing_col_max`, `missing_col_mean`, `missing_col_std` | Missing | Terobservasi | Maksimum, rata-rata, simpangan baku laju missing per kolom | 0 |
+| `missing_rate_weighted` | Missing | Terobservasi | Σ importance × laju missing per kolom | 0 |
+| `missing_target_assoc` | Missing | Terobservasi | Maksimum \|P(missing \| kelas) − P(missing)\| atas kolom dan kelas | 0 |
+| `missing_feature_assoc` | Missing | Terobservasi | Maksimum \|Spearman\| antara indikator missing dan fitur numerik lain (≤ 50 kolom ber-missing) | 0 |
+| `label_noise_rate` | Label noise | Diestimasi | Jumlah isu label menurut confident learning (cleanlab, ADR 0009 K2) dibagi jumlah baris | 0 |
+| `dup_conflict_rate` | Label noise | Terobservasi | Proporsi baris dalam kelompok fitur identik yang labelnya lebih dari satu | 0 |
+| `outlier_cell_frac_iqr` | Outlier | Diestimasi | Proporsi sel numerik di luar [Q1 − 1,5·IQR; Q3 + 1,5·IQR] | 0 |
+| `outlier_row_frac_iforest` | Outlier | Diestimasi | Proporsi baris yang dinilai anomali oleh Isolation Forest (`contamination="auto"`) | 0 |
+| `outlier_rate_weighted` | Outlier | Diestimasi | Σ importance × proporsi sel outlier IQR per kolom | 0 |
+| `skew_abs_mean`, `kurtosis_mean` | Outlier | Terobservasi | Rata-rata \|skewness\| dan excess kurtosis kolom numerik | — |
+| `dup_row_rate` | Duplikat dan tipe | Terobservasi | Proporsi baris yang duplikat eksak dari baris sebelumnya (fitur dan target) | 0 |
+| `const_col_frac` | Duplikat dan tipe | Terobservasi | Proporsi kolom fitur dengan ≤ 1 nilai unik | 0 |
+| `type_inconsistency_rate` | Duplikat dan tipe | Terobservasi | Rata-rata min(p; 1 − p) atas kolom non-numerik, p = proporsi nilai yang terbaca sebagai angka | 0 |
+
+Kolom "Tanpa temuan" adalah nilai struktural untuk potensi pemulihan (ADR 0006); "—" berarti fitur tidak dinormalkan. Model berbasis probe (importance, probe out-of-fold, confident learning, Isolation Forest, probe kebocoran BR-15) memakai sampel ≤ 100.000 baris (BR-12); statistik terobservasi lain dihitung pada seluruh baris. Selain fitur, profil mencatat jumlah baris masukan, ukuran sampel, kolom yang dikeluarkan beserta alasannya, peringatan kontrak input, dan hasil probe kebocoran. Skor OOD (BR-24) dan noise floor estimasi (BR-04) tidak termasuk fitur profil.
+
 ## 7. Architectural constraints
 
 Batasan ini mengikat setiap perubahan kode. Melanggarnya memerlukan perubahan dokumen ini lebih dulu.

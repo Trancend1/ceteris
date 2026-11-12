@@ -193,3 +193,95 @@ def test_run_records_full_learner_hash(
     assert (
         store.read("experiment_config").loc[0, "learner_spec_sha256"] == row["learner_spec_sha256"]
     )
+
+
+def test_ac11_profile_is_stored_with_delta_in_one_row(
+    prepared: PreparedDataset, fast_learner: LearnerSpec, tmp_path: Path
+) -> None:
+    from ceteris.dqprofile import FEATURES
+
+    store = RunStore(tmp_path / "runs")
+    row = run_corruption(
+        prepared, [LabelUniform(level=0.3)], 0, fast_learner, store, fake_provenance
+    )
+    stored = store.read("corruption_run")
+    assert row["profile_schema_version"] == "v1"
+    for name in FEATURES:
+        assert stored.loc[0, f"p_{name}"] == pytest.approx(row[f"p_{name}"])
+    assert row["p_label_noise_rate"] > 0.1  # profil melihat data kotor (BR-20)
+    assert row["leakage_flagged"] is False
+
+
+def test_ac12_profile_is_identical_across_stores(
+    prepared: PreparedDataset, fast_learner: LearnerSpec, tmp_path: Path
+) -> None:
+    from ceteris.dqprofile import FEATURES
+
+    specs = [MissingMCAR(level=0.2), Outlier(level=0.1)]
+    a = run_corruption(prepared, specs, 2, fast_learner, RunStore(tmp_path / "a"), fake_provenance)
+    b = run_corruption(prepared, specs, 2, fast_learner, RunStore(tmp_path / "b"), fake_provenance)
+    assert [a[f"p_{n}"] for n in FEATURES] == [b[f"p_{n}"] for n in FEATURES]
+
+
+def test_profile_config_does_not_reseed_the_run(
+    prepared: PreparedDataset, fast_learner: LearnerSpec, tmp_path: Path
+) -> None:
+    """Mengubah konfigurasi profil tidak mengacak ulang korupsi dan ΔAUC (seed dari config_id)."""
+    from ceteris.dqprofile import ProfileConfig
+    from ceteris.experiment import profile_config_id
+
+    store = RunStore(tmp_path / "runs")
+    specs = [LabelUniform(level=0.2)]
+    default = run_corruption(prepared, specs, 0, fast_learner, store, fake_provenance)
+    other_cfg = ProfileConfig(leakage_max_depth=2)
+    other = run_corruption(
+        prepared, specs, 0, fast_learner, store, fake_provenance, profile_config=other_cfg
+    )
+    assert default["seed"] == other["seed"] and default["delta_auc"] == other["delta_auc"]
+    assert default["run_id"] != other["run_id"]
+    assert other["profile_config_id"] == profile_config_id(other_cfg)
+    registry = store.read("experiment_config")
+    assert sorted(registry["kind"]) == ["corruption", "profile", "profile"]
+
+
+def test_br16_stored_profile_matches_direct_profile_of_same_dirty_data(
+    prepared: PreparedDataset, fast_learner: LearnerSpec, tmp_path: Path
+) -> None:
+    """Profil memakai seed tetap: data kotor yang sama memberi profil yang sama di luar run."""
+    from ceteris.corrupt import corrupt
+    from ceteris.dqprofile import FEATURES, PROFILE_SEED, compute_profile
+    from ceteris.experiment import context_for
+
+    specs = [MissingMCAR(level=0.2)]
+    row = run_corruption(
+        prepared, specs, 0, fast_learner, RunStore(tmp_path / "r"), fake_provenance
+    )
+    dirty = corrupt(
+        prepared.train_frame(),
+        prepared.target,
+        specs,
+        row["corruption_seed"],
+        context_for(prepared, fast_learner),
+    ).frame
+    direct = compute_profile(dirty, prepared.target, learner=fast_learner, seed=PROFILE_SEED)
+    assert [direct.features[n] for n in FEATURES] == [row[f"p_{n}"] for n in FEATURES]
+
+
+def test_leakage_calibration_finds_synthetic_leak(
+    prepared: PreparedDataset, fast_learner: LearnerSpec
+) -> None:
+    from ceteris.experiment import calibrate_leakage
+
+    rows = calibrate_leakage(prepared, fast_learner, [0.0, 0.2], [(2, 0.01), (4, 0.05)], seed=1)
+    assert [(r["epsilon"], r["max_depth"]) for r in rows] == [
+        (0.0, 2),
+        (0.0, 4),
+        (0.2, 2),
+        (0.2, 4),
+    ]
+    clean, _, noisy, _ = rows
+    assert clean["leak_auc"] == pytest.approx(1.0)
+    assert clean["leak_cat_auc"] == pytest.approx(1.0)
+    assert noisy["leak_auc"] < clean["leak_auc"]  # label noise menurunkan AUC fitur bocor
+    assert noisy["eps_hat"] > clean["eps_hat"]
+    assert clean["max_feature_auc"] < 0.99

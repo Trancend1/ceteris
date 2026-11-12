@@ -18,8 +18,17 @@
 
 ## Hal terbuka
 
-- **[T]** `max_depth` dan `min_samples_leaf` pohon probe. Ditetapkan lewat kalibrasi pada kebocoran sintetis di berbagai level label noise dan di korpus, lalu dibekukan di G1.
-- **[T]** Ambang tetap atau adaptif terhadap label noise: lihat [ADR 0007](0007-opsi-ambang-kebocoran-adaptif.md). Probe berjalan pada data kotor, sehingga kebocoran bisa lolos dari ambang 0,99 bila label noise tinggi.
+- **[K]** `max_depth` 4 dan `min_samples_leaf` 0,01 untuk pohon probe. Diputuskan 12/11/2026 dari kalibrasi di [ADR 0010](0010-gate-g1.md); dibekukan saat G1 disetujui.
+- **[K]** Ambang tetap 0,99 ([ADR 0007](0007-opsi-ambang-kebocoran-adaptif.md) Opsi A), diputuskan 12/11/2026. Kebocoran yang menyalin label sebenarnya lolos bila label noise ≥ 0,1; ini dicatat sebagai keterbatasan BR-15.
+
+## Pembaruan 12/11/2026
+
+Tinjauan Phase 2 mengubah dua rincian mekanik probe di butir 3:
+
+- **Pohon per kelas dan pengodean kategori.** Probe kini memakai satu pohon biner per kelas (one-vs-rest), sehingga salinan target multikelas tetap terdeteksi. Fitur kategorikal dikodekan menurut proporsi kelas di lipatan latih.
+- **Seed tetap.** Seed probe kini tetap (`PROFILE_SEED`), bukan turunan BR-84, agar memenuhi BR-12 dan BR-16.
+
+Rinciannya di [ADR 0010](0010-gate-g1.md).
 
 ## Konsekuensi
 

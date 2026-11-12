@@ -1,8 +1,9 @@
 """ceteris.train: learner acuan (LightGBM), AUC, dan ΔAUC.
 
-Fitur: F-S03 (docs/product.md); bagian noise floor terukur (F-S06) menyusul di Phase 2.
-Jalur: riset. Aturan: BR-01 (ΔAUC pada test set bersih yang sama), BR-02 (ΔAUC relatif),
-BR-03 (learner acuan deterministik dari `configs/learner.yaml`), BR-07 (hanya ΔAUC).
+Fitur: F-S03 (docs/product.md); noise floor terukur dan probe (F-S06, F-S05).
+Jalur: riset dan scan (probe). Aturan: BR-01 (ΔAUC pada test set bersih yang sama), BR-02 (ΔAUC
+relatif), BR-03 (learner acuan deterministik dari `configs/learner.yaml`, juga untuk probe),
+BR-04 (noise floor terukur), BR-07 (hanya ΔAUC); ADR 0009 K1 (bagging agar seed berpengaruh).
 
 Modul ini tidak mengimpor kode korupsi atau korpus, sehingga spesifikasi learner bisa dipakai
 probe di jalur scan tanpa melanggar AC-3.
@@ -21,6 +22,9 @@ import pandas as pd
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import StratifiedKFold
+
+from ceteris.seeding import sub_seed
 
 # Parameter yang diatur oleh harness, bukan oleh berkas spesifikasi.
 _RESERVED = {"objective", "num_class", "seed", "random_state", "num_iterations", "n_estimators"}
@@ -45,6 +49,12 @@ class LearnerSpec(BaseModel):
         reserved = _RESERVED.intersection(params)
         if reserved:
             raise ValueError(f"parameter diatur harness, jangan di spesifikasi: {sorted(reserved)}")
+        fraction = params.get("bagging_fraction", 1.0)
+        if not (int(params.get("bagging_freq", 0)) >= 1 and 0.0 < float(fraction) < 1.0):
+            raise ValueError(
+                "learner acuan wajib bagging aktif (bagging_freq >= 1, 0 < bagging_fraction < 1) "
+                "agar seed berpengaruh pada noise floor (ADR 0009 K1)"
+            )
         return params
 
 
@@ -66,6 +76,27 @@ def _xy(frame: pd.DataFrame, target: str) -> tuple[pd.DataFrame, np.ndarray]:
     return features, codes.astype(np.int64)
 
 
+def _fit(spec: LearnerSpec, train: pd.DataFrame, target: str, seed: int) -> lgb.Booster:
+    x_train, y_train = _xy(train, target)
+    n_classes = len(train[target].cat.categories)
+    params: dict[str, Any] = {**spec.params, "seed": int(seed)}
+    if n_classes == 2:
+        params["objective"] = "binary"
+    else:
+        params.update(objective="multiclass", num_class=n_classes)
+    dataset = lgb.Dataset(x_train, label=y_train, free_raw_data=True)
+    return lgb.train(params, dataset, num_boost_round=spec.num_boost_round)
+
+
+def _predict(booster: lgb.Booster, frame: pd.DataFrame, target: str) -> np.ndarray:
+    x, _ = _xy(frame, target)
+    n_classes = len(frame[target].cat.categories)
+    raw = np.asarray(booster.predict(x))
+    if n_classes == 2:
+        return np.column_stack([1.0 - raw, raw])
+    return raw.reshape(len(x), n_classes)
+
+
 def fit_predict_proba(
     spec: LearnerSpec,
     train: pd.DataFrame,
@@ -74,22 +105,61 @@ def fit_predict_proba(
     seed: int,
 ) -> np.ndarray:
     """Latih learner acuan pada `train`, kembalikan probabilitas kelas untuk `test` (n × K)."""
-    x_train, y_train = _xy(train, target)
-    x_test, _ = _xy(test, target)
+    _xy(train, target)
+    _xy(test, target)
     if list(train[target].cat.categories) != list(test[target].cat.categories):
         raise ValueError("kategori target latih dan uji harus identik")
-    n_classes = len(train[target].cat.categories)
-    params: dict[str, Any] = {**spec.params, "seed": int(seed)}
-    if n_classes == 2:
-        params["objective"] = "binary"
-    else:
-        params.update(objective="multiclass", num_class=n_classes)
-    dataset = lgb.Dataset(x_train, label=y_train, free_raw_data=True)
-    booster = lgb.train(params, dataset, num_boost_round=spec.num_boost_round)
-    raw = np.asarray(booster.predict(x_test))
-    if n_classes == 2:
-        return np.column_stack([1.0 - raw, raw])
-    return raw.reshape(len(x_test), n_classes)
+    return _predict(_fit(spec, train, target, seed), test, target)
+
+
+def oof_predict_proba(
+    spec: LearnerSpec,
+    frame: pd.DataFrame,
+    target: str,
+    seed: int,
+    n_folds: int = 5,
+    split_seed: int | None = None,
+) -> np.ndarray:
+    """Probabilitas out-of-fold dari validasi silang berstrata (probe dan confident learning).
+
+    `split_seed` menentukan pembagian lipatan (bawaan: `seed`); seed learner tiap lipatan
+    diturunkan dari `seed` sehingga tidak bertabrakan antar-seed.
+    """
+    _, y = _xy(frame, target)
+    proba = np.zeros((len(frame), len(frame[target].cat.categories)))
+    split = int(seed if split_seed is None else split_seed)
+    folds = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=split)
+    for fold, (fit_idx, val_idx) in enumerate(folds.split(np.zeros(len(y)), y)):
+        booster = _fit(spec, frame.iloc[fit_idx], target, sub_seed(seed, f"fold{fold}"))
+        proba[val_idx] = _predict(booster, frame.iloc[val_idx], target)
+    return proba
+
+
+def feature_importance(spec: LearnerSpec, frame: pd.DataFrame, target: str, seed: int) -> pd.Series:
+    """Importance gain per kolom fitur, dinormalisasi berjumlah 1 (nol semua bila tanpa split)."""
+    booster = _fit(spec, frame, target, seed)
+    gain = np.asarray(booster.feature_importance(importance_type="gain"), dtype="float64")
+    total = gain.sum()
+    names = [c for c in frame.columns if c != target]
+    return pd.Series(gain / total if total > 0 else gain, index=names, dtype="float64")
+
+
+def measure_noise_floor(
+    spec: LearnerSpec,
+    train: pd.DataFrame,
+    test: pd.DataFrame,
+    target: str,
+    seeds: list[int],
+) -> list[float]:
+    """BR-04 noise floor terukur: AUC model versi bersih per seed pada test set yang sama.
+
+    Statistik ringkasnya (rentang, simpangan baku, atau persentil) masih terbuka sampai G2
+    (`business-rules.md` hal terbuka #1), jadi fungsi ini mengembalikan AUC per seed.
+    """
+    if len(seeds) < 2:
+        raise ValueError("noise floor butuh minimal dua seed")
+    _, y_test = _xy(test, target)
+    return [auc_score(y_test, fit_predict_proba(spec, train, test, target, s)) for s in seeds]
 
 
 def auc_score(y_true: np.ndarray, proba: np.ndarray) -> float:
