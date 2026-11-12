@@ -1,11 +1,22 @@
-# Grid korupsi (F-S02). DRAF Phase 1: level dan parameter belum diputuskan;
-# grid final ditetapkan di pilot E0 (Phase 3). Semantik level: ADR 0008.
-levels: [0.05, 0.1, 0.2, 0.3]
-kinds:
-  missing_mcar: {n_columns: 3}
-  missing_mar: {n_columns: 3}
-  label_uniform: {}
-  label_class_conditional: {}
-  outlier: {scale: 3.0}
-  duplicate_exact: {}
-  duplicate_conflict: {}
+# Grid korupsi (F-S02). DRAF sampai G1; disesuaikan di pilot E0 bila ΔAUC di bawah noise floor.
+# Grid tunggal mengikuti rencana skripsi (ADR 0009 K3a); semantik level: ADR 0008 dan ADR 0009.
+version: "0.2.0-draft"
+singles:
+  - kind: missing_mcar
+    levels: [0.05, 0.10, 0.20, 0.35, 0.50]
+    variants: [{columns: high_importance}, {columns: low_importance}]   # K3e
+  - kind: missing_mar
+    levels: [0.05, 0.10, 0.20, 0.35, 0.50]
+    variants: [{columns: high_importance}, {columns: low_importance}]   # K3e
+  - kind: label_uniform
+    levels: [0.02, 0.05, 0.10, 0.20, 0.30]
+  - kind: label_class_conditional
+    levels: [0.02, 0.05, 0.10, 0.20, 0.30]
+  - kind: outlier
+    levels: [0.01, 0.03, 0.05, 0.10, 0.20]
+  - kind: duplicate_exact
+    levels: [0.05, 0.10, 0.20, 0.30, 0.50]
+  - kind: duplicate_conflict
+    levels: [0.05, 0.10, 0.20, 0.30, 0.50]
+# [T] ±10 campuran dua–tiga jenis pada level sedang–tinggi; didefinisikan di pilot E0 (G2).
+mixtures: []

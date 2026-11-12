@@ -16,9 +16,12 @@ from ceteris.train import (
     auc_score,
     delta_auc,
     delta_auc_relative,
+    feature_importance,
     fit_predict_proba,
     load_learner_spec,
     measure_delta_auc,
+    measure_noise_floor,
+    oof_predict_proba,
 )
 from tests.conftest import CONFIGS, REPO_ROOT, make_frame
 
@@ -101,25 +104,77 @@ def test_target_must_be_categorical_and_complete(fast_learner: LearnerSpec) -> N
         fit_predict_proba(fast_learner, broken, test, "class", 1)
 
 
-def test_br03_learner_spec_requires_determinism(tmp_path: Path) -> None:
-    good = {
-        "version": "x",
-        "num_boost_round": 5,
-        "params": {"deterministic": True, "force_row_wise": True},
+def test_br03_learner_spec_requires_determinism_and_bagging(tmp_path: Path) -> None:
+    params = {
+        "deterministic": True,
+        "force_row_wise": True,
+        "bagging_fraction": 0.8,
+        "bagging_freq": 1,
     }
+    good = {"version": "x", "num_boost_round": 5, "params": params}
     LearnerSpec.model_validate(good)
+    drop = {k: v for k, v in params.items() if k != "deterministic"}
     with pytest.raises(ValidationError, match="deterministic"):
-        LearnerSpec.model_validate({**good, "params": {"force_row_wise": True}})
+        LearnerSpec.model_validate({**good, "params": drop})
+    drop = {k: v for k, v in params.items() if k != "force_row_wise"}
     with pytest.raises(ValidationError, match="force_row_wise"):
-        LearnerSpec.model_validate({**good, "params": {"deterministic": True}})
+        LearnerSpec.model_validate({**good, "params": drop})
     with pytest.raises(ValidationError, match="harness"):
-        LearnerSpec.model_validate({**good, "params": {**good["params"], "seed": 1}})  # type: ignore[dict-item]
+        LearnerSpec.model_validate({**good, "params": {**params, "seed": 1}})
+    for broken in ({"bagging_freq": 0}, {"bagging_fraction": 1.0}):
+        with pytest.raises(ValidationError, match="bagging"):
+            LearnerSpec.model_validate({**good, "params": {**params, **broken}})
 
 
-def test_br03_repository_learner_spec_is_valid() -> None:
+def test_br04_different_seeds_give_different_models(fast_learner: LearnerSpec) -> None:
+    """ADR 0009 K1: seed harus berpengaruh, kalau tidak noise floor terukur selalu 0."""
+    train, test = split_frames(n=800)
+    a = fit_predict_proba(fast_learner, train, test, "class", seed=1)
+    b = fit_predict_proba(fast_learner, train, test, "class", seed=2)
+    assert not np.array_equal(a, b)
+
+
+def test_br04_noise_floor_harness_returns_auc_per_seed(fast_learner: LearnerSpec) -> None:
+    train, test = split_frames(n=800)
+    aucs = measure_noise_floor(fast_learner, train, test, "class", [1, 2, 3])
+    assert len(aucs) == 3 and all(0.5 < a <= 1.0 for a in aucs)
+    assert aucs == measure_noise_floor(fast_learner, train, test, "class", [1, 2, 3])
+    with pytest.raises(ValueError, match="dua seed"):
+        measure_noise_floor(fast_learner, train, test, "class", [1])
+
+
+def test_oof_predictions_cover_every_row(fast_learner: LearnerSpec) -> None:
+    train, _ = split_frames(n=600, n_classes=3)
+    proba = oof_predict_proba(fast_learner, train, "class", seed=4)
+    assert proba.shape == (len(train), 3)
+    assert np.allclose(proba.sum(axis=1), 1.0)
+    assert np.array_equal(proba, oof_predict_proba(fast_learner, train, "class", seed=4))
+
+
+def test_feature_importance_is_normalised_per_column(fast_learner: LearnerSpec) -> None:
+    train, _ = split_frames(n=600)
+    importance = feature_importance(fast_learner, train, "class", seed=3)
+    assert list(importance.index) == [c for c in train.columns if c != "class"]
+    assert importance.sum() == pytest.approx(1.0)
+    assert importance["x1"] < min(importance["x0"], importance["c0"])  # x1 hanya derau
+
+
+def test_br03_repository_learner_spec_is_frozen_at_g1() -> None:
+    """ADR 0010 B1: versi 1.0.0 dibekukan; mengubah isinya wajib menaikkan versi."""
     spec = load_learner_spec(CONFIGS / "learner.yaml")
-    assert spec.params["deterministic"] is True
-    assert spec.version.endswith("draft")
+    assert spec.version == "1.0.0"
+    assert spec.num_boost_round == 100
+    assert spec.params == {
+        "learning_rate": 0.1,
+        "num_leaves": 31,
+        "min_data_in_leaf": 20,
+        "bagging_fraction": 0.8,
+        "bagging_freq": 1,
+        "deterministic": True,
+        "force_row_wise": True,
+        "num_threads": 1,
+        "verbosity": -1,
+    }
 
 
 def test_br07_no_delta_f1_anywhere_in_package() -> None:

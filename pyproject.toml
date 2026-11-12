@@ -16,6 +16,7 @@ dependencies = [
     "typer>=0.12",
     "pydantic>=2.7",
     "pyyaml>=6.0",
+    "cleanlab>=2.8.0,<3",
 ]
 
 [dependency-groups]
@@ -71,5 +72,5 @@ files = ["ceteris"]
 
 [[tool.mypy.overrides]]
 # Pustaka tanpa anotasi tipe; diperlakukan sebagai Any (ADR 0004).
-module = ["pandas.*", "sklearn.*", "lightgbm.*", "pyarrow.*", "yaml.*", "scipy.*"]
+module = ["pandas.*", "sklearn.*", "lightgbm.*", "pyarrow.*", "yaml.*", "scipy.*", "cleanlab.*"]
 ignore_missing_imports = true

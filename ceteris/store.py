@@ -25,6 +25,8 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from ceteris.dqprofile import FEATURES
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 _EMPTY = "_empty.parquet"
 
@@ -86,6 +88,15 @@ CORRUPTION_RUN = pa.schema(
         ("test_sha256", pa.string()),
         ("learner_spec_version", pa.string()),
         ("learner_spec_sha256", pa.string()),
+        ("profile_schema_version", pa.string()),
+        ("profile_config_id", pa.string()),
+        ("profile_sample_size", pa.int64()),
+        ("profile_input_warnings", pa.string()),
+        ("leakage_flagged", pa.bool_()),
+        ("leakage_feature", pa.string()),
+        ("leakage_auc", pa.float64()),
+        ("leakage_threshold", pa.float64()),
+        *[(f"p_{name}", pa.float64()) for name in FEATURES],
         ("created_at", pa.string()),
     ]
 )

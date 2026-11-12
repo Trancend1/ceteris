@@ -1,12 +1,16 @@
-# Spesifikasi learner acuan (BR-03). DRAF Phase 1; dibekukan di G1, perubahan sesudahnya = versi baru.
-# Nilai di bawah adalah default LightGBM, ditambah pengaturan determinisme.
+# Spesifikasi learner acuan (BR-03), dipakai juga oleh probe. DIBEKUKAN di G1 (12/11/2026,
+# ADR 0010 B1); perubahan apa pun = versi baru.
+# Default LightGBM ditambah determinisme dan bagging baris agar seed berpengaruh pada
+# noise floor (ADR 0009 K1).
 # objective, num_class, dan seed diatur oleh harness (ceteris.train), bukan di berkas ini.
-version: "0.1.0-draft"
+version: "1.0.0"
 num_boost_round: 100
 params:
   learning_rate: 0.1
   num_leaves: 31
   min_data_in_leaf: 20
+  bagging_fraction: 0.8
+  bagging_freq: 1
   deterministic: true
   force_row_wise: true
   num_threads: 1
