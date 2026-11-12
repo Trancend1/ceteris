@@ -60,7 +60,7 @@ notebooks/   NB00–NB10 (papermill)
 tests/       unit, properti, determinisme, kontrak, konsistensi jalur
 ```
 
-- Python 3.11, dikelola `uv`. Dependensi baru: periksa lisensinya dan sebutkan di PR (cleanlab berlisensi Apache-2.0 sejak 2.8.0, sebelumnya AGPL-3.0; pemakaiannya masih hal terbuka).
+- Python 3.11, dikelola `uv`. Dependensi baru: periksa lisensinya dan sebutkan di PR (cleanlab dipakai untuk F-S05 dengan versi `>=2.8.0,<3`, berlisensi Apache-2.0; ADR 0009).
 - Setiap fitur merujuk ID di `docs/product.md` (F-S.. atau F-L..). Kode tanpa ID fitur berarti di luar scope: tanyakan dulu.
 - Setiap aturan `BR-xx` punya kolom Verifikasi. Saat mengimplementasikan aturan, tulis uji yang disebut di sana dan sebut ID aturan di nama atau docstring uji.
 - Keacakan selalu memakai seed eksplisit yang diturunkan dari (`dataset_id`, `config_id`, indeks seed) (BR-84). LightGBM dijalankan deterministik.

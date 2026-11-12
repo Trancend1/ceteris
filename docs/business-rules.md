@@ -12,7 +12,7 @@ Dokumen ini adalah satu-satunya sumber untuk aturan yang menentukan **angka dan 
 | --- | --- | --- |
 | BR-01 | **ΔAUC** = AUC(model dilatih pada versi bersih) − AUC(model dilatih pada versi kotor). Kedua model memakai learner acuan yang sama dan dievaluasi pada **test set bersih yang sama**. Multikelas memakai macro one-vs-rest. | Uji unit `train`: dua model, satu test set; hash test set sama |
 | BR-02 | **ΔAUC relatif** = ΔAUC / (AUC bersih − 0,5). Dilaporkan berdampingan dengan ΔAUC, tidak menggantikannya. | Uji unit dengan contoh 1 |
-| BR-03 | **Learner acuan** adalah LightGBM dengan konfigurasi tetap dari `configs/learner.yaml`, mode deterministik, seed eksplisit. Satu versi spesifikasi berlaku untuk seluruh korpus dan untuk probe saat scan. | Uji determinisme: run yang sama dua kali menghasilkan ΔAUC identik |
+| BR-03 | **Learner acuan** adalah LightGBM dengan konfigurasi tetap dari `configs/learner.yaml`, mode deterministik, seed eksplisit. Satu versi spesifikasi berlaku untuk seluruh korpus dan untuk probe saat scan. Spesifikasi mengaktifkan bagging baris (`bagging_fraction` < 1, `bagging_freq` = 1) agar seed berpengaruh; nilai fraksinya dibekukan di G1 ([ADR 0009](decisions/0009-paket-keputusan-g1.md)). | Uji determinisme: run yang sama dua kali menghasilkan ΔAUC identik |
 | BR-04 | **Noise floor terukur** (riset) berasal dari selisih AUC dua model versi bersih dengan seed berbeda. **Noise floor estimasi** (scan) berasal dari variasi AUC probe antar-seed pada data kotor, karena pengguna tidak punya versi bersih. | Tabel perbandingan keduanya (eksperimen E3, hipotesis H5) |
 | BR-05 | **Ambang kerugian material** `T = max(0,01; noise floor)`. Saat scan, noise floor yang dipakai adalah noise floor estimasi. | Uji unit dengan contoh 2 |
 | BR-06 | Setiap angka ΔAUC yang ditampilkan disertai **kalimat kondisi**: "dibanding model yang dilatih pada versi bersih dan dievaluasi pada data bersih". | Contract test: field `condition` wajib ada di `ScanReport` |
@@ -108,7 +108,7 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | BR-72 | Pada mode hosted, data mentah dihapus paling lambat 24 jam setelah scan selesai. | Uji retensi otomatis |
 | BR-73 | Profil hanya dikirim keluar bila diaktifkan pengguna; kolom yang terdeteksi sebagai PII tidak pernah ikut. | Uji unit ekspor profil |
 
-**[F]** cleanlab, pustaka estimasi label noise, berlisensi Apache-2.0 sejak versi 2.8.0 (08/01/2026); versi sampai 2.7.1 berlisensi AGPL-3.0 (dicek 12/11/2026 di PyPI dan GitHub; catatan 04/11/2026 sebelumnya hanya menyebut AGPL-3.0). **[T]** Pilihan untuk F-S05 dan rilis produk: cleanlab ≥ 2.8.0 atau implementasi confident learning sendiri.
+**[F]** cleanlab, pustaka estimasi label noise, berlisensi Apache-2.0 sejak versi 2.8.0 (08/01/2026); versi sampai 2.7.1 berlisensi AGPL-3.0 (dicek 12/11/2026 di PyPI dan GitHub; catatan 04/11/2026 sebelumnya hanya menyebut AGPL-3.0). **[K]** F-S05 memakai cleanlab `>=2.8.0,<3` dengan probabilitas out-of-fold 5 lipatan dari learner acuan ([ADR 0009](decisions/0009-paket-keputusan-g1.md)).
 
 ## 9. Aturan eksperimen
 
@@ -205,5 +205,5 @@ Keputusan gate untuk scan yang sama:
 | 7 | Batas ukuran input vs rentang korpus | BR-10 | Sebelum R1 |
 | 8 | Keputusan gate untuk scan yang ditolak; `fail_mode` | BR-51 | Sebelum R2 |
 | 9 | Tabel effort per `issue_type` | BR-43 | Sebelum R2 |
-| 10 | Estimator label noise untuk rilis produk: cleanlab ≥ 2.8.0 (Apache-2.0) atau implementasi sendiri | — (fitur F-S05) | Sebelum R1 |
-| 11 | Sumber keacakan learner acuan agar noise floor terukur tidak selalu 0 (misalnya bagging atau `feature_fraction` < 1), atau definisi noise floor lain ([ADR 0008](decisions/0008-protokol-korpus-dan-semantik-korupsi.md)) | BR-03, BR-04 | G1 |
+| 10 | **Ditutup [K]**: estimator label noise memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) | — (fitur F-S05) | — |
+| 11 | Jenis keacakan **ditutup [K]**: bagging baris ([ADR 0009](decisions/0009-paket-keputusan-g1.md)). Masih terbuka: nilai `bagging_fraction` | BR-03, BR-04 | G1 |

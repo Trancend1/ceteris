@@ -29,7 +29,7 @@ Istilah teknis berbahasa Inggris dipertahankan bila itu bentuk yang dipakai di k
 | **ΔAUC relatif** | ΔAUC dibagi headroom (AUC bersih − 0,5): proporsi kemampuan di atas tebakan acak yang hilang. | BR-02 |
 | **Kalimat kondisi** | Kalimat wajib yang menyertai setiap ΔAUC: "dibanding model yang dilatih pada versi bersih dan dievaluasi pada data bersih". | BR-06 |
 | **Learner acuan** | LightGBM dengan konfigurasi tetap; model yang dampaknya ditaksir. ΔAUC tidak berlaku untuk learner lain. | BR-03 |
-| **Probe** | Model LightGBM default yang dilatih cepat pada data apa adanya saat profil dihitung; memberi proxy kesulitan, feature importance, dan noise floor estimasi. Bukan learner acuan. | BR-12 |
+| **Probe** | Model LightGBM dengan spesifikasi learner acuan yang dilatih pada data apa adanya saat profil dihitung; memberi proxy kesulitan, feature importance, probabilitas out-of-fold untuk estimasi label noise, dan noise floor estimasi. Tidak dipakai untuk mengukur ΔAUC. | BR-03, BR-12 |
 | **Noise floor** | Variasi AUC yang muncul hanya karena seed berbeda. **Terukur**: dari dua model versi bersih (riset). **Estimasi**: dari probe pada data kotor (scan). | BR-04 |
 | **Ambang kerugian material (T)** | Batas di atasnya ΔAUC dianggap berarti. | BR-05 |
 | **Level nominal** | Tingkat korupsi yang diminta (misalnya "10%"); artinya berbeda antar-jenis korupsi. | BR-82 |

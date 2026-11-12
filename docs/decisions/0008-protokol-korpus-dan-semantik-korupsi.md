@@ -33,6 +33,18 @@ Glosarium menyaring korpus OpenML-CC18 pada 2.000–50.000 baris dengan missing 
 - **[T]** Dengan `configs/learner.yaml` sekarang (tanpa bagging, `feature_fraction` 1), seed tidak memengaruhi LightGBM: **[F]** seed 1 dan 987654 memberi prediksi identik (dicek 11/11/2026). Akibatnya noise floor terukur (BR-04) akan selalu 0. Sumber keacakan learner harus diputuskan sebelum G1 (`business-rules.md` bagian 11).
 - Duplikat menambah ukuran partisi latih, sehingga learner melihat lebih banyak baris pada run duplikat; ini disengaja karena begitulah duplikat muncul di data nyata.
 
+## Pembaruan 12/11/2026
+
+[ADR 0009](0009-paket-keputusan-g1.md) mengubah sebagian butir 5 dan menutup **[T]** keacakan learner:
+
+- MAR memilih kolom pemicu dengan korelasi absolut tertinggi; bobot peringkat dan jumlah sel tepat tetap.
+- Label noise class-conditional: laju asimetris 2:1 pada data biner (kelas minoritas sebagai positif) dan perpindahan ke kelas yang paling sering tertukar menurut confusion matrix learner acuan pada D₀ untuk multikelas.
+- Outlier ditempatkan di luar pagar Tukey dengan k ∼ U[3; 10] per sel; tetap satu kolom numerik per baris terdampak.
+- Missing disuntikkan ke 3 kolom ber-importance tertinggi atau 3 terendah, sebagai dua konfigurasi terpisah.
+- Grid level mengikuti rencana skripsi; learner acuan memakai bagging baris.
+
+Butir lain di ADR ini tetap berlaku. Implementasinya dikerjakan di Phase 2.
+
 ## Alternatif yang ditolak
 
 - Saringan glosarium saja (36 dataset): 6 dataset berbentuk yang akan ditolak scan pengguna.

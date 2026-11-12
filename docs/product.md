@@ -198,7 +198,7 @@ Tingkat OOD adalah KPI yang paling menentukan nilai produk: bila sebagian besar 
 | H1 gagal; angka ΔAUC tidak bisa diklaim | Fallback di bagian 5.2 |
 | Sebagian besar scan nyata berstatus tidak yakin karena OOD | Ukur sejak R1; perluas korpus ke data besar dan bertimestamp |
 | Gate memblokir secara keliru sehingga tim mematikannya | Block hanya sesudah G3; default warn; alasan selalu disertakan |
-| Kewajiban lisensi AGPL cleanlab: tidak berlaku untuk versi ≥ 2.8.0, yang berlisensi Apache-2.0 sejak 08/01/2026 **[F]** | Bila cleanlab dipakai, kunci versi ≥ 2.8.0 (lihat hal terbuka) |
+| Kewajiban lisensi AGPL cleanlab: tidak berlaku untuk versi ≥ 2.8.0, yang berlisensi Apache-2.0 sejak 08/01/2026 **[F]** | Versi dikunci `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) |
 | Kompetitor menambah estimasi dampak | Laporan akurasi terbuka; fokus pada interval yang jujur |
 
 ### 7.2 Hal terbuka
@@ -206,7 +206,7 @@ Tingkat OOD adalah KPI yang paling menentukan nilai produk: bila sebagian besar 
 | # | Hal terbuka **[T]** | Diputuskan paling lambat |
 | --- | --- | --- |
 | 1 | Model distribusi: open-core, self-host berlisensi, atau keduanya | Sebelum R1 |
-| 2 | Estimator label noise: cleanlab ≥ 2.8.0 (Apache-2.0) atau implementasi sendiri | Sebelum R1 |
+| 2 | **Ditutup [K]**: estimator label noise memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) | — |
 | 3 | Apakah R1 memerlukan versi hosted | Sebelum R1 |
 | 4 | Design partner warehouse untuk R3–R4 | Pencarian dimulai saat R1 |
 | 5 | Tabel effort per jenis temuan: ditetapkan tim atau dipelajari dari umpan balik | Sebelum R2 |

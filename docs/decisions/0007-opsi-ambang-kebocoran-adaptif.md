@@ -23,7 +23,7 @@ Probe kebocoran (BR-15) berjalan pada data **kotor** (BR-20). Label noise menuru
 | --- | --- | --- |
 | Daya deteksi pada data berderau tinggi | Turun tajam | Terjaga |
 | False flag pada dataset berderau tinggi | Rendah | Lebih tinggi (fitur sah yang kuat ikut ditandai), sehingga lebih banyak `tidak_yakin` (BR-33) |
-| Kopling | Tidak ada | Bergantung pada ε̂ dari F-S05, sehingga ikut terpengaruh pilihan estimator label noise (cleanlab ≥ 2.8.0 berlisensi Apache-2.0 atau implementasi sendiri, masih **[T]**) dan akurasi estimatornya |
+| Kopling | Tidak ada | Bergantung pada ε̂ dari F-S05, sehingga ikut terpengaruh estimator label noise (cleanlab `>=2.8.0,<3`, [ADR 0009](0009-paket-keputusan-g1.md)) dan akurasi estimatornya |
 | Perubahan aturan | Tidak ada | BR-15 berubah |
 
 ## Cara memilih
