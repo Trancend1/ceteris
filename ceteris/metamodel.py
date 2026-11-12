@@ -582,8 +582,8 @@ def build_artifact_v1(
     if relative:
         finite = runs[np.isfinite(runs[RELATIVE_TARGET].to_numpy("float64"))]
         rel_rows = lodo[lodo["method"] == "metamodel_relative"]
-        if rel_rows.empty:
-            raise ValueError("lodo_result belum memuat metamodel_relative")
+        if set(rel_rows["run_id"]) != set(finite["run_id"]):
+            raise ValueError("lodo_result metamodel_relative harus mencakup semua run ΔAUC relatif")
         cal_rel = _calibration(rel_rows)
         q_rel = weighted_conformal_quantile(
             cal_rel["score"].tolist(), cal_rel["dataset_id"].tolist()

@@ -152,6 +152,11 @@ def save_artifact(
     relative = (booster_relative, calibration_relative, metadata.relative_quantile)
     if any(item is None for item in relative) and not all(item is None for item in relative):
         raise ArtifactError("meta-model relatif butuh booster, kalibrasi, dan kuantilnya")
+    if calibration_relative is not None and list(calibration_relative.columns) != [
+        "dataset_id",
+        "score",
+    ]:
+        raise ArtifactError("kalibrasi relatif harus berkolom dataset_id dan score")
     folder.mkdir(parents=True)
     (folder / "metadata.json").write_text(
         json.dumps(metadata.model_dump(), indent=2, sort_keys=True), encoding="utf-8"
@@ -206,6 +211,8 @@ def load_artifact(path: Path) -> Artifact:
         if not math.isclose(q_rel, metadata.relative_quantile, rel_tol=0, abs_tol=1e-12):
             raise ArtifactError("kuantil relatif tidak cocok dengan skor kalibrasinya")
         booster_relative = lgb.Booster(model_file=str(folder / "model_relative.txt"))
+        if list(booster_relative.feature_name()) != _lgb_names(metadata.features):
+            raise ArtifactError("urutan fitur booster relatif tidak sama dengan metadata")
     return Artifact(folder, metadata, booster, ood, learner, booster_relative)
 
 

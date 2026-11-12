@@ -52,6 +52,17 @@ G3 membuka klaim angka dan interval (`product.md` 5.1). Gerbang ini butuh artefa
 - **Skor OOD per fold:** kNN (k = 5, standarisasi z) terhadap profil proper-train. Skor ini dipakai H4.
 - **Keluaran:** `lodo_result`, satu berkas per (metode, dataset uji). Potensi pemulihan run campuran dari model fold ditulis ke `lodo_recovery.parquet`, dan waktu prediksi meta-model per estimasi ke `lodo_timing.parquet` (H1b).
 
+### Tafsiran ukuran rencana analisis
+
+Butir ini memperjelas pelaksanaan rencana analisis yang dibekukan. Ukuran dan kriterianya tidak berubah.
+
+- **H2, kurva dosis–respons:** median antar-seed per level, dengan titik (0, 0). Nilai pada `affected_row_frac` = 0,10 diinterpolasi linear. Bila 0,10 di luar rentang level, nilainya NaN dan tidak diekstrapolasi.
+- **H2, varian kolom missing:** dirata-ratakan hanya bila kedua varian mencapai 0,10; bila tidak, NaN. Akibatnya nilai satu varian tidak tercampur dengan nilai dua varian antar-dataset. Dataset dengan nilai NaN dikeluarkan dari uji Friedman dan dicatat di `excluded_datasets`.
+- **H2, peran Friedman:** kolom kriteria rencana hanya menyebut post-hoc. Karena itu `passed` mengikuti kriteria itu, sedangkan p Friedman dilaporkan terpisah (`friedman_significant`). Bila post-hoc lolos tetapi Friedman tidak signifikan, hal itu disebut eksplisit di laporan G3.
+- **H1b, biaya:** detik baseline (d) dan detik prediksi meta-model per estimasi diringkas dengan median per dataset lalu median antar-dataset (BR-85).
+- **Bootstrap:** semua CI, termasuk H4, memakai 10.000 resample atas dataset (rencana bagian 1).
+- **Noise floor:** analisis gagal dengan galat bila sebuah dataset punya kurang dari 10 seed terukur atau sebuah run kurang dari 5 seed estimasi (G2-1).
+
 ### Artefak v1 (`ceteris.metamodel.build_artifact_v1`)
 
 - **Hiperparameter:** dipilih dengan grouped CV per dataset atas seluruh korpus, memakai grid yang sama.

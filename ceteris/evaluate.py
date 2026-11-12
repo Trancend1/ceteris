@@ -609,7 +609,10 @@ def h1a(per_ds: pd.DataFrame) -> dict[str, Any]:
 
 
 def h1b(pred: pd.DataFrame, baseline_d: pd.DataFrame, predict_seconds: float) -> dict[str, Any]:
-    """H1b: batas atas CI 95% median selisih MAE (meta − d) < 0,005 dan biaya ≥ 10× lebih murah."""
+    """H1b: batas atas CI 95% median selisih MAE (meta − d) < 0,005 dan biaya ≥ 10× lebih murah.
+
+    `predict_seconds` = median antar-dataset detik prediksi meta-model per estimasi.
+    """
     meta = pred[pred["method"] == "metamodel"].set_index("run_id")
     frame = baseline_d.set_index("run_id").join(meta[["actual", "predicted"]], how="inner")
     rows = []
@@ -625,7 +628,8 @@ def h1b(pred: pd.DataFrame, baseline_d: pd.DataFrame, predict_seconds: float) ->
     per_ds = pd.DataFrame(rows)
     diff = per_ds["mae_meta"] - per_ds["mae_d"]
     ci = bootstrap_ci(diff.to_numpy())
-    d_seconds = float(frame["seconds"].median())
+    # BR-85: median per dataset dulu, lalu median antar-dataset.
+    d_seconds = float(frame.groupby("dataset_id")["seconds"].median().median())
     ratio = d_seconds / predict_seconds if predict_seconds > 0 else float("inf")
     return {
         "n_datasets": len(per_ds),
@@ -664,7 +668,8 @@ def dose_response_at(runs: pd.DataFrame, at: float = 0.10) -> pd.DataFrame:
             {
                 "dataset_id": int(dataset_id),
                 "kind": kind,
-                "delta_at": float(np.nanmean(values)) if np.isfinite(values).any() else np.nan,
+                # Semua varian harus terdefinisi; satu dan dua varian tidak dicampur antar-dataset.
+                "delta_at": float(np.mean(values)) if np.isfinite(values).all() else np.nan,
             }
         )
     return pd.DataFrame(rows)
@@ -709,6 +714,8 @@ def h2(runs: pd.DataFrame) -> dict[str, Any]:
         "median_delta_at_0_10": {k: float(v) for k, v in medians.items()},
         "friedman_statistic": float(stat.statistic),
         "friedman_p": float(stat.pvalue),
+        # Kriteria rencana analisis hanya menyebut post-hoc; Friedman dilaporkan terpisah.
+        "friedman_significant": bool(stat.pvalue < ALPHA),
         "posthoc": posthoc,
         "top": top,
         "bottom": bottom,
@@ -797,7 +804,7 @@ def h4(pred: pd.DataFrame, method: str = "metamodel") -> dict[str, Any]:
     groups = [g for _, g in sel.groupby("dataset_id")]
     rng = np.random.default_rng(derive_seed("analysis", "bootstrap"))
     stats = []
-    for _ in range(N_BOOTSTRAP // 10):  # resample dataset; 1.000 cukup untuk CI rho gabungan
+    for _ in range(N_BOOTSTRAP):  # resample dataset (analysis-plan.md bagian 1)
         pick = rng.integers(0, len(groups), size=len(groups))
         sample = pd.concat([groups[i] for i in pick])
         stats.append(spearmanr(sample["ood_score"], sample["abs_error"]).statistic)
@@ -815,17 +822,23 @@ def noise_floors(nf: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
     """Noise floor terukur per dataset (10 seed) dan estimasi per run (5 seed), statistik G2-1."""
     from ceteris.dqprofile import noise_floor_value
 
+    def _value(aucs: pd.Series, k: int) -> float:
+        values = aucs.to_numpy("float64")
+        if values.size < k:  # G2-1: k seed awalan; kurang dari itu = data tidak lengkap
+            raise ValueError(f"noise floor butuh {k} seed, ada {values.size}")
+        return noise_floor_value(values[:k], "pairwise_mean")
+
     measured = (
         nf[nf["kind"] == "measured"]
         .sort_values("seed_index")
         .groupby("dataset_id")["auc"]
-        .apply(lambda a: noise_floor_value(a.to_numpy("float64")[:10], "pairwise_mean"))
+        .apply(lambda a: _value(a, 10))
     )
     estimated = (
         nf[nf["kind"] == "estimated"]
         .sort_values("seed_index")
         .groupby("source_run_id")["auc"]
-        .apply(lambda a: noise_floor_value(a.to_numpy("float64")[:5], "pairwise_mean"))
+        .apply(lambda a: _value(a, 5))
     )
     return measured, estimated
 
