@@ -500,6 +500,53 @@ def estimate_run_noise_floor(
     return aucs
 
 
+def run_baseline_d(
+    prepared: PreparedDataset,
+    specs: Sequence[AnySpec],
+    seed_index: int,
+    learner: LearnerSpec,
+    store: RunStore,
+    provenance_fn: Callable[[], Provenance] = provenance,
+    profile_config: ProfileConfig | None = None,
+) -> dict[str, Any]:
+    """Baseline (d) pada data kotor sebuah run yang sudah ada (F-S09, ADR 0011 G2-7).
+
+    Data kotor dibangun ulang dengan `dirty_train` dan seed run yang sama; profilnya diambil dari
+    `corruption_run` (dihitung hanya dari data kotor, BR-20).
+    """
+    from ceteris.metamodel import baseline_d
+
+    profile_cfg = profile_config or ProfileConfig()
+    config_id = config_id_for(specs, learner)
+    run_id = run_id_for(prepared.dataset_id, config_id, profile_config_id(profile_cfg), seed_index)
+    if store.has_baseline_d(run_id):
+        raise RecordExistsError(f"baseline (d) {run_id} sudah ada")
+    stored = store.read_run(run_id)
+    profile = {name: float(stored[f"p_{name}"]) for name in FEATURES}
+    seed = run_seed(prepared.dataset_id, config_id, seed_index)
+    _, result = dirty_train(prepared, specs, seed, learner)
+    out = baseline_d(result.frame, prepared.target, profile, learner, sub_seed(seed, "baseline_d"))
+    prov = provenance_fn()
+    row = {
+        "run_id": run_id,
+        "dataset_id": prepared.dataset_id,
+        "delta_linear": out.delta_linear,
+        "delta_quadratic": out.delta_quadratic,
+        "auc_current": out.auc_current,
+        "p0_total": out.p0_total,
+        "detected_json": json.dumps(out.detected, sort_keys=True),
+        "points_json": json.dumps(out.points),
+        "seconds": out.seconds,
+        "n_train": out.n_train,
+        "n_holdout": out.n_holdout,
+        "git_commit": prov.git_commit,
+        "git_dirty": prov.git_dirty,
+        "created_at": _now(),
+    }
+    store.write_baseline_d(row)
+    return row
+
+
 # --- pilot E0 (Phase 3) ---
 
 
@@ -514,6 +561,7 @@ class E0Protocol(BaseModel):
     measured_seeds: int = Field(ge=2)
     estimated_seeds: int = Field(ge=2)
     estimated_seed_indices: list[int]
+    baseline_d_seed_indices: list[int] = Field(default_factory=list)
     mixture_candidates: list[list[dict[str, Any]]]
 
     def mixtures(self) -> list[tuple[AnySpec, ...]]:
@@ -528,7 +576,7 @@ def load_e0_protocol(path: Path) -> E0Protocol:
 class Task:
     """Satu pekerjaan E0: run korupsi, noise floor terukur, atau noise floor estimasi."""
 
-    kind: Literal["run", "nf_measured", "nf_estimated"]
+    kind: Literal["run", "nf_measured", "nf_estimated", "baseline_d"]
     dataset_id: int
     specs_json: str | None = None
     seed_index: int = 0
@@ -548,6 +596,9 @@ def e0_tasks(protocol: E0Protocol, singles: Sequence[AnySpec]) -> list[Task]:
             tasks.extend(
                 Task("nf_estimated", dataset_id, payload, i)
                 for i in protocol.estimated_seed_indices
+            )
+            tasks.extend(
+                Task("baseline_d", dataset_id, payload, i) for i in protocol.baseline_d_seed_indices
             )
     return tasks
 
@@ -603,6 +654,8 @@ def _run_task(task: Task) -> tuple[Task, str, float, str | None]:
             estimate_run_noise_floor(
                 prepared, specs, task.seed_index, learner, store, protocol.estimated_seeds
             )
+        elif task.kind == "baseline_d":
+            run_baseline_d(prepared, specs, task.seed_index, learner, store)
         else:
             run_corruption(prepared, specs, task.seed_index, learner, store)
     except RecordExistsError:
@@ -618,8 +671,12 @@ def run_e0(
     store_root: Path,
     workers: int,
     repo_root: Path = REPO_ROOT,
+    kinds: Sequence[str] | None = None,
 ) -> dict[str, int]:
-    """Jalankan seluruh pekerjaan E0 secara paralel; pekerjaan yang sudah ada dilewati (resume)."""
+    """Jalankan pekerjaan E0 secara paralel; pekerjaan yang sudah ada dilewati (resume).
+
+    `kinds` membatasi jenis pekerjaan, misalnya hanya `baseline_d`.
+    """
     from multiprocessing import get_context
 
     from ceteris.corrupt import load_corruption_grid
@@ -627,6 +684,8 @@ def run_e0(
     protocol = load_e0_protocol(protocol_path)
     grid = load_corruption_grid(repo_root / "configs" / "corruption.yaml")
     tasks = e0_tasks(protocol, grid.singles)
+    if kinds:
+        tasks = [t for t in tasks if t.kind in set(kinds)]
     # Noise floor terukur dulu (murah), lalu urutan dataset di protokol (terbesar di depan).
     rank = {d: i for i, d in enumerate(protocol.datasets)}
     tasks.sort(key=lambda t: (t.kind != "nf_measured", rank[t.dataset_id]))
@@ -667,8 +726,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     e0.add_argument("--corpus", type=Path, default=REPO_ROOT / "data" / "corpus")
     e0.add_argument("--store", type=Path, default=REPO_ROOT / "runs" / "e0")
     e0.add_argument("--workers", type=int, default=4)
+    e0.add_argument("--kinds", nargs="*", help="hanya jenis pekerjaan ini, misalnya baseline_d")
     args = parser.parse_args(argv)
-    counts = run_e0(args.protocol, args.corpus, args.store, args.workers)
+    counts = run_e0(args.protocol, args.corpus, args.store, args.workers, kinds=args.kinds)
     print(json.dumps(counts), flush=True)
     return 1 if counts["failed"] else 0
 

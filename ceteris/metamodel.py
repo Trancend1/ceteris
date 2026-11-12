@@ -198,6 +198,137 @@ def lodo_predictions(runs: pd.DataFrame, methods: Sequence[Method]) -> pd.DataFr
     return pd.concat(rows, ignore_index=True)
 
 
+# --- baseline (d): dose–response (F-S09, ADR 0011 G2-7) ---
+
+DOSES: tuple[float, ...] = (0.05, 0.10, 0.20)
+HOLDOUT_FRAC = 0.20
+# Jenis yang dideteksi dari profil Dₖ dan fitur taksiran proporsi baris terdampaknya.
+DOSE_TYPES: dict[str, str | None] = {
+    "missing_mcar": None,  # dihitung langsung: proporsi baris dengan minimal satu sel kosong
+    "label_uniform": "label_noise_rate",
+    "duplicate_exact": "dup_row_rate",
+    "duplicate_conflict": "dup_conflict_rate",
+    "outlier": "outlier_row_frac_iforest",
+}
+
+
+@dataclass(frozen=True)
+class DoseResponse:
+    """Hasil baseline (d) untuk satu dataset kotor."""
+
+    delta_linear: float
+    delta_quadratic: float
+    auc_current: float
+    p0_total: float
+    detected: dict[str, float]
+    points: list[tuple[float, float]]
+    seconds: float
+    n_train: int
+    n_holdout: int
+
+
+def _level_for_rows(kind: str, rows: float, n_columns: int) -> float:
+    """Level spesifikasi korupsi agar proporsi baris terdampak ≈ `rows` (semantik ADR 0009)."""
+    rows = min(max(rows, 0.0), 0.9)
+    if kind.startswith("duplicate"):
+        return rows / (1.0 - rows)  # baris tambahan / (n + tambahan) = rows
+    if kind == "missing_mcar":
+        return float(1.0 - (1.0 - rows) ** (1.0 / n_columns))  # 3 kolom independen
+    return rows
+
+
+def baseline_d(
+    dirty: pd.DataFrame,
+    target: str,
+    profile: dict[str, float],
+    learner: LearnerSpec,
+    seed: int,
+) -> DoseResponse:
+    """Baseline (d) dose–response, hanya dari data kotor Dₖ dan profilnya (ADR 0011 G2-7).
+
+    1. Taksiran proporsi baris terdampak per jenis (missing dari data, lainnya dari profil);
+       jenis terdeteksi bila taksirannya > 0.
+    2. Dₖ dibagi berstrata 80/20 (seed tetap); korupsi tambahan hanya di bagian latih.
+    3. Dosis +5%, +10%, +20% baris terdampak, dibagi antar-jenis sebanding taksirannya.
+    4. Learner acuan dilatih untuk empat titik; AUC diukur pada hold-out data kotor.
+    5. Garis AUC terhadap proporsi terdampak total diekstrapolasi ke nol:
+       Δ = AUC(0) − AUC saat ini; kuadratik sebagai pembanding.
+    """
+    import time
+
+    from sklearn.model_selection import train_test_split
+
+    from ceteris.corrupt import CorruptionContext, corrupt, parse_spec
+    from ceteris.seeding import sub_seed
+    from ceteris.train import auc_score, feature_importance, fit_predict_proba
+
+    start = time.perf_counter()
+    features = [c for c in dirty.columns if c != target]
+    train, holdout = train_test_split(
+        dirty,
+        test_size=HOLDOUT_FRAC,
+        stratify=dirty[target],
+        random_state=sub_seed(seed, "d_split") % (2**32),
+    )
+    train = train.reset_index(drop=True)
+    holdout = holdout.reset_index(drop=True)
+    detected: dict[str, float] = {}
+    for kind, column in DOSE_TYPES.items():
+        share = (
+            float(dirty[features].isna().any(axis=1).mean())
+            if column is None
+            else float(profile[column])
+        )
+        if share > 0:
+            detected[kind] = share
+    learner_seed = sub_seed(seed, "d_learner")
+    y_holdout = holdout[target].cat.codes.to_numpy()
+    auc_current = auc_score(
+        y_holdout, fit_predict_proba(learner, train, holdout, target, learner_seed)
+    )
+    p0 = min(sum(detected.values()), 1.0)
+    points = [(p0, auc_current)]
+    if detected:
+        importance = feature_importance(learner, train, target, sub_seed(seed, "d_importance"))
+        context = CorruptionContext(
+            importance_order=tuple(importance.sort_values(ascending=False).index),
+            confusion_target={},
+        )
+        n_columns = min(3, len(features))
+        for i, dose in enumerate(DOSES):
+            specs = []
+            for kind, share in detected.items():
+                level = _level_for_rows(kind, dose * share / p0, n_columns)
+                if level > 0:
+                    payload: dict[str, Any] = {"kind": kind, "level": level}
+                    specs.append(parse_spec(payload))
+            # Outlier tanpa kolom numerik tidak terdeteksi (taksiran Isolation Forest = 0).
+            result = corrupt(train, target, specs, sub_seed(seed, f"d_dose{i}"), context)
+            auc = auc_score(
+                y_holdout, fit_predict_proba(learner, result.frame, holdout, target, learner_seed)
+            )
+            points.append((p0 + result.affected_row_frac, auc))
+    x = np.array([p for p, _ in points])
+    y = np.array([a for _, a in points])
+    if len(points) < 2 or np.ptp(x) == 0:
+        delta_linear = delta_quadratic = 0.0
+    else:
+        delta_linear = float(np.polyval(np.polyfit(x, y, 1), 0.0) - auc_current)
+        degree = 2 if len(points) >= 3 else 1
+        delta_quadratic = float(np.polyval(np.polyfit(x, y, degree), 0.0) - auc_current)
+    return DoseResponse(
+        delta_linear=delta_linear,
+        delta_quadratic=delta_quadratic,
+        auc_current=float(auc_current),
+        p0_total=float(p0),
+        detected=detected,
+        points=[(float(p), float(a)) for p, a in points],
+        seconds=time.perf_counter() - start,
+        n_train=len(train),
+        n_holdout=len(holdout),
+    )
+
+
 # --- artefak pilot (F-S08, F-S10) ---
 
 

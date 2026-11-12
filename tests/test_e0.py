@@ -101,9 +101,31 @@ def test_e0_tasks_cover_every_config_seed_and_dataset() -> None:
     singles = load_corruption_grid(CONFIGS / "corruption.yaml").singles
     tasks = e0_tasks(protocol, singles)
     configs = len(singles) + len(protocol.mixtures())
-    per_dataset = 1 + configs * (protocol.seeds_per_config + len(protocol.estimated_seed_indices))
+    per_config = (
+        protocol.seeds_per_config
+        + len(protocol.estimated_seed_indices)
+        + len(protocol.baseline_d_seed_indices)
+    )
+    per_dataset = 1 + configs * per_config
+    assert protocol.baseline_d_seed_indices == [0]  # G2-7: 1 seed × semua konfigurasi
     assert len(singles) == 45
     assert len(tasks) == per_dataset * len(protocol.datasets)
     runs = [t for t in tasks if t.kind == "run"]
     assert len(runs) == len({(t.dataset_id, t.specs_json, t.seed_index) for t in runs})
     assert sum(t.kind == "nf_measured" for t in tasks) == len(protocol.datasets)
+
+
+def test_g2_7_baseline_d_is_stored_once_per_run(
+    prepared: PreparedDataset, fast_learner: LearnerSpec, tmp_path: Path
+) -> None:
+    from ceteris.experiment import run_baseline_d
+
+    store = RunStore(tmp_path / "runs")
+    specs = [LabelUniform(level=0.2)]
+    run = run_corruption(prepared, specs, 0, fast_learner, store, fake_provenance)
+    row = run_baseline_d(prepared, specs, 0, fast_learner, store, fake_provenance)
+    assert row["run_id"] == run["run_id"]
+    stored = store.read("baseline_d_run")
+    assert len(stored) == 1 and stored.loc[0, "git_commit"] == fake_provenance().git_commit
+    with pytest.raises(RecordExistsError):
+        run_baseline_d(prepared, specs, 0, fast_learner, store, fake_provenance)

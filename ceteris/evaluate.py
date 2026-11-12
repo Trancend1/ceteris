@@ -208,10 +208,12 @@ def e0_report(store_root: Path, corpus_meta: pd.DataFrame | None = None) -> dict
     log = store.read("run_log")
     seconds = run_seconds(store)
     datasets = store.read("corpus_dataset")
+    failed = log[(log["status"] == "failed") & ~log["run_id"].isin(runs["run_id"])]
+    failed = failed.drop_duplicates("run_id")  # percobaan ulang tidak dihitung dua kali
     report: dict[str, Any] = {
         "n_runs": len(runs),
-        "n_failed": int((log["status"] == "failed").sum()),
-        "failed_errors": log.loc[log["status"] == "failed", "error"].value_counts().to_dict(),
+        "n_failed": len(failed),
+        "failed_errors": failed["error"].value_counts().to_dict(),
         "git_commits": sorted(log["git_commit"].unique().tolist()),
         "git_dirty_runs": int(log["git_dirty"].sum()),
         "datasets": datasets[["dataset_id", "name", "n_rows", "n_features", "n_classes"]].to_dict(
@@ -252,7 +254,43 @@ def e0_report(store_root: Path, corpus_meta: pd.DataFrame | None = None) -> dict
         report["projection"] = project_compute(per_dataset, corpus_meta, 55 * 5, 55)
     predictions = lodo_predictions(runs, pilot_methods())
     report["lodo_pilot"] = _records(lodo_metrics(predictions))
+    baseline = store.read("baseline_d_run")
+    if len(baseline):
+        report["baseline_d"] = baseline_d_comparison(baseline, runs, predictions)
     return report
+
+
+def baseline_d_comparison(
+    baseline: pd.DataFrame, runs: pd.DataFrame, predictions: pd.DataFrame
+) -> dict[str, Any]:
+    """Baseline (d) dibanding meta-model LODO pada subset run yang sama (pratinjau H1b).
+
+    MAE per dataset (BR-85) dan detik per estimasi. Detik meta-model hanya prediksi; profil
+    dibutuhkan kedua metode, sehingga tidak dihitung di sisi mana pun.
+    """
+    actual = runs.set_index("run_id")["delta_auc"]
+    meta = predictions[predictions["method"] == "metamodel"].set_index("run_id")["predicted"]
+    frame = baseline.set_index("run_id")
+    frame = frame.assign(actual=actual.reindex(frame.index), meta=meta.reindex(frame.index))
+    rows = []
+    for dataset_id, group in frame.groupby("dataset_id"):
+        rows.append(
+            {
+                "dataset_id": int(dataset_id),
+                "n": len(group),
+                "mae_d_linear": float((group["delta_linear"] - group["actual"]).abs().mean()),
+                "mae_d_quadratic": float((group["delta_quadratic"] - group["actual"]).abs().mean()),
+                "mae_metamodel": float((group["meta"] - group["actual"]).abs().mean()),
+                "seconds_d_median": float(group["seconds"].median()),
+            }
+        )
+    per_dataset = pd.DataFrame(rows)
+    diff = per_dataset["mae_metamodel"] - per_dataset["mae_d_linear"]
+    return {
+        "per_dataset": _records(per_dataset),
+        "median_mae_difference_meta_minus_d": float(diff.median()),
+        "seconds_d_median": float(frame["seconds"].median()),
+    }
 
 
 def _records(frame: pd.DataFrame) -> list[dict[str, Any]]:
