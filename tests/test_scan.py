@@ -173,8 +173,11 @@ def test_br35_scan_report_is_experimental_and_valid(small_pilot: SmallPilot) -> 
     report = scan(frame, "class", artifact, scan_id="scn_a")
     assert report.model.experimental is True
     assert report.schema_version == "1.0"
-    assert report.estimate.delta_relative is None  # ADR 0011: null selama pilot
-    assert report.findings == []
+    assert report.estimate.delta_relative is None  # artefak pilot tanpa meta-model relatif (K7)
+    # F-S12: temuan yang ada, urut menurut potensi pemulihan (BR-43), tanpa total (BR-42).
+    potentials = [f.recovery_potential or 0.0 for f in report.findings]
+    assert report.findings and potentials == sorted(potentials, reverse=True)
+    assert all(0.0 <= f.rows_affected_pct <= 100.0 for f in report.findings)
     assert report.status.threshold == materiality_threshold(report.status.noise_floor_estimated)
     lo, hi = report.estimate.interval_90
     assert lo <= report.estimate.delta <= hi

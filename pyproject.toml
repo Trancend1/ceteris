@@ -75,5 +75,5 @@ files = ["ceteris"]
 
 [[tool.mypy.overrides]]
 # Pustaka tanpa anotasi tipe; diperlakukan sebagai Any (ADR 0004).
-module = ["pandas.*", "sklearn.*", "lightgbm.*", "pyarrow.*", "yaml.*", "scipy.*", "cleanlab.*"]
+module = ["pandas.*", "sklearn.*", "lightgbm.*", "pyarrow.*", "yaml.*", "scipy.*", "cleanlab.*", "statsmodels.*"]
 ignore_missing_imports = true

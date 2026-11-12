@@ -12,7 +12,9 @@ execution-plan Phase 3). Satu artefak adalah satu folder:
 - `calibration.parquet`: skor nonconformity dan dataset asalnya (kuantil dihitung ulang dan
   dicocokkan saat dimuat);
 - `ood_reference.parquet`: profil referensi untuk skor OOD;
-- `learner.yaml`: spesifikasi learner acuan yang dipakai probe saat scan.
+- `learner.yaml`: spesifikasi learner acuan yang dipakai probe saat scan;
+- opsional (artefak v1, K7): `model_relative.txt` dan `calibration_relative.parquet` untuk
+  meta-model ΔAUC relatif terpisah.
 """
 
 from __future__ import annotations
@@ -71,6 +73,11 @@ class ArtifactMetadata(BaseModel):
     ood_threshold_basis: str
     noise_floor_statistic: NoiseFloorStatistic
     noise_floor_seeds: int = Field(ge=2)
+    # Artefak v1 (Phase 4). Nilai bawaan menjaga artefak pilot tetap bisa dimuat.
+    meta_params: dict[str, float | int] = Field(default_factory=dict)
+    calibration_basis: str = "residu absolut LODO per dataset"
+    relative_quantile: float | None = Field(default=None, ge=0.0)
+    finding_order: Literal["potential", "volume"] = "potential"
 
 
 def learner_sha256(learner: LearnerSpec) -> str:
@@ -87,6 +94,7 @@ class Artifact:
     booster: lgb.Booster
     ood: OODReference
     learner: LearnerSpec
+    booster_relative: lgb.Booster | None = None
 
     def check_profile(self, profile_schema_version: str) -> None:
         """BR-23, AC-9: versi skema profil harus sama dengan versi artefak."""
@@ -107,6 +115,12 @@ class Artifact:
         """Estimasi ΔAUC dari fitur profil."""
         return float(self.booster.predict(self._vector(features))[0])
 
+    def predict_relative(self, features: Mapping[str, float]) -> float | None:
+        """Estimasi ΔAUC relatif (BR-02) dari meta-model terpisah; None bila artefak tanpa itu."""
+        if self.booster_relative is None:
+            return None
+        return float(self.booster_relative.predict(self._vector(features))[0])
+
     def interval(self, prediction: float) -> tuple[float, float]:
         return conformal_interval(prediction, self.metadata.conformal_quantile)
 
@@ -124,6 +138,8 @@ def save_artifact(
     calibration: pd.DataFrame,
     ood_profiles: pd.DataFrame,
     learner: LearnerSpec,
+    booster_relative: lgb.Booster | None = None,
+    calibration_relative: pd.DataFrame | None = None,
 ) -> None:
     """Tulis satu folder artefak. Folder yang sudah ada tidak ditimpa (artefak berversi)."""
     folder = Path(path)
@@ -133,6 +149,9 @@ def save_artifact(
         raise ArtifactError("spesifikasi learner tidak sama dengan metadata")
     if list(calibration.columns) != ["dataset_id", "score"]:
         raise ArtifactError("kalibrasi harus berkolom dataset_id dan score")
+    relative = (booster_relative, calibration_relative, metadata.relative_quantile)
+    if any(item is None for item in relative) and not all(item is None for item in relative):
+        raise ArtifactError("meta-model relatif butuh booster, kalibrasi, dan kuantilnya")
     folder.mkdir(parents=True)
     (folder / "metadata.json").write_text(
         json.dumps(metadata.model_dump(), indent=2, sort_keys=True), encoding="utf-8"
@@ -143,6 +162,9 @@ def save_artifact(
     (folder / "learner.yaml").write_text(
         yaml.safe_dump(learner.model_dump(), sort_keys=True), encoding="utf-8"
     )
+    if booster_relative is not None and calibration_relative is not None:
+        booster_relative.save_model(str(folder / "model_relative.txt"))
+        calibration_relative.to_parquet(folder / "calibration_relative.parquet", index=False)
 
 
 def load_artifact(path: Path) -> Artifact:
@@ -171,7 +193,20 @@ def load_artifact(path: Path) -> Artifact:
         raise ArtifactError("urutan fitur booster tidak sama dengan metadata")
     reference = pd.read_parquet(folder / "ood_reference.parquet")
     ood = fit_ood_reference(reference, metadata.features, metadata.ood_k)
-    return Artifact(folder, metadata, booster, ood, learner)
+    booster_relative = None
+    if metadata.relative_quantile is not None:
+        files = ["model_relative.txt", "calibration_relative.parquet"]
+        absent = [name for name in files if not (folder / name).exists()]
+        if absent:
+            raise ArtifactError(f"artefak {folder} tidak lengkap: {absent}")
+        cal_rel = pd.read_parquet(folder / "calibration_relative.parquet")
+        q_rel = weighted_conformal_quantile(
+            cal_rel["score"].tolist(), cal_rel["dataset_id"].tolist(), metadata.coverage_target
+        )
+        if not math.isclose(q_rel, metadata.relative_quantile, rel_tol=0, abs_tol=1e-12):
+            raise ArtifactError("kuantil relatif tidak cocok dengan skor kalibrasinya")
+        booster_relative = lgb.Booster(model_file=str(folder / "model_relative.txt"))
+    return Artifact(folder, metadata, booster, ood, learner, booster_relative)
 
 
 def _lgb_names(features: Sequence[str]) -> list[str]:
