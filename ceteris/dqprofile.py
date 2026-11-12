@@ -206,6 +206,13 @@ def compute_profile(
     )
 
 
+def noise_floor_seeds(n: int) -> list[int]:
+    """Seed probe tetap untuk noise floor estimasi, sama di jalur riset dan scan (BR-16, AC-12)."""
+    if n < 2:
+        raise ValueError("noise floor butuh minimal dua seed")
+    return [sub_seed(PROFILE_SEED, f"noise_floor_seed_{i}") for i in range(n)]
+
+
 def estimate_noise_floor(
     dirty: pd.DataFrame,
     target: str,
