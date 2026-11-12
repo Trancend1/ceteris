@@ -59,9 +59,10 @@ Paket `ceteris` adalah isi worker dan CLI. Draft memakai nama kerja `dqimpact`; 
 | `ceteris.train` | F-S03, F-S06 | Learner acuan, AUC, noise floor terukur | Riset | Pipeline retrain |
 | `ceteris.dqprofile` | F-S04, F-S05, F-S06 | Praproses kontrak input, quality profile, label noise, noise floor estimasi | Riset **dan** scan | Dipakai worker tanpa perubahan |
 | `ceteris.store` | F-S07 | Skema Parquet/DuckDB, run log, experiment registry | Riset | Store offline |
-| `ceteris.metamodel` | F-S08, F-S09 | Melatih meta-model dan baseline; memuat artefak | Riset; scan (muat saja) | Model registry |
+| `ceteris.metamodel` | F-S08, F-S09 | Melatih meta-model dan baseline; menulis artefak | Riset | Pipeline retrain |
+| `ceteris.artifact` | F-S08 (muat), F-S10 | Format dan pemuat artefak; cek versi profil (AC-9) dan integritas kalibrasi; dipisah dari `metamodel` agar jalur scan tidak membawa kode pelatihan (Phase 3) | Scan (hanya membaca); riset (menulis lewat `metamodel`) | Model registry |
 | `ceteris.uncertainty` | F-S10 | Interval conformal, skor OOD | Riset **dan** scan | Impact Engine |
-| `ceteris.evaluate` | F-S11 | LODO bersarang, uji statistik | Riset | Uji regresi sebelum rilis artefak |
+| `ceteris.evaluate` | F-S11 | LODO bersarang, uji statistik; ringkasan pilot E0 | Riset | Uji regresi sebelum rilis artefak |
 | `ceteris.recovery` | F-S12 | Potensi pemulihan per temuan | Riset **dan** scan | Prioritizer (F-L08) |
 | `ceteris.scan` | F-S13, F-S14 | Orkestrasi scan, status, `ScanReport` (Pydantic), CLI | Scan | Worker scan + REST API |
 | `ceteris.seeding` | F-S07 | Turunan seed deterministik (BR-84) | Riset **dan** scan | Dipakai worker tanpa perubahan |
@@ -135,7 +136,8 @@ Kontrak penghubung antara R0 dan produk. Struktur yang ditulis `ceteris scan` sa
   "model": {"version": "1.0.0", "experimental": false, "profile_schema_version": "v1"},
   "estimate": {"metric": "auc", "delta": 0.031, "delta_relative": 0.09,
                "interval_90": [0.012, 0.050], "ood_score": 0.42},
-  "status": {"value": "material", "threshold": 0.010, "noise_floor_estimated": 0.004},
+  "status": {"value": "material", "threshold": 0.010, "noise_floor_estimated": 0.004,
+             "reasons": ["interval_above_threshold"]},
   "findings": [{"issue_type": "label_noise", "column": null, "rows_affected_pct": 7.1,
                 "observed_or_estimated": "estimated", "recovery_potential": 0.022}],
   "input_warnings": ["id_column_dropped: customer_id"],
@@ -145,13 +147,26 @@ Kontrak penghubung antara R0 dan produk. Struktur yang ditulis `ceteris scan` sa
 
 Angka di atas adalah ilustrasi. Nilai `status.value` yang sah: `material`, `tidak_material`, `tidak_yakin`.
 
+**[K]** Implementasi `schema_version` "1.0" di Phase 3 (`ceteris.scan.ScanReport`, Pydantic; ADR 0011):
+
+- **`status.reasons`:** wajib berisi minimal satu alasan:
+  - `interval_above_threshold`;
+  - `interval_below_threshold`;
+  - `interval_crosses_threshold`;
+  - `ood_high`;
+  - `target_leakage`.
+- **`estimate.delta_relative`:** bernilai null selama pilot, karena metode taksiran AUC versi bersih saat scan belum diputuskan.
+- **`findings`:** kosong sampai potensi pemulihan (F-S12) dibangun di Phase 4; `recovery_potential` boleh null.
+- **Field tak dikenal:** ditolak.
+- **Snapshot skema JSON:** disimpan di `tests/contracts/scan_report_<versi>.schema.json`. Mengubah skema tanpa menaikkan versi membuat uji kontrak gagal (BR-60, AC-10).
+
 ### 6.2 Artefak riset → produk
 
 | Artefak | Isi | Format | Siap di | Sebelum siap, produk memakai |
 | --- | --- | --- | --- | --- |
 | `dqprofile` v1 | Kode perhitungan profil | Modul Python | G1 | Dibangun bersama sejak awal |
 | Spesifikasi learner acuan | Versi LightGBM, parameter, protokol split | YAML | G1 | Langsung dipakai |
-| Meta-model pilot | Meta-model dari 5 dataset pilot | `.txt` LightGBM + metadata | G2 | Model dummy berbasis aturan |
+| Meta-model pilot | Meta-model dari 5 dataset pilot. Satu folder berisi `model.txt` (LightGBM), `metadata.json`, `calibration.parquet` (residu LODO per dataset), `ood_reference.parquet`, dan `learner.yaml` (ADR 0011) | `.txt` LightGBM + metadata | G2 | Model dummy berbasis aturan |
 | Meta-model v1 + kalibrator | Korpus penuh + skor kalibrasi conformal | `.txt` + `.parquet` | G3 | Meta-model pilot, berlabel eksperimental |
 | Referensi OOD | Profil korpus pelatihan untuk jarak kNN | `.parquet` | G3 | Profil pilot |
 | Laporan akurasi | MAE, coverage, Spearman per jenis korupsi; kondisi tidak andal | Tabel + ringkasan | G3, diperbarui G4 | Tidak ada; klaim akurasi tidak tampil |
@@ -162,7 +177,7 @@ Metadata wajib setiap artefak model: `profile_schema_version`, `learner_spec_ver
 
 | Store | Isi | Teknologi | Mulai |
 | --- | --- | --- | --- |
-| Run store (offline) | `corpus_dataset`, `corruption_run`, `ablation_run`, `lodo_result`, `run_log` | Parquet + DuckDB | R0 |
+| Run store (offline) | `corpus_dataset`, `experiment_config`, `corruption_run`, `noise_floor` (satu baris per seed, terukur atau estimasi; Phase 3), `ablation_run`, `lodo_result`, `run_log` | Parquet + DuckDB | R0 |
 | Metadata store (online) | `dataset`, `scan`, `finding`, `impact_estimate`, `model_version` (R1); `simulation`, `gate_policy`, `gate_run`, `audit_log` (R2); `source_connection` (R3); `feedback`, `trust_signal`, `data_contract` (R4); `cost_model` (R5) | Postgres | R1 |
 | Object store | Snapshot data yang dipindai (dirujuk lewat `snapshot_uri`), laporan HTML | S3-compatible | R1 |
 
@@ -223,7 +238,7 @@ Batasan ini mengikat setiap perubahan kode. Melanggarnya memerlukan perubahan do
 | --- | --- | --- | --- |
 | AC-1 | Hanya ada satu implementasi profil, `ceteris.dqprofile`, dipakai riset dan scan. | Fitur saat melatih harus sama dengan fitur saat scan (BR-16) | Uji konsistensi jalur |
 | AC-2 | `dqprofile` hanya menerima satu dataset (data kotor) dan nama kolom target. | Mencegah kebocoran versi bersih atau level korupsi (BR-20) | Uji isolasi profil |
-| AC-3 | Jalur scan (`scan`, `dqprofile`, `uncertainty`, `recovery`, pemuat artefak) tidak mengimpor `corpus`, `corrupt`, atau `evaluate`. | Produk bergantung pada artefak, bukan kode eksperimen | Uji impor di CI |
+| AC-3 | Jalur scan (`scan`, `dqprofile`, `uncertainty`, `recovery`, pemuat artefak `artifact`) tidak mengimpor `corpus`, `corrupt`, `evaluate`, `experiment`, atau kode pelatihan `metamodel`. | Produk bergantung pada artefak, bukan kode eksperimen | Uji impor di CI |
 | AC-4 | Jalur scan tidak melatih meta-model dan tidak menulis ke model registry. | Hasil scan harus bisa diaudit ke satu versi artefak (BR-21) | Registry hanya-baca bagi worker |
 | AC-5 | `ScanReport` identik di CLI, Python API, dan REST API; worker membungkus fungsi yang sama. | Satu kontrak keluaran | Uji konsistensi jalur SDK vs API |
 | AC-6 | Semua perhitungan atas data pengguna terjadi di worker. API, antrian, dan metadata store tidak menyimpan data mentah. | Batas privasi yang jelas (BR-71) | Tinjauan skema; uji integrasi |
@@ -289,13 +304,13 @@ Untuk R0 berlaku tambahan **reprodusibilitas**: seed turunan ([BR-84](business-r
 
 **[F]** cleanlab berlisensi Apache-2.0 sejak versi 2.8.0 (08/01/2026); versi sampai 2.7.1 berlisensi AGPL-3.0 (dicek 12/11/2026 di PyPI dan GitHub). Bila dipakai di produk, hanya versi ≥ 2.8.0 yang bebas kewajiban AGPL. **[K]** F-S05 memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)).
 
-Struktur repository (**[F]** per 11/11/2026: `corpus`, `corrupt`, `train`, `store`, `seeding`, dan `experiment` sudah berisi kode Phase 1; modul lain masih kosong):
+Struktur repository (**[F]** per 12/11/2026: semua modul berisi kode Phase 1–3 kecuali `recovery`, yang menyusul di Phase 4):
 
 ```text
 ceteris/            paket Python: corpus, corrupt, train, dqprofile, store,
-                    metamodel, uncertainty, evaluate, recovery, scan,
-                    seeding, experiment
-configs/            experiment.yaml, learner.yaml, corruption.yaml
+                    metamodel, artifact, uncertainty, evaluate, recovery,
+                    scan, seeding, experiment
+configs/            experiment.yaml, learner.yaml, corruption.yaml, e0.yaml
 notebooks/          NB00–NB10, dijalankan lewat papermill
 tests/              unit, properti, determinisme, kontrak, konsistensi jalur
 docs/               product.md, architecture.md, business-rules.md,

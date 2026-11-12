@@ -47,7 +47,7 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | BR-23 | Profil dan artefak model harus memiliki `profile_schema_version` yang sama. Jika berbeda, scan gagal dengan galat eksplisit, bukan estimasi. | Uji unit versi tidak cocok |
 | BR-24 | **Skor OOD** = jarak kNN profil ke profil korpus pelatihan meta-model. Skor OOD bukan input meta-model. | Uji unit; daftar fitur meta-model |
 
-**[T]** Kuantil conformal dihitung atas seluruh run kalibrasi (seperti contoh 3) atau dibobot per dataset; diputuskan di rencana analisis G2. **[T]** Besar pelebaran interval saat OOD tinggi dan nilai ambang "OOD tinggi". **[T]** Apakah batas bawah interval dipotong di nol (ΔAUC bisa negatif, misalnya saat missingness informatif).
+**[K]** Kuantil conformal memberi bobot sama pada setiap dataset kalibrasi: skor run berbobot 1 / (jumlah run datasetnya), titik baru berbobot rata-rata bobot run, dan kuantil adalah skor terkecil yang bobot kumulatifnya mencapai 90% dari total bobot. Bila setiap dataset punya jumlah run yang sama, hasilnya sama dengan Contoh 3 (keputusan pemilik repo 12/11/2026, [ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)). **[K]** Batas bawah interval tidak dipotong di nol, karena ΔAUC bisa negatif (misalnya saat missingness informatif) dan pemotongan menggeser coverage (ADR 0011). **[T]** Besar pelebaran interval saat OOD tinggi dan nilai ambang "OOD tinggi" tetap terbuka sampai G3. Selama pilot, scan memakai ambang sementara berlabel eksperimental: persentil ke-95 skor OOD leave-one-dataset-out pada profil pilot (ADR 0011).
 
 ## 4. Status hasil scan
 
@@ -198,9 +198,9 @@ Keputusan gate untuk scan yang sama:
 | --- | --- | --- | --- |
 | 1 | Statistik noise floor dan jumlah seed probe | BR-04, BR-05 | G2 |
 | 2 | Validitas noise floor estimasi (H5) | BR-05, BR-31 sampai BR-33 | G3 |
-| 3 | Ambang "OOD tinggi" dan besar pelebaran interval | BR-24, BR-33 | G3 |
-| 4 | Kuantil conformal: seluruh run atau dibobot per dataset | BR-22 | G2 |
-| 5 | Interval dipotong di nol atau tidak | BR-22 | G2 |
+| 3 | Ambang "OOD tinggi" dan besar pelebaran interval (pilot memakai ambang sementara, ADR 0011) | BR-24, BR-33 | G3 |
+| 4 | **Ditutup [K]**: kuantil conformal berbobot sama per dataset ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-22 | — |
+| 5 | **Ditutup [K]**: interval tidak dipotong di nol ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-22 | — |
 | 6 | **Ditutup [K]**: probe kebocoran memakai pohon `max_depth` 4, `min_samples_leaf` 0,01, dan ambang tetap 0,99 ([ADR 0010](decisions/0010-gate-g1.md)) | BR-15 | — |
 | 7 | Batas ukuran input vs rentang korpus | BR-10 | Sebelum R1 |
 | 8 | Keputusan gate untuk scan yang ditolak; `fail_mode` | BR-51 | Sebelum R2 |
