@@ -256,7 +256,7 @@ Untuk R0 berlaku tambahan **reprodusibilitas**: seed turunan ([BR-84](business-r
 | Uji | pytest, hypothesis; mulai R1: schemathesis, Playwright, Locust, Semgrep, pip-audit, Trivy |
 | Server (R1+) | FastAPI, Redis Queue, Postgres, MinIO/S3, Next.js + shadcn/ui (kerangka) + ECharts (grafik; [ADR 0003](decisions/0003-web-ui-shadcn.md)) |
 
-**[F]** cleanlab berlisensi Apache-2.0 sejak versi 2.8.0 (08/01/2026); versi sampai 2.7.1 berlisensi AGPL-3.0 (dicek 12/11/2026 di PyPI dan GitHub). Bila dipakai di produk, hanya versi ≥ 2.8.0 yang bebas kewajiban AGPL.
+**[F]** cleanlab berlisensi Apache-2.0 sejak versi 2.8.0 (08/01/2026); versi sampai 2.7.1 berlisensi AGPL-3.0 (dicek 12/11/2026 di PyPI dan GitHub). Bila dipakai di produk, hanya versi ≥ 2.8.0 yang bebas kewajiban AGPL. **[K]** F-S05 memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)).
 
 Struktur repository (**[F]** per 11/11/2026: `corpus`, `corrupt`, `train`, `store`, `seeding`, dan `experiment` sudah berisi kode Phase 1; modul lain masih kosong):
 
@@ -277,7 +277,7 @@ AGENTS.md, CLAUDE.md
 | # | Hal terbuka **[T]** | Bagian terdampak | Diputuskan paling lambat |
 | --- | --- | --- | --- |
 | 1 | Satu repository atau dipisah (paket inti vs server) | 10 | Sebelum R1 |
-| 2 | Estimator label noise: cleanlab ≥ 2.8.0 (Apache-2.0) atau implementasi confident learning sendiri; lisensi bukan lagi kendala | 4, 10 | Sebelum R1 |
+| 2 | **Ditutup [K]**: estimator label noise memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) | 4, 10 | — |
 | 3 | Apakah versi hosted dibangun di R1 | 10 | Sebelum R1 |
 | 4 | Perilaku gate saat layanan tidak tersedia (`fail_mode`) | 5.2, NFR-4 | Sebelum R2 |
 | 5 | Batas ukuran unggahan dan strategi sampling untuk data di atas 100.000 baris | 5.1, NFR-1 | Sebelum R1 |
