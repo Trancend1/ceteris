@@ -127,6 +127,8 @@ Hal yang dibawa ke Phase 3:
 
 ### Phase 4 — Korpus penuh dan artefak v1
 
+**Status: berjalan sejak 13/11/2026.** E1 sedang dijalankan. LODO bersarang, artefak v1, potensi pemulihan, dan register klaim sudah dibangun. Keputusan G3 menunggu hasil E1 ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md), [register klaim](claims-register.md)).
+
 | | |
 | --- | --- |
 | Scope | Pelatihan pada korpus penuh; F-S08, F-S10 (penuh, termasuk skor OOD), F-S11 evaluator LODO bersarang, F-S12 potensi pemulihan |

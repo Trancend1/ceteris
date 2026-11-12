@@ -155,8 +155,8 @@ Angka di atas adalah ilustrasi. Nilai `status.value` yang sah: `material`, `tida
   - `interval_crosses_threshold`;
   - `ood_high`;
   - `target_leakage`.
-- **`estimate.delta_relative`:** bernilai null selama pilot, karena metode taksiran AUC versi bersih saat scan belum diputuskan.
-- **`findings`:** kosong sampai potensi pemulihan (F-S12) dibangun di Phase 4; `recovery_potential` boleh null.
+- **`estimate.delta_relative`:** diisi oleh meta-model ΔAUC relatif terpisah bila artefak memuatnya; null bila tidak (artefak pilot). Pemakaiannya diputuskan di G3 (ADR 0012 G3-4).
+- **`findings`:** sejak Phase 4 berisi temuan yang ada beserta potensi pemulihan ideal (F-S12, `ceteris.recovery`, ADR 0012). Urutannya menurut potensi, atau menurut volume bila artefak menetapkan `finding_order = volume` (fallback H2b). `column` null untuk temuan tingkat dataset, dan `recovery_potential` boleh null.
 - **Field tak dikenal:** ditolak.
 - **Snapshot skema JSON:** disimpan di `tests/contracts/scan_report_<versi>.schema.json`. Mengubah skema tanpa menaikkan versi membuat uji kontrak gagal (BR-60, AC-10).
 
@@ -167,7 +167,7 @@ Angka di atas adalah ilustrasi. Nilai `status.value` yang sah: `material`, `tida
 | `dqprofile` v1 | Kode perhitungan profil | Modul Python | G1 | Dibangun bersama sejak awal |
 | Spesifikasi learner acuan | Versi LightGBM, parameter, protokol split | YAML | G1 | Langsung dipakai |
 | Meta-model pilot | Meta-model dari 5 dataset pilot. Satu folder berisi `model.txt` (LightGBM), `metadata.json`, `calibration.parquet` (residu LODO per dataset), `ood_reference.parquet`, dan `learner.yaml` (ADR 0011) | `.txt` LightGBM + metadata | G2 | Model dummy berbasis aturan |
-| Meta-model v1 + kalibrator | Korpus penuh + skor kalibrasi conformal | `.txt` + `.parquet` | G3 | Meta-model pilot, berlabel eksperimental |
+| Meta-model v1 + kalibrator | Korpus penuh + skor kalibrasi conformal. Format folder sama dengan pilot; skor kalibrasi = residu LODO bersarang, dan metadata menambah `meta_params`, `calibration_basis`, `relative_quantile`, `finding_order`. Opsional `model_relative.txt` dan `calibration_relative.parquet` untuk ΔAUC relatif (ADR 0012) | `.txt` + `.parquet` | G3 | Meta-model pilot, berlabel eksperimental |
 | Referensi OOD | Profil korpus pelatihan untuk jarak kNN | `.parquet` | G3 | Profil pilot |
 | Laporan akurasi | MAE, coverage, Spearman per jenis korupsi; kondisi tidak andal | Tabel + ringkasan | G3, diperbarui G4 | Tidak ada; klaim akurasi tidak tampil |
 
@@ -177,7 +177,7 @@ Metadata wajib setiap artefak model: `profile_schema_version`, `learner_spec_ver
 
 | Store | Isi | Teknologi | Mulai |
 | --- | --- | --- | --- |
-| Run store (offline) | `corpus_dataset`, `experiment_config`, `corruption_run`, `noise_floor` (satu baris per seed, terukur atau estimasi; Phase 3), `baseline_d_run` (baseline (d) per run; Phase 3), `ablation_run`, `lodo_result`, `run_log` | Parquet + DuckDB | R0 |
+| Run store (offline) | `corpus_dataset`, `experiment_config`, `corruption_run`, `noise_floor` (satu baris per seed, terukur atau estimasi; Phase 3), `baseline_d_run` (baseline (d) per run; Phase 3), `ablation_run` (satu baris per run campuran dan jenis yang dipulihkan; Phase 4), `lodo_result` (prediksi, interval, dan skor OOD LODO bersarang, satu berkas per metode dan dataset uji; Phase 4), `run_log`; berkas pendamping `lodo_recovery.parquet` dan `lodo_timing.parquet` | Parquet + DuckDB | R0 |
 | Metadata store (online) | `dataset`, `scan`, `finding`, `impact_estimate`, `model_version` (R1); `simulation`, `gate_policy`, `gate_run`, `audit_log` (R2); `source_connection` (R3); `feedback`, `trust_signal`, `data_contract` (R4); `cost_model` (R5) | Postgres | R1 |
 | Object store | Snapshot data yang dipindai (dirujuk lewat `snapshot_uri`), laporan HTML | S3-compatible | R1 |
 

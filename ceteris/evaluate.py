@@ -1004,7 +1004,7 @@ def e1_report(store_root: Path) -> dict[str, Any]:
         "h1a": h1a(per_ds),
         "h1b": h1b(pred, baseline, float(timing["predict_seconds"].median())),
         "h2": h2(runs),
-        "h2b": h2b(recovery, ablation, runs),
+        "h2b": h2b(recovery, ablation, runs) if len(ablation) else None,
         "h3": h3(per_ds),
         "h4": h4(pred),
         "h5": h5(nf, pred, runs),
