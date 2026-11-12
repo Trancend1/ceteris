@@ -1,6 +1,6 @@
 # ADR 0011: Phase 3 — desain pilot E0, kalibrator, scan eksperimental, dan gate G2
 
-- **Status:** Diusulkan. Keputusan K1–K7 sudah diambil pemilik repo pada 12/11/2026. Keputusan G2 (bagian "Keputusan G2") masih menunggu hasil E0 dan persetujuan; sebelum G2 disetujui, rencana analisis belum dibekukan.
+- **Status:** Diusulkan. K1–K7 dan G2-1 sampai G2-9 sudah diputuskan pemilik repo pada 12/11/2026. Yang menunggu hanya persetujuan gate G2; sebelum itu, rencana analisis belum dibekukan.
 - **Tanggal:** 12/11/2026
 - **Rilis terdampak:** R0, Phase 3
 - **Rujukan:** `execution-plan.md` Phase 3; BR-04, BR-05, BR-22, BR-24, BR-30–BR-35, BR-60, BR-86; ADR 0006, 0010; [analysis-plan.md](../analysis-plan.md)
@@ -143,9 +143,11 @@ Sumber: `runs/e0/report.json`, dihasilkan dari run store oleh `python -m ceteris
   - ambang OOD sementara 6,04.
 - **Scan pada data E0 nyata** berjalan 3–23 detik. Karena setengah lebar interval (0,022) lebih besar dari `T` (0,01), status `material` hanya mungkin bila estimasi di atas 0,032, sehingga sebagian besar scan pilot berstatus `tidak_yakin`.
 
-## Keputusan G2 yang masih terbuka **[T]**
+## Keputusan G2 **[K]**
 
-| # | Butir | Opsi | Rekomendasi dan alasan |
+Semua rekomendasi di bawah disetujui pemilik repo pada 12/11/2026. G2-2 juga dibawa ke pembimbing (agenda A12).
+
+| # | Butir | Opsi | Keputusan (rekomendasi yang disetujui) dan alasan |
 | --- | --- | --- | --- |
 | G2-1 | Statistik noise floor dan jumlah seed (hal terbuka #1, P1 rencana analisis) | A: rata-rata \|selisih\| antar-pasangan seed, 10 seed terukur dan 5 seed estimasi. B: persentil ke-95 \|selisih\|, 10 seed keduanya. C: rentang, 10 seed keduanya | **A.** Paling dekat dengan definisi BR-04 ("selisih AUC dua model ... seed berbeda"). Nilainya stabil terhadap jumlah seed, sehingga scan cukup 5 seed (biaya separuh) dan tetap sebanding dengan nilai terukur 10 seed. Statistik tidak mengubah status di pilot karena `T` didominasi lantai 0,01 |
 | G2-2 | Level grid untuk jenis yang jarang di atas `T` (P3, agenda bimbingan A12) | A: grid tetap; kriteria ≥ 30% dicatat tidak terpenuhi untuk missing, outlier, dan duplikat eksak, dan hal itu dilaporkan sebagai temuan. B: tambah level tinggi, yaitu missing 0,65 dan 0,80 serta outlier 0,30 dan 0,50 (+10 konfigurasi, +18% komputasi). C: tunda sampai dibahas dengan pembimbing | **A, dan bawa ke pembimbing.** Pada level tertinggi sekarang (missing 0,50, duplikat eksak 0,50) median ΔAUC masih ≤ 0,0012. LightGBM menangani nilai kosong secara bawaan, dan pohon kebal terhadap outlier serta duplikat eksak. Dampak rendah ini adalah bagian jawaban H2, bukan kegagalan desain |
@@ -178,9 +180,41 @@ Sumber: `runs/e0/report.json`, dihasilkan dari run store oleh `python -m ceteris
 5. **Ekstrapolasi:** garis AUC terhadap proporsi terdampak total diekstrapolasi ke nol, sehingga Δ = AUC(0) − AUC(saat ini). Kuadratik dilaporkan sebagai pembanding. Bila tidak ada jenis terdeteksi, Δ = 0.
 6. **Subset:** 1 seed × semua konfigurasi × semua dataset, dengan waktu CPU dicatat.
 
+## Hasil baseline (d) dan artefak pilot final **[F]**
+
+- **Baseline (d) pada subset E0:**
+  - 265 run (seed index 0 × semua konfigurasi × 5 dataset). Sepuluh konfigurasi outlier kr-vs-kp tidak punya run.
+  - MAE (d) linear per dataset 0,0062–0,0388, meta-model LODO 0,0072–0,0123.
+  - Median selisih MAE (meta-model − d) = −0,0032. Meta-model lebih baik di 3/5 dataset dan kalah di adult dan segment.
+  - Ekstrapolasi kuadratik tidak stabil (MAE 0,043–0,234), dan hanya dilaporkan sebagai pembanding.
+  - Biaya tambahan (d) median 1,6 detik per estimasi (4 proses paralel), di luar profil yang dipakai kedua metode. Prediksi meta-model hanya butuh milidetik.
+
+  Ini pratinjau H1b dengan n = 5, bukan uji.
+- **Artefak pilot final `artifacts/metamodel-0.1.0-pilot/`:**
+  - 1.325 run dari 5 dataset, `experimental = true`;
+  - kuantil conformal 0,0222, coverage LODO per dataset 85,8–94,2% (median 90,5%);
+  - ambang OOD sementara 6,04;
+  - noise floor rata-rata |selisih| dengan 5 seed.
+
+  Artefak tidak di-commit (folder `artifacts/` diabaikan git). Artefak ini bisa dibangun ulang dari run store E0 dengan `ceteris.metamodel.build_artifact`.
+- **Scan CLI end-to-end:** `ceteris scan` pada churn kotor (label uniform 0,30) selesai dalam ≈ 10 detik dan menghasilkan `ScanReport` 1.0 yang valid.
+- **Variasi ΔAUC antar-seed untuk konfigurasi yang sama:**
+  - median simpangan baku per dataset 0,0002–0,0067 (median 0,0006);
+  - kasus ekstrem: churn label uniform 0,30 punya ΔAUC 0,064–0,153 pada 5 seed, dengan profil hampir identik (`label_noise_rate` 0,25–0,27).
+
+  Variasi ini tidak bisa dijelaskan oleh profil, sehingga menjadi batas bawah galat yang bisa dicapai meta-model (H1).
+
+## Keterbatasan yang ditemukan
+
+- **Tipe kolom pada CSV.** Saat dibaca dari CSV, kolom nominal yang berkode angka berubah menjadi integer. Pada churn ada 4 kolom fitur dan target.
+  - Profil pun bergeser: `frac_numeric` 0,79 → 1,00, dan fitur outlier hampir dua kali lipat.
+  - Estimasi berubah dari 0,108 (Parquet atau frame asli) ke 0,142 (CSV).
+  - BR-10 menerima CSV, tetapi BR-14 belum mengatur inferensi tipe. Hal ini dicatat sebagai hal terbuka baru di `business-rules.md` (#12), diputuskan sebelum E4.
+- **Interval pilot lebar.** Setengah lebar 0,022 lebih besar dari `T` = 0,01, sehingga sebagian besar scan pilot berstatus `tidak_yakin`. Hal ini konsisten dengan BR-34 dan diharapkan menyempit di korpus penuh.
+
 ## Bukti Phase 3
 
-- **Uji:** 168 uji lulus, cakupan paket 92%; `ruff check`, `ruff format --check`, dan `mypy` strict bersih.
+- **Uji:** 171 uji lulus, cakupan paket 92%; `ruff check`, `ruff format --check`, dan `mypy` strict bersih.
 - **Kriteria selesai Phase 3 (`execution-plan.md`):**
 
   | Kriteria | Bukti |
@@ -191,6 +225,7 @@ Sumber: `runs/e0/report.json`, dihasilkan dari run store oleh `python -m ceteris
   | Label eksperimental (BR-35) | Artefak pilot `experimental = true`, dan `ScanReport.model.experimental` mengikutinya |
   | Pemuat artefak dipisah dari pelatihan | `ceteris.artifact`; uji AC-3 mencakup `artifact` dan melarang `metamodel` di jalur scan |
 
+- **Baseline (a)–(d) (F-S09) lengkap:** (d) mengikuti operasionalisasi G2-7, dengan uji determinisme dan uji pemetaan dosis.
 - **Belum ada:**
   - potensi pemulihan (F-S12);
   - LODO bersarang (F-S11);
@@ -200,7 +235,6 @@ Sumber: `runs/e0/report.json`, dihasilkan dari run store oleh `python -m ceteris
 
 ## Setelah G2 disetujui
 
-1. Nilai G2-1 sampai G2-9 masuk `analysis-plan.md` bagian 7, dan rencana analisis dibekukan dengan tanggal (BR-86).
-2. `business-rules.md` hal terbuka #1 ditutup. Campuran final masuk `configs/corruption.yaml` (versi naik).
-3. Artefak meta-model pilot dibangun ulang dengan statistik noise floor final dan disimpan sebagai `artifacts/metamodel-0.1.0-pilot/`.
-4. Status ADR ini dan Phase 3 di `execution-plan.md` menjadi selesai, sehingga Phase 4 bisa dimulai.
+1. Status `analysis-plan.md` menjadi "Dibekukan" dengan tanggal (BR-86). Nilai G2-1 sampai G2-9 sudah tertulis di bagian 7.
+2. Campuran final masuk `configs/corruption.yaml`, yang naik ke versi `1.0.0`.
+3. Status ADR ini dan Phase 3 di `execution-plan.md` menjadi selesai, sehingga Phase 4 bisa dimulai.

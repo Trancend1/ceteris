@@ -18,7 +18,7 @@ Dokumen ini adalah satu-satunya sumber untuk aturan yang menentukan **angka dan 
 | BR-06 | Setiap angka ΔAUC yang ditampilkan disertai **kalimat kondisi**: "dibanding model yang dilatih pada versi bersih dan dievaluasi pada data bersih". | Contract test: field `condition` wajib ada di `ScanReport` |
 | BR-07 | Satu metrik untuk riset dan produk: ΔAUC. ΔF1 tidak dipakai. | Pencarian kode: tidak ada field `delta_f1` |
 
-**[T]** Statistik pasti untuk noise floor (rentang, simpangan baku, atau persentil selisih antar-seed) dan jumlah seed probe belum ditetapkan; diputuskan di pilot E0 dan dibekukan di G2. **[K]** Bila H5 gagal menurut kriteria rencana analisis G2, `T` tetap 0,01 dan noise floor estimasi hanya informatif; BR-05 diubah lewat revisi dokumen ini pada saat itu ([ADR 0006](decisions/0006-kerangka-pengujian-rq2b-dan-h5.md)).
+**[K]** Noise floor adalah rata-rata |selisih AUC| antar-pasangan seed. Noise floor terukur memakai 10 seed model versi bersih; noise floor estimasi memakai 5 seed probe tetap. Statistik ini stabil terhadap jumlah seed, sehingga kedua nilai sebanding. Keputusan pemilik repo 12/11/2026 berdasarkan pilot E0 ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md) G2-1). **[K]** Bila H5 gagal menurut kriteria rencana analisis G2, `T` tetap 0,01 dan noise floor estimasi hanya informatif; BR-05 diubah lewat revisi dokumen ini pada saat itu ([ADR 0006](decisions/0006-kerangka-pengujian-rq2b-dan-h5.md)).
 
 ## 2. Kontrak input scan
 
@@ -196,7 +196,7 @@ Keputusan gate untuk scan yang sama:
 
 | # | Hal terbuka | Aturan terdampak | Diputuskan paling lambat |
 | --- | --- | --- | --- |
-| 1 | Statistik noise floor dan jumlah seed probe | BR-04, BR-05 | G2 |
+| 1 | **Ditutup [K]**: rata-rata \|selisih\| antar-pasangan seed; 10 seed terukur, 5 seed estimasi ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-04, BR-05 | — |
 | 2 | Validitas noise floor estimasi (H5) | BR-05, BR-31 sampai BR-33 | G3 |
 | 3 | Ambang "OOD tinggi" dan besar pelebaran interval (pilot memakai ambang sementara, ADR 0011) | BR-24, BR-33 | G3 |
 | 4 | **Ditutup [K]**: kuantil conformal berbobot sama per dataset ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-22 | — |
@@ -207,3 +207,4 @@ Keputusan gate untuk scan yang sama:
 | 9 | Tabel effort per `issue_type` | BR-43 | Sebelum R2 |
 | 10 | **Ditutup [K]**: estimator label noise memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) | — (fitur F-S05) | — |
 | 11 | **Ditutup [K]**: keacakan learner acuan lewat bagging baris ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) dengan `bagging_fraction` 0,8, dibekukan di G1 ([ADR 0010](decisions/0010-gate-g1.md)) | BR-03, BR-04 | — |
+| 12 | Inferensi tipe kolom pada input CSV. Kolom nominal berkode angka terbaca sebagai integer, sehingga profil dan estimasi berbeda dari Parquet ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-10, BR-14, BR-16 | Sebelum E4 (Phase 5) |

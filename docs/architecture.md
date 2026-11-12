@@ -177,7 +177,7 @@ Metadata wajib setiap artefak model: `profile_schema_version`, `learner_spec_ver
 
 | Store | Isi | Teknologi | Mulai |
 | --- | --- | --- | --- |
-| Run store (offline) | `corpus_dataset`, `experiment_config`, `corruption_run`, `noise_floor` (satu baris per seed, terukur atau estimasi; Phase 3), `ablation_run`, `lodo_result`, `run_log` | Parquet + DuckDB | R0 |
+| Run store (offline) | `corpus_dataset`, `experiment_config`, `corruption_run`, `noise_floor` (satu baris per seed, terukur atau estimasi; Phase 3), `baseline_d_run` (baseline (d) per run; Phase 3), `ablation_run`, `lodo_result`, `run_log` | Parquet + DuckDB | R0 |
 | Metadata store (online) | `dataset`, `scan`, `finding`, `impact_estimate`, `model_version` (R1); `simulation`, `gate_policy`, `gate_run`, `audit_log` (R2); `source_connection` (R3); `feedback`, `trust_signal`, `data_contract` (R4); `cost_model` (R5) | Postgres | R1 |
 | Object store | Snapshot data yang dipindai (dirujuk lewat `snapshot_uri`), laporan HTML | S3-compatible | R1 |
 
@@ -328,4 +328,4 @@ AGENTS.md, CLAUDE.md
 | 4 | Perilaku gate saat layanan tidak tersedia (`fail_mode`) | 5.2, NFR-4 | Sebelum R2 |
 | 5 | Batas ukuran unggahan dan strategi sampling untuk data di atas 100.000 baris | 5.1, NFR-1 | Sebelum R1 |
 | 6 | Alias endpoint draft awal (`POST /scan`, `GET /report/{id}`) dipertahankan atau tidak | 6.4 | Sebelum R1 |
-| 7 | Mesin komputasi untuk korpus penuh (perkiraan 62.000–72.000 fit LightGBM) | 5.1 | Pilot E0 |
+| 7 | **Ditutup [K]**: mesin lokal 4 inti dengan runner yang bisa dilanjutkan; proyeksi pilot ≈ 68 jam CPU. Pindah ke VM awan bila waktu nyata lebih dari 2× proyeksi ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md) G2-6) | 5.1 | — |
