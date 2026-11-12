@@ -19,6 +19,9 @@ dependencies = [
     "cleanlab>=2.8.0,<3",
 ]
 
+[project.scripts]
+ceteris = "ceteris.scan:app"
+
 [dependency-groups]
 dev = [
     "pytest>=8.0",

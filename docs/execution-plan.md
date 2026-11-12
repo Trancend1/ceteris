@@ -103,6 +103,20 @@ Hal yang dibawa ke Phase 3:
 
 ### Phase 3 — Pilot dan scan eksperimental
 
+**Status: selesai; gate G2 disetujui pemilik repo pada 12/11/2026.** Bukti dan keputusan ada di [ADR 0011](decisions/0011-phase-3-dan-gate-g2.md).
+
+- **Dibekukan:** [rencana analisis](analysis-plan.md) dan grid korupsi `1.0.0`, termasuk 10 campuran.
+- **Diserahkan:**
+  - meta-model pilot `0.1.0-pilot` (eksperimental);
+  - `ScanReport` 1.0;
+  - perintah `ceteris scan`.
+- **Dibawa ke Phase 4:**
+  - LODO bersarang;
+  - OOD penuh;
+  - potensi pemulihan;
+  - ΔAUC relatif saat scan;
+  - E1 korpus penuh.
+
 | | |
 | --- | --- |
 | Scope | Pilot E0 pada 5 dataset; F-S08 (versi pilot), F-S09 baseline (a)–(d), F-S10 (prototipe kalibrator conformal), F-S13 `ceteris scan`, F-S14 status hasil |
@@ -201,7 +215,8 @@ Hal yang dibawa ke Phase 3:
 | --- | --- |
 | **Ditutup [K] 12/11/2026:** hiperparameter probe kebocoran dan ambang tetap 0,99 (BR #6, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
 | **Ditutup [K] 12/11/2026:** `bagging_fraction` 0,8 untuk learner acuan (BR #11, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
-| Statistik noise floor dan seed probe (BR #1); kuantil conformal (BR #4); pemotongan interval (BR #5); mesin komputasi (arsitektur #7) | Phase 3 (G2) |
+| **Ditutup [K] 12/11/2026:** statistik noise floor dan seed probe (BR #1), kuantil conformal (BR #4), pemotongan interval (BR #5), dan mesin komputasi (arsitektur #7) ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | Phase 3 (G2) |
+| Inferensi tipe kolom input CSV (BR #12) | Phase 5 (sebelum E4) |
 | Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | Phase 4 (G3) |
 | Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |
 | Label status UI, presisi angka, tampilan histori | Phase 9 (G6) |

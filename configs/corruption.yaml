@@ -1,6 +1,7 @@
-# Grid korupsi (F-S02). DRAF sampai G1; disesuaikan di pilot E0 bila ΔAUC di bawah noise floor.
-# Grid tunggal mengikuti rencana skripsi (ADR 0009 K3a); semantik level: ADR 0008 dan ADR 0009.
-version: "0.2.0-draft"
+# Grid korupsi (F-S02). DIBEKUKAN di G2 (12/11/2026, ADR 0011); perubahan apa pun = versi baru.
+# Grid tunggal mengikuti rencana skripsi (ADR 0009 K3a) dan tidak diubah setelah pilot (G2-2);
+# semantik level: ADR 0008 dan ADR 0009.
+version: "1.0.0"
 singles:
   - kind: missing_mcar
     levels: [0.05, 0.10, 0.20, 0.35, 0.50]
@@ -18,5 +19,15 @@ singles:
     levels: [0.05, 0.10, 0.20, 0.30, 0.50]
   - kind: duplicate_conflict
     levels: [0.05, 0.10, 0.20, 0.30, 0.50]
-# [T] ±10 campuran dua–tiga jenis pada level sedang–tinggi; didefinisikan di pilot E0 (G2).
-mixtures: []
+# Campuran final: kesepuluh kandidat pilot E0 (configs/e0.yaml), ADR 0011 G2-3.
+mixtures:
+  - [{kind: label_uniform, level: 0.10}, {kind: missing_mcar, level: 0.20, columns: high_importance}]
+  - [{kind: label_uniform, level: 0.10}, {kind: outlier, level: 0.10}]
+  - [{kind: label_class_conditional, level: 0.10}, {kind: missing_mar, level: 0.20, columns: high_importance}]
+  - [{kind: missing_mcar, level: 0.20, columns: high_importance}, {kind: outlier, level: 0.10}]
+  - [{kind: missing_mar, level: 0.20, columns: high_importance}, {kind: duplicate_exact, level: 0.20}]
+  - [{kind: duplicate_conflict, level: 0.20}, {kind: label_uniform, level: 0.10}]
+  - [{kind: outlier, level: 0.10}, {kind: duplicate_exact, level: 0.20}]
+  - [{kind: label_uniform, level: 0.10}, {kind: missing_mcar, level: 0.20, columns: high_importance}, {kind: outlier, level: 0.10}]
+  - [{kind: label_class_conditional, level: 0.10}, {kind: missing_mar, level: 0.20, columns: high_importance}, {kind: duplicate_conflict, level: 0.20}]
+  - [{kind: missing_mcar, level: 0.35, columns: low_importance}, {kind: outlier, level: 0.05}, {kind: duplicate_exact, level: 0.30}]

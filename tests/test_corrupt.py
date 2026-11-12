@@ -272,8 +272,9 @@ def test_invalid_inputs_are_rejected() -> None:
 
 
 def test_k3a_grid_follows_thesis_plan() -> None:
+    """ADR 0011: grid dibekukan di G2 sebagai versi 1.0.0, tunggal tidak berubah sejak pilot."""
     grid = load_corruption_grid(CONFIGS / "corruption.yaml")
-    assert grid.version.endswith("draft")
+    assert grid.version == "1.0.0"
     assert {s.kind for s in grid.singles} == set(APPLY_ORDER)
     assert len(grid.singles) == 45
     missing = [s for s in grid.singles if s.kind.startswith("missing")]
@@ -285,7 +286,16 @@ def test_k3a_grid_follows_thesis_plan() -> None:
         0.2,
         0.3,
     ]
-    assert grid.mixtures == ()
+
+
+def test_g2_3_final_mixtures_are_the_pilot_candidates() -> None:
+    """ADR 0011 G2-3: campuran final = kesepuluh kandidat E0, isi dan urutan sama."""
+    from ceteris.experiment import load_e0_protocol
+
+    grid = load_corruption_grid(CONFIGS / "corruption.yaml")
+    protocol = load_e0_protocol(CONFIGS / "e0.yaml")
+    assert len(grid.mixtures) == 10
+    assert list(grid.mixtures) == protocol.mixtures()
 
 
 def test_grid_loader_accepts_variants_and_mixtures(tmp_path: Path) -> None:

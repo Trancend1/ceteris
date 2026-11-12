@@ -124,11 +124,55 @@ RUN_LOG = pa.schema(
     ]
 )
 
+# Noise floor (BR-04, F-S06) dalam format panjang: satu baris per seed, sehingga statistik
+# ringkas apa pun bisa dihitung belakangan (`business-rules.md` hal terbuka #1).
+NOISE_FLOOR = pa.schema(
+    [
+        ("nf_id", pa.string()),
+        ("dataset_id", pa.int64()),
+        ("kind", pa.string()),  # "measured" (model versi bersih) | "estimated" (probe data kotor)
+        ("source_run_id", pa.string()),  # run kotor sumber untuk "estimated"; null untuk "measured"
+        ("seed_index", pa.int64()),
+        ("seed", pa.int64()),
+        ("auc", pa.float64()),
+        ("n_seeds", pa.int64()),
+        ("batch_seconds", pa.float64()),  # waktu seluruh batch seed, untuk proyeksi komputasi
+        ("learner_spec_version", pa.string()),
+        ("learner_spec_sha256", pa.string()),
+        ("profile_config_id", pa.string()),
+        ("git_commit", pa.string()),
+        ("git_dirty", pa.bool_()),
+        ("created_at", pa.string()),
+    ]
+)
+
+# Baseline (d) dose–response per run (F-S09, ADR 0011 G2-7); kunci = run_id sumber.
+BASELINE_D_RUN = pa.schema(
+    [
+        ("run_id", pa.string()),
+        ("dataset_id", pa.int64()),
+        ("delta_linear", pa.float64()),
+        ("delta_quadratic", pa.float64()),
+        ("auc_current", pa.float64()),
+        ("p0_total", pa.float64()),
+        ("detected_json", pa.string()),
+        ("points_json", pa.string()),
+        ("seconds", pa.float64()),
+        ("n_train", pa.int64()),
+        ("n_holdout", pa.int64()),
+        ("git_commit", pa.string()),
+        ("git_dirty", pa.bool_()),
+        ("created_at", pa.string()),
+    ]
+)
+
 TABLES: dict[str, pa.Schema] = {
     "corpus_dataset": CORPUS_DATASET,
     "experiment_config": EXPERIMENT_CONFIG,
     "corruption_run": CORRUPTION_RUN,
     "run_log": RUN_LOG,
+    "noise_floor": NOISE_FLOOR,
+    "baseline_d_run": BASELINE_D_RUN,
 }
 
 
@@ -275,6 +319,31 @@ class RunStore:
         if not row.get("git_commit") or row.get("seed") is None:
             raise StoreError("run_log wajib mencatat git_commit dan seed")
         self._write("run_log", str(row["log_id"]), row, overwrite=False)
+
+    def read_run(self, run_id: str) -> dict[str, Any]:
+        """Satu baris `corruption_run` menurut `run_id`."""
+        path = self._path("corruption_run", run_id)
+        if not path.exists():
+            raise StoreError(f"run {run_id} tidak ada")
+        row: dict[str, Any] = pq.read_table(path).to_pylist()[0]
+        return row
+
+    def has_baseline_d(self, run_id: str) -> bool:
+        return self._path("baseline_d_run", run_id).exists()
+
+    def write_baseline_d(self, row: dict[str, Any]) -> None:
+        if not row.get("git_commit"):
+            raise StoreError("baseline_d_run wajib mencatat git_commit")
+        self._write("baseline_d_run", str(row["run_id"]), row, overwrite=False)
+
+    def has_noise_floor(self, nf_id: str) -> bool:
+        return self._path("noise_floor", nf_id).exists()
+
+    def write_noise_floor(self, row: dict[str, Any]) -> None:
+        """Tulis satu baris `noise_floor` (satu seed); baris yang sama tidak ditulis dua kali."""
+        if not row.get("git_commit"):
+            raise StoreError("noise_floor wajib mencatat git_commit")
+        self._write("noise_floor", str(row["nf_id"]), row, overwrite=False)
 
     def connect(self) -> duckdb.DuckDBPyConnection:
         """Koneksi DuckDB di memori dengan satu view per tabel."""

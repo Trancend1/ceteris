@@ -1,0 +1,29 @@
+# Protokol pilot E0 (Phase 3, execution-plan.md). Diputuskan pemilik repo 12/11/2026:
+# 5 dataset beragam termasuk satu dataset besar, 45 konfigurasi tunggal dari corruption.yaml
+# ditambah 10 kandidat campuran, 5 seed per konfigurasi, dan noise floor dengan 10 seed.
+# Campuran final, grid level, statistik noise floor, dan jumlah seed final diputuskan di G2.
+version: "1.1.0"   # 1.1.0: baseline (d) pada seed index 0 tiap konfigurasi (ADR 0011 G2-7)
+# Urutan = urutan eksekusi; dataset termahal di depan agar beban paralel merata.
+datasets:
+  - 1590   # adult: biner, 48.842 baris, kolom campuran, tidak seimbang
+  - 40701  # churn: biner, 5.000 baris, kolom campuran, tidak seimbang, ada kolom ID
+  - 40984  # segment: 7 kelas, 2.310 baris, numerik
+  - 3      # kr-vs-kp: biner, 3.196 baris, kategorikal
+  - 1489   # phoneme: biner, 5.404 baris, numerik
+seeds_per_config: 5
+measured_seeds: 10             # noise floor terukur: model versi bersih per dataset
+estimated_seeds: 10            # noise floor estimasi: seed probe (noise_floor_seeds) per run
+estimated_seed_indices: [0]    # noise floor estimasi dihitung pada run seed index 0 tiap konfigurasi
+baseline_d_seed_indices: [0]   # baseline (d): 1 seed × semua konfigurasi × semua dataset
+# [T] Kandidat campuran 2–3 jenis pada level sedang–tinggi; pilihan final di G2.
+mixture_candidates:
+  - [{kind: label_uniform, level: 0.10}, {kind: missing_mcar, level: 0.20, columns: high_importance}]
+  - [{kind: label_uniform, level: 0.10}, {kind: outlier, level: 0.10}]
+  - [{kind: label_class_conditional, level: 0.10}, {kind: missing_mar, level: 0.20, columns: high_importance}]
+  - [{kind: missing_mcar, level: 0.20, columns: high_importance}, {kind: outlier, level: 0.10}]
+  - [{kind: missing_mar, level: 0.20, columns: high_importance}, {kind: duplicate_exact, level: 0.20}]
+  - [{kind: duplicate_conflict, level: 0.20}, {kind: label_uniform, level: 0.10}]
+  - [{kind: outlier, level: 0.10}, {kind: duplicate_exact, level: 0.20}]
+  - [{kind: label_uniform, level: 0.10}, {kind: missing_mcar, level: 0.20, columns: high_importance}, {kind: outlier, level: 0.10}]
+  - [{kind: label_class_conditional, level: 0.10}, {kind: missing_mar, level: 0.20, columns: high_importance}, {kind: duplicate_conflict, level: 0.20}]
+  - [{kind: missing_mcar, level: 0.35, columns: low_importance}, {kind: outlier, level: 0.05}, {kind: duplicate_exact, level: 0.30}]

@@ -1,7 +1,7 @@
 """Uji impor: jalur scan tidak boleh mengimpor kode eksperimen (AC-3).
 
-Jalur scan: scan, dqprofile, uncertainty, recovery (pemuat artefak ada di
-metamodel dan belum dicakup di sini). Kode eksperimen: corpus, corrupt, evaluate.
+Jalur scan: scan, dqprofile, uncertainty, recovery, dan pemuat artefak (`artifact`, dipisah dari
+kode pelatihan `metamodel` di Phase 3). Kode eksperimen: corpus, corrupt, evaluate.
 """
 
 import ast
@@ -9,9 +9,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-SCAN_PATH = ["scan", "dqprofile", "uncertainty", "recovery"]
+SCAN_PATH = ["scan", "dqprofile", "uncertainty", "recovery", "artifact"]
 # `experiment` mengimpor corpus dan corrupt, sehingga jalur scan juga tidak boleh mengimpornya.
-EXPERIMENT = ["corpus", "corrupt", "evaluate", "experiment"]
+# `metamodel` adalah kode pelatihan; jalur scan hanya memuat artefak (AC-4, execution-plan Phase 3).
+EXPERIMENT = ["corpus", "corrupt", "evaluate", "experiment", "metamodel"]
 PACKAGE_DIR = Path(__file__).resolve().parent.parent / "ceteris"
 
 
