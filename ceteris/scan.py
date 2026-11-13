@@ -8,6 +8,9 @@ AC-3 (tidak mengimpor kode eksperimen), AC-4 (hanya membaca artefak), AC-12 (det
 dijumlahkan, diurutkan menurut potensi (atau volume bila artefak menetapkan `finding_order` =
 `volume`, fallback H2b). `estimate.delta_relative` berasal dari meta-model ΔAUC relatif terpisah
 bila artefak memuatnya (K7, ADR 0011); artefak tanpa model itu memberi null.
+
+CSV dibaca dengan tipe apa adanya; kolom integer bernilai unik sedikit diberi peringatan
+`csv_integer_low_cardinality`, bukan ditebak sebagai kategorikal (BR #12, ADR 0014).
 """
 
 from __future__ import annotations
@@ -15,6 +18,7 @@ from __future__ import annotations
 import json
 import sys
 import uuid
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Annotated, Final, Literal
 
@@ -38,6 +42,7 @@ from ceteris.recovery import displayed_potential, missing_row_frac, ranked_findi
 SCHEMA_VERSION: Final = "1.0"
 CONDITION: Final = "dibanding model yang dilatih pada versi bersih dan dievaluasi pada data bersih"
 MIN_THRESHOLD = 0.01
+CSV_LOW_CARDINALITY = 20  # sama dengan batas kelas BR-11 (ADR 0014)
 
 StatusValue = Literal["material", "tidak_material", "tidak_yakin"]
 
@@ -131,7 +136,11 @@ def decide_status(
 
 
 def scan(
-    data: pd.DataFrame, target: str, artifact: Artifact, scan_id: str | None = None
+    data: pd.DataFrame,
+    target: str,
+    artifact: Artifact,
+    scan_id: str | None = None,
+    extra_warnings: Sequence[str] = (),
 ) -> ScanReport:
     """Scan satu dataset kotor dengan artefak yang sudah dimuat.
 
@@ -174,7 +183,7 @@ def scan(
             value=value, threshold=threshold, noise_floor_estimated=noise_floor, reasons=reasons
         ),
         findings=findings_for(data, target, profile.features, artifact),
-        input_warnings=list(profile.input_warnings),
+        input_warnings=[*profile.input_warnings, *extra_warnings],
         condition=CONDITION,
     )
 
@@ -209,11 +218,34 @@ def read_table(path: Path) -> pd.DataFrame:
     raise InputContractError([f"BR-10 format_unsupported: {suffix or 'tanpa ekstensi'}"])
 
 
+def csv_type_warnings(frame: pd.DataFrame, target: str) -> list[str]:
+    """BR #12 (ADR 0014): kolom integer CSV dengan ≤ 20 nilai unik mungkin nominal berkode angka.
+
+    Hanya peringatan; tipe kolom tidak diubah.
+    """
+    warnings = []
+    for name in frame.columns:
+        column = frame[name]
+        if name == target or not pd.api.types.is_numeric_dtype(column.dtype):
+            continue
+        if pd.api.types.is_bool_dtype(column.dtype):
+            continue
+        values = column.dropna()
+        integral = pd.api.types.is_integer_dtype(column.dtype) or bool(
+            len(values) and (values.to_numpy(dtype="float64") % 1.0 == 0.0).all()
+        )
+        if integral and 0 < values.nunique() <= CSV_LOW_CARDINALITY:
+            warnings.append(f"csv_integer_low_cardinality: {name}")
+    return warnings
+
+
 def scan_file(
     path: Path, target: str, artifact_path: Path, scan_id: str | None = None
 ) -> ScanReport:
     """Python API: baca berkas, muat artefak, dan jalankan scan."""
-    return scan(read_table(path), target, load_artifact(artifact_path), scan_id)
+    data = read_table(path)
+    extra = csv_type_warnings(data, target) if Path(path).suffix.lower() == ".csv" else []
+    return scan(data, target, load_artifact(artifact_path), scan_id, extra)
 
 
 # --- CLI ---

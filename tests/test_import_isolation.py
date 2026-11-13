@@ -12,7 +12,7 @@ from pathlib import Path
 SCAN_PATH = ["scan", "dqprofile", "uncertainty", "recovery", "artifact"]
 # `experiment` mengimpor corpus dan corrupt, sehingga jalur scan juga tidak boleh mengimpornya.
 # `metamodel` adalah kode pelatihan; jalur scan hanya memuat artefak (AC-4, execution-plan Phase 3).
-EXPERIMENT = ["corpus", "corrupt", "evaluate", "experiment", "metamodel"]
+EXPERIMENT = ["corpus", "corrupt", "evaluate", "experiment", "metamodel", "validation"]
 PACKAGE_DIR = Path(__file__).resolve().parent.parent / "ceteris"
 
 

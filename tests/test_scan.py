@@ -25,10 +25,12 @@ from ceteris.scan import (
     SCHEMA_VERSION,
     ScanReport,
     app,
+    csv_type_warnings,
     decide_status,
     materiality_threshold,
     read_table,
     scan,
+    scan_file,
 )
 from ceteris.seeding import run_seed
 from tests.conftest import SmallPilot
@@ -229,3 +231,37 @@ def test_cli_scan_writes_report_and_rejects_bad_input(
     rejected = runner.invoke(app, [*args[:3], "nope", *args[4:]])
     assert rejected.exit_code == 2
     assert "input_contract" in rejected.output
+
+
+def test_br12_csv_low_cardinality_integers_only_warn() -> None:
+    """BR #12 (ADR 0014): kolom integer CSV dengan <= 20 nilai unik diberi peringatan saja."""
+    frame = pd.DataFrame(
+        {
+            "code": [1, 2, 3, 1] * 10,
+            "code_nan": [1.0, None, 2.0, 3.0] * 10,
+            "amount": [float(i) + 0.5 for i in range(40)],
+            "many": list(range(40)),
+            "flag": [True, False] * 20,
+            "class": [0, 1] * 20,
+        }
+    )
+    assert csv_type_warnings(frame, "class") == [
+        "csv_integer_low_cardinality: code",
+        "csv_integer_low_cardinality: code_nan",
+    ]
+
+
+def test_br12_csv_scan_reports_warning_but_parquet_does_not(
+    small_pilot: SmallPilot, tmp_path: Path
+) -> None:
+    """BR #12: profil dan estimasi tidak berubah; hanya `input_warnings` CSV yang bertambah."""
+    frame, _ = _dirty_frame(small_pilot, 0)
+    frame = frame.assign(nominal_code=[i % 3 for i in range(len(frame))])
+    parquet = tmp_path / "data.parquet"
+    csv = tmp_path / "data.csv"
+    frame.to_parquet(parquet, index=False)
+    frame.to_csv(csv, index=False)
+    from_parquet = scan_file(parquet, "class", small_pilot.artifact_dir, "s")
+    from_csv = scan_file(csv, "class", small_pilot.artifact_dir, "s")
+    assert "csv_integer_low_cardinality: nominal_code" in from_csv.input_warnings
+    assert not any(w.startswith("csv_") for w in from_parquet.input_warnings)
