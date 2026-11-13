@@ -22,6 +22,8 @@ Setiap dokumen punya satu tanggung jawab. Baca yang relevan sebelum bekerja; jan
 | Alasan keputusan desain (ADR 0001–) | `docs/decisions/` |
 | Urutan sprint, phase, gerbang, dan kriteria selesai | `docs/execution-plan.md` |
 | Ukuran, uji, dan kriteria hipotesis H1–H5 (dibekukan di G2, BR-86) | `docs/analysis-plan.md` |
+| Klaim yang boleh tampil, buktinya, dan gerbangnya (BR-64) | `docs/claims-register.md` |
+| Batas epoch eksperimen, arsip, manifest, dan dataset holdout | ADR 0013; arsip tiap epoch di `docs/epochs/epoch-N/` |
 | Penyusunan skripsi (workspace lokal, repository git terpisah, diabaikan repo ini) | `.skripsi/README.md`; kode, uji, dan dokumen repo ini tidak boleh merujuk ke sana |
 
 Urutan otoritas bila ada pertentangan: `business-rules.md` (angka dan keputusan) → `architecture.md` (struktur) → `product.md` (scope) → kode. Jika kode bertentangan dengan dokumen, laporkan; jangan diam-diam memilih salah satu.

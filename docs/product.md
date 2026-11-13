@@ -145,6 +145,8 @@ R0 berjalan lewat empat gerbang. Gerbang adalah titik di mana artefak dibekukan 
 
 Hasil negatif diterima. Jika hipotesis akurasi (H1) gagal, klaim "ΔAUC diperkirakan X ± Y" diganti menjadi "indikasi risiko" tanpa angka, dan baseline dose–response dipertimbangkan sebagai mekanisme estimasi yang lebih lambat. Urutan Next dan Later ditinjau ulang sebelum R1 dimulai.
 
+Jika hipotesis coverage (H3) gagal, interval dan status tetap tampil dengan label eksperimental, dan gate tidak memberi **block** (BR-51). Perbaikan interval diuji di epoch 1 dengan protokol tertulis lebih dulu, dan klaim interval dibuka paling cepat setelah validasi pada dataset holdout. Ini berlaku sejak G3 karena H3 gagal di E1 ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md), [ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)).
+
 ### 5.3 Gerbang R1 hingga Web UI
 
 **[K]** Disetujui pemilik repo pada 10/11/2026. Urutan phase dan kriteria selesainya ada di [execution-plan.md](execution-plan.md); rencana itu berhenti di G7.

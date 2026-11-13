@@ -547,11 +547,89 @@ def run_baseline_d(
     return row
 
 
-# --- pilot E0 (Phase 3) ---
+def run_ablation(
+    prepared: PreparedDataset,
+    specs: Sequence[AnySpec],
+    seed_index: int,
+    learner: LearnerSpec,
+    store: RunStore,
+    provenance_fn: Callable[[], Provenance] = provenance,
+    profile_config: ProfileConfig | None = None,
+) -> list[dict[str, Any]]:
+    """Ablation H2b (ADR 0006): keuntungan AUC nyata dari memulihkan satu jenis korupsi campuran.
+
+    Untuk run campuran (seed run sama), setiap komponen dihapus satu per satu. Seed tiap langkah
+    korupsi diturunkan dari isi spesifikasinya, sehingga komponen lain disuntikkan dengan RNG yang
+    sama. Model dilatih dengan seed learner run dan dinilai pada test set bersih yang sama (BR-01,
+    BR-80). `auc_full` dihitung ulang dan harus sama dengan `auc_dirty` run (pemeriksaan analisis).
+    """
+    from ceteris.recovery import KIND_TO_FINDING, missing_row_frac
+    from ceteris.train import auc_score, fit_predict_proba
+
+    if not prepared.passed:
+        raise CorpusError(f"dataset {prepared.dataset_id} tidak lolos saringan korpus")
+    if len(specs) < 2:
+        raise ValueError("ablation hanya untuk konfigurasi campuran")
+    profile_cfg = profile_config or ProfileConfig()
+    config_id = config_id_for(specs, learner)
+    run_id = run_id_for(prepared.dataset_id, config_id, profile_config_id(profile_cfg), seed_index)
+    ids = [f"abl_{run_id}_{j}" for j in range(len(specs))]
+    if all(store.has_ablation(a) for a in ids):
+        raise RecordExistsError(f"ablation {run_id} sudah ada")
+    seed = run_seed(prepared.dataset_id, config_id, seed_index)
+    learner_seed = sub_seed(seed, "learner")
+    target = prepared.target
+    test = prepared.test_frame()
+    test_hash = frame_sha256(test)
+    if test_hash != prepared.meta["test_sha256"]:
+        raise PartitionChangedError("partisi uji berbeda dari yang dicatat saat disiapkan (BR-80)")
+    y_test = test[target].cat.codes.to_numpy()
+    _, full = dirty_train(prepared, specs, seed, learner)
+    auc_full = auc_score(y_test, fit_predict_proba(learner, full.frame, test, target, learner_seed))
+    missing_full = missing_row_frac(prepare_input(full.frame, target, profile_cfg).frame, target)
+    prov = provenance_fn()
+    rows: list[dict[str, Any]] = []
+    for j, (ablation_id, removed) in enumerate(zip(ids, specs, strict=True)):
+        rest = [s for i, s in enumerate(specs) if i != j]
+        step_start = time.perf_counter()
+        _, ablated = dirty_train(prepared, rest, seed, learner)
+        auc = auc_score(
+            y_test, fit_predict_proba(learner, ablated.frame, test, target, learner_seed)
+        )
+        row = {
+            "ablation_id": ablation_id,
+            "run_id": run_id,
+            "dataset_id": prepared.dataset_id,
+            "config_id": config_id,
+            "seed_index": int(seed_index),
+            "removed_kind": removed.kind,
+            "finding": KIND_TO_FINDING[removed.kind],
+            "auc_full": auc_full,
+            "auc_ablated": auc,
+            "gain": float(auc - auc_full),
+            "affected_row_frac_ablated": ablated.affected_row_frac,
+            "missing_row_frac_full": missing_full,
+            "seconds": time.perf_counter() - step_start,
+            "git_commit": prov.git_commit,
+            "git_dirty": prov.git_dirty,
+            "created_at": _now(),
+        }
+        if not store.has_ablation(ablation_id):
+            store.write_ablation(row)
+        rows.append(row)
+    if frame_sha256(test) != test_hash:
+        raise PartitionChangedError("partisi uji berubah selama ablation (BR-80)")
+    return rows
+
+
+# --- pilot E0 (Phase 3) dan korpus penuh E1 (Phase 4) ---
 
 
 class E0Protocol(BaseModel):
-    """Isi `configs/e0.yaml`: dataset pilot, jumlah seed, dan kandidat campuran."""
+    """Protokol eksperimen: `configs/e0.yaml` (pilot) atau `configs/e1.yaml` (korpus penuh).
+
+    `mixture_candidates` kosong berarti campuran final dari `configs/corruption.yaml`.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -562,7 +640,8 @@ class E0Protocol(BaseModel):
     estimated_seeds: int = Field(ge=2)
     estimated_seed_indices: list[int]
     baseline_d_seed_indices: list[int] = Field(default_factory=list)
-    mixture_candidates: list[list[dict[str, Any]]]
+    ablation_seed_indices: list[int] = Field(default_factory=list)
+    mixture_candidates: list[list[dict[str, Any]]] = Field(default_factory=list)
 
     def mixtures(self) -> list[tuple[AnySpec, ...]]:
         return [tuple(parse_spec(item) for item in mix) for mix in self.mixture_candidates]
@@ -576,15 +655,24 @@ def load_e0_protocol(path: Path) -> E0Protocol:
 class Task:
     """Satu pekerjaan E0: run korupsi, noise floor terukur, atau noise floor estimasi."""
 
-    kind: Literal["run", "nf_measured", "nf_estimated", "baseline_d"]
+    kind: Literal["run", "nf_measured", "nf_estimated", "baseline_d", "ablation"]
     dataset_id: int
     specs_json: str | None = None
     seed_index: int = 0
 
 
-def e0_tasks(protocol: E0Protocol, singles: Sequence[AnySpec]) -> list[Task]:
-    """Semua pekerjaan E0: konfigurasi tunggal dan kandidat campuran × seed × dataset."""
-    configs: list[tuple[AnySpec, ...]] = [(spec,) for spec in singles] + protocol.mixtures()
+def e0_tasks(
+    protocol: E0Protocol,
+    singles: Sequence[AnySpec],
+    mixtures: Sequence[tuple[AnySpec, ...]] = (),
+) -> list[Task]:
+    """Semua pekerjaan: konfigurasi tunggal dan campuran × seed × dataset.
+
+    Campuran berasal dari `mixture_candidates` protokol (E0) atau, bila kosong, dari `mixtures`
+    grid korupsi (E1). Ablation H2b hanya untuk campuran.
+    """
+    mixes = protocol.mixtures() or list(mixtures)
+    configs: list[tuple[AnySpec, ...]] = [(spec,) for spec in singles] + mixes
     tasks: list[Task] = []
     for dataset_id in protocol.datasets:
         tasks.append(Task("nf_measured", dataset_id))
@@ -600,6 +688,10 @@ def e0_tasks(protocol: E0Protocol, singles: Sequence[AnySpec]) -> list[Task]:
             tasks.extend(
                 Task("baseline_d", dataset_id, payload, i) for i in protocol.baseline_d_seed_indices
             )
+            if len(specs) > 1:
+                tasks.extend(
+                    Task("ablation", dataset_id, payload, i) for i in protocol.ablation_seed_indices
+                )
     return tasks
 
 
@@ -656,6 +748,8 @@ def _run_task(task: Task) -> tuple[Task, str, float, str | None]:
             )
         elif task.kind == "baseline_d":
             run_baseline_d(prepared, specs, task.seed_index, learner, store)
+        elif task.kind == "ablation":
+            run_ablation(prepared, specs, task.seed_index, learner, store)
         else:
             run_corruption(prepared, specs, task.seed_index, learner, store)
     except RecordExistsError:
@@ -683,12 +777,14 @@ def run_e0(
 
     protocol = load_e0_protocol(protocol_path)
     grid = load_corruption_grid(repo_root / "configs" / "corruption.yaml")
-    tasks = e0_tasks(protocol, grid.singles)
+    tasks = e0_tasks(protocol, grid.singles, grid.mixtures)
     if kinds:
         tasks = [t for t in tasks if t.kind in set(kinds)]
     # Noise floor terukur dulu (murah), lalu urutan dataset di protokol (terbesar di depan).
+    # Dalam satu dataset, run lebih dulu dari pekerjaan yang membaca run (baseline (d)).
     rank = {d: i for i, d in enumerate(protocol.datasets)}
-    tasks.sort(key=lambda t: (t.kind != "nf_measured", rank[t.dataset_id]))
+    order = {"nf_measured": 0, "run": 1, "nf_estimated": 2, "ablation": 3, "baseline_d": 4}
+    tasks.sort(key=lambda t: (t.kind != "nf_measured", rank[t.dataset_id], order[t.kind]))
     init_args = (
         str(repo_root / "configs" / "learner.yaml"),
         str(repo_root / "configs" / "experiment.yaml"),
@@ -727,6 +823,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     e0.add_argument("--store", type=Path, default=REPO_ROOT / "runs" / "e0")
     e0.add_argument("--workers", type=int, default=4)
     e0.add_argument("--kinds", nargs="*", help="hanya jenis pekerjaan ini, misalnya baseline_d")
+    e1 = sub.add_parser("e1", help="jalankan korpus penuh E1 (Phase 4)")
+    e1.add_argument("--protocol", type=Path, default=REPO_ROOT / "configs" / "e1.yaml")
+    e1.add_argument("--corpus", type=Path, default=REPO_ROOT / "data" / "corpus")
+    e1.add_argument("--store", type=Path, default=REPO_ROOT / "runs" / "e1")
+    e1.add_argument("--workers", type=int, default=4)
+    e1.add_argument("--kinds", nargs="*", help="hanya jenis pekerjaan ini, misalnya ablation")
     args = parser.parse_args(argv)
     counts = run_e0(args.protocol, args.corpus, args.store, args.workers, kinds=args.kinds)
     print(json.dumps(counts), flush=True)

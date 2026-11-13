@@ -101,14 +101,19 @@ Istilah teknis berbahasa Inggris dipertahankan bila itu bentuk yang dipakai di k
 | **Run** | Satu kombinasi (dataset, konfigurasi korupsi, seed) yang menghasilkan satu pasangan profil dan ΔAUC. | BR-84 |
 | **`config_id`** | Hash kanonik konfigurasi korupsi dan spesifikasi learner. Urutan masukan korupsi tidak berpengaruh. | BR-84 |
 | **Seed run** | Seed untuk korupsi dan pelatihan learner pada satu run, diturunkan dari (`dataset_id`, `config_id`, indeks seed). | BR-84 |
-| **Run store** | Penyimpanan offline Parquet + DuckDB untuk hasil riset. Tabel yang sudah ada:<br>• `corpus_dataset`;<br>• `experiment_config`, registry konfigurasi;<br>• `corruption_run`, satu baris per run berisi konfigurasi, profil, dan ΔAUC;<br>• `run_log`, satu baris per percobaan termasuk yang gagal, dengan commit dan seed.<br>Angka di naskah dan laporan dibaca dari sini. | BR-82, BR-84 |
+| **Run store** | Penyimpanan offline Parquet + DuckDB untuk hasil riset. Tabel yang sudah ada:<br>• `corpus_dataset`;<br>• `experiment_config`, registry konfigurasi;<br>• `corruption_run`, satu baris per run berisi konfigurasi, profil, dan ΔAUC;<br>• `run_log`, satu baris per percobaan termasuk yang gagal, dengan commit dan seed;<br>• `noise_floor`, `baseline_d_run` (Phase 3);<br>• `ablation_run`, `lodo_result` (Phase 4).<br>Angka di naskah dan laporan dibaca dari sini. | BR-82, BR-84 |
 | **Jalur riset / jalur scan** | Jalur riset: pipeline offline korpus → korupsi → profil → ΔAUC → run store → meta-model. Jalur scan: kontrak input → profil → estimasi dengan artefak yang sudah dirilis. Jalur scan tidak mengimpor kode eksperimen dan tidak melatih meta-model ([architecture.md](../architecture.md) AC-3, AC-4). | BR-16 |
 | **LODO bersarang** | Leave-one-dataset-out: setiap dataset bergiliran menjadi data uji dan tidak dipakai untuk melatih, men-tuning, atau mengkalibrasi. | BR-81 |
+| **Proper-train / dataset kalibrasi** | Pembagian dataset latih satu fold LODO bersarang: proper-train (≈ 80% dataset) untuk tuning dan pelatihan, dataset kalibrasi (≈ 20%) untuk kuantil conformal. Pembagiannya per dataset, bukan per run. | BR-22, BR-81 |
+| **Ablation (H2b)** | Run campuran yang diulang dengan satu jenis korupsi dihapus, memakai seed yang sama. Selisih AUC-nya terhadap campuran penuh adalah keuntungan nyata memulihkan jenis itu. Disimpan di `ablation_run`. | — |
 | **Baseline (a)–(d)** | Pembanding meta-model: (a) rata-rata ΔAUC, (b) skor kualitas gabungan terkalibrasi, (c) meta-fitur saja, (d) dose–response (melatih ulang pada data yang dikorupsi bertingkat). | — |
 | **RQ1–RQ4, RQ2b** | Pertanyaan penelitian: akurasi estimasi; dampak per jenis korupsi; urutan temuan; ketidakpastian dan OOD; data kotor asli. | — |
 | **E0–E4** | Eksperimen: E0 pilot, E1 akurasi, E2 dampak per jenis, E3 ketidakpastian, E4 data kotor asli dan konsistensi jalur. | — |
 | **Uji konsistensi jalur** | Pemeriksaan bahwa jalur riset dan jalur scan memberi profil dan prediksi yang sama untuk data yang sama. | BR-16 |
 | **Rencana analisis** | Dokumen bertanggal berisi uji statistik dan kriteria; dibekukan di G2. | BR-86 |
+| **Epoch** | Satu putaran eksperimen utuh: satu rencana analisis yang dibekukan, satu protokol, satu set `corpus_snapshot`, dan semua hipotesisnya dilaporkan. Refinement selalu masuk epoch berikutnya. Epoch 0 = E0–E4 menurut rencana analisis G2 ([ADR 0013](../decisions/0013-epoch-eksperimen-dan-pelestarian.md)). | BR-86 |
+| **Arsip epoch / manifest epoch** | Arsip: salinan tidak berubah dari run store, log, artefak, dan config sebuah epoch, disimpan di luar git. Manifest: daftar berkas arsip beserta SHA-256, commit, dan versi, di `docs/epochs/epoch-N/`. Setelah epoch ditutup, arsipnya hanya boleh dibaca. | AC-12 |
+| **Dataset holdout** | Dataset di luar korpus yang dipilih dan disegel sebelum refinement sebuah epoch dirancang, dan hanya dipakai untuk evaluasi konfirmatorinya. Berbeda dengan `n_holdout` di baseline (d), yaitu potongan hold-out baris di dalam satu dataset. | BR-81, BR-86 |
 
 ## 6. Proses
 

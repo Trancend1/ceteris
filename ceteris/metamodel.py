@@ -83,22 +83,77 @@ class Method(Protocol):
     def predict(self, runs: pd.DataFrame) -> np.ndarray: ...
 
 
-def fit_booster(features: pd.DataFrame, target: np.ndarray) -> lgb.Booster:
+def fit_booster(
+    features: pd.DataFrame, target: np.ndarray, params: dict[str, Any] | None = None
+) -> lgb.Booster:
+    """LightGBM regresi deterministik; `params` menimpa `META_PARAMS` (hasil tuning, G2-9)."""
     data = lgb.Dataset(features, label=target, feature_name=list(features.columns))
-    return lgb.train(META_PARAMS, data, num_boost_round=META_ROUNDS)
+    return lgb.train({**META_PARAMS, **(params or {})}, data, num_boost_round=META_ROUNDS)
+
+
+# --- tuning bersarang (G2-9, analysis-plan.md bagian 2 butir 3) ---
+
+# G2-9 (P6): 3 × 2 × 2 = 12 kombinasi, 300 ronde, grouped CV 3 lipatan per dataset.
+TUNING_GRID: tuple[dict[str, Any], ...] = tuple(
+    {"num_leaves": nl, "learning_rate": lr, "min_data_in_leaf": md}
+    for nl in (7, 15, 31)
+    for lr in (0.03, 0.1)
+    for md in (10, 40)
+)
+INNER_FOLDS = 3
+
+
+def tune(
+    runs: pd.DataFrame,
+    features: Sequence[str],
+    target: str = "delta_auc",
+    grid: Sequence[dict[str, Any]] = TUNING_GRID,
+    n_folds: int = INNER_FOLDS,
+) -> dict[str, Any]:
+    """Pilih hiperparameter dengan grouped CV per dataset, hanya pada `runs` (proper-train).
+
+    Skor = rata-rata MAE per dataset yang ditahan (unit analisis dataset, BR-85); seri dipecah
+    menurut urutan grid. Lipatan GroupKFold deterministik.
+    """
+    from sklearn.model_selection import GroupKFold
+
+    groups = runs["dataset_id"].to_numpy()
+    folds = min(n_folds, len(np.unique(groups)))
+    if folds < 2:
+        return dict(grid[0])
+    x = feature_frame(runs, features)
+    y = runs[target].to_numpy("float64")
+    splits = list(GroupKFold(n_splits=folds).split(x, groups=groups))
+    best: tuple[float, dict[str, Any]] | None = None
+    for params in grid:
+        errors: list[float] = []
+        for train_idx, test_idx in splits:
+            booster = fit_booster(x.iloc[train_idx], y[train_idx], params)
+            residual = np.abs(np.asarray(booster.predict(x.iloc[test_idx])) - y[test_idx])
+            errors.extend(pd.Series(residual).groupby(groups[test_idx]).mean().tolist())
+        score = float(np.mean(errors))
+        if best is None or score < best[0]:
+            best = (score, dict(params))
+    assert best is not None
+    return best[1]
 
 
 @dataclass
 class LightGBMMethod:
-    """Meta-model utama (semua fitur profil) atau baseline (c) (konteks dan probe)."""
+    """Meta-model utama (semua fitur profil) atau baseline (c) (konteks dan probe).
+
+    `target` = kolom yang ditaksir (ΔAUC; ΔAUC relatif untuk meta-model terpisah K7).
+    """
 
     name: str
     features: tuple[str, ...]
     booster: lgb.Booster | None = None
+    params: dict[str, Any] = field(default_factory=dict)
+    target: str = TARGET
 
     def fit(self, runs: pd.DataFrame) -> LightGBMMethod:
         self.booster = fit_booster(
-            feature_frame(runs, self.features), runs[TARGET].to_numpy("float64")
+            feature_frame(runs, self.features), runs[self.target].to_numpy("float64"), self.params
         )
         return self
 
@@ -106,6 +161,32 @@ class LightGBMMethod:
         if self.booster is None:
             raise RuntimeError(f"{self.name} belum dilatih")
         return np.asarray(self.booster.predict(feature_frame(runs, self.features)))
+
+
+@dataclass
+class LinearMethod:
+    """Sanity check: regresi linear pada fitur profil yang sama (dilaporkan, tidak diuji)."""
+
+    name: str = "sanity_linear"
+    coef: np.ndarray | None = None
+    intercept: float = 0.0
+
+    def fit(self, runs: pd.DataFrame) -> LinearMethod:
+        from sklearn.linear_model import LinearRegression
+
+        model = LinearRegression().fit(
+            feature_frame(runs, FEATURES).to_numpy("float64"), runs[TARGET].to_numpy("float64")
+        )
+        self.coef = np.asarray(model.coef_, dtype="float64")
+        self.intercept = float(model.intercept_)
+        return self
+
+    def predict(self, runs: pd.DataFrame) -> np.ndarray:
+        if self.coef is None:
+            raise RuntimeError("sanity linear belum dilatih")
+        return np.asarray(feature_frame(runs, FEATURES).to_numpy("float64") @ self.coef) + (
+            self.intercept
+        )
 
 
 @dataclass
@@ -410,3 +491,171 @@ def lodo_coverage_summary(lodo: pd.DataFrame) -> dict[str, float]:
         "width_median": float(np.median(widths)),
         "n_datasets": float(len(coverages)),
     }
+
+
+# --- artefak v1 (Phase 4, gate G3) ---
+
+RELATIVE_TARGET = "delta_auc_relative"
+
+
+def corpus_snapshot_tag(corpus: pd.DataFrame) -> str:
+    """Tag `corpus_snapshot`: jumlah dataset dan hash isi partisi (D0, latih, uji) tiap dataset."""
+    import hashlib
+    import json
+
+    rows = corpus.sort_values("dataset_id")[
+        ["dataset_id", "d0_sha256", "train_sha256", "test_sha256"]
+    ].to_dict("records")
+    payload = json.dumps([{k: str(v) for k, v in row.items()} for row in rows], sort_keys=True)
+    digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
+    return f"openml-cc18:{len(rows)}:{digest}"
+
+
+def nested_coverage_summary(lodo: pd.DataFrame) -> dict[str, float]:
+    """Coverage dan lebar interval LODO bersarang per dataset (kuantil dari kalibrasi fold)."""
+    inside = (lodo["actual"] >= lodo["lo"]) & (lodo["actual"] <= lodo["hi"])
+    frame = lodo.assign(inside=inside, width=lodo["hi"] - lodo["lo"])
+    per_dataset = frame.groupby("dataset_id")[["inside", "width"]].mean()
+    coverage = per_dataset["inside"]
+    return {
+        "coverage_median": float(coverage.median()),
+        "coverage_min": float(coverage.min()),
+        "coverage_max": float(coverage.max()),
+        "share_datasets_85_95": float(coverage.between(0.85, 0.95).mean()),
+        "width_median": float(per_dataset["width"].median()),
+        "n_datasets": float(len(per_dataset)),
+    }
+
+
+def _calibration(rows: pd.DataFrame) -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "dataset_id": rows["dataset_id"].astype("int64").to_numpy(),
+            "score": (rows["actual"] - rows["predicted"]).abs().to_numpy("float64"),
+        }
+    )
+
+
+def build_artifact_v1(
+    runs: pd.DataFrame,
+    lodo: pd.DataFrame,
+    learner: LearnerSpec,
+    out_dir: Path,
+    *,
+    version: str,
+    corpus_snapshot: str,
+    ood_percentile: float,
+    finding_order: str,
+    relative: bool,
+    experimental: bool,
+    noise_floor_statistic: NoiseFloorStatistic = "pairwise_mean",
+    noise_floor_seeds: int = 5,
+    ood_k: int = 5,
+) -> ArtifactMetadata:
+    """Artefak v1: meta-model korpus penuh, kalibrator, referensi OOD, dan (opsional) ΔAUC relatif.
+
+    - Hiperparameter dipilih dengan grouped CV per dataset atas seluruh korpus (grid G2-9).
+    - Skor kalibrasi conformal = residu absolut LODO bersarang (`lodo_result`): setiap skor
+      berasal dari model fold yang tidak melihat datasetnya (BR-22). Kuantil berbobot dataset.
+    - Ringkasan coverage = coverage LODO bersarang per dataset (bukti H3).
+    - Referensi OOD = profil seluruh run; ambang = persentil skor OOD leave-one-dataset-out
+      (hal terbuka #3, diputuskan di G3).
+    """
+    from ceteris.uncertainty import lodo_ood_scores
+
+    if (runs["profile_schema_version"] != PROFILE_SCHEMA_VERSION).any():
+        raise ValueError("semua run harus memakai skema profil yang sama dengan kode")
+    meta_rows = lodo[lodo["method"] == "metamodel"]
+    if set(meta_rows["run_id"]) != set(runs["run_id"]):
+        raise ValueError("lodo_result meta-model harus mencakup tepat semua run korpus")
+    calibration = _calibration(meta_rows)
+    quantile = weighted_conformal_quantile(
+        calibration["score"].tolist(), calibration["dataset_id"].tolist()
+    )
+    params = tune(runs, FEATURES)
+    profiles = feature_frame(runs, FEATURES)
+    booster = fit_booster(profiles, runs[TARGET].to_numpy("float64"), params)
+    ood_scores = lodo_ood_scores(profiles, runs["dataset_id"].tolist(), FEATURES, ood_k)
+    booster_rel = None
+    cal_rel = None
+    q_rel = None
+    if relative:
+        finite = runs[np.isfinite(runs[RELATIVE_TARGET].to_numpy("float64"))]
+        rel_rows = lodo[lodo["method"] == "metamodel_relative"]
+        if set(rel_rows["run_id"]) != set(finite["run_id"]):
+            raise ValueError("lodo_result metamodel_relative harus mencakup semua run ΔAUC relatif")
+        cal_rel = _calibration(rel_rows)
+        q_rel = weighted_conformal_quantile(
+            cal_rel["score"].tolist(), cal_rel["dataset_id"].tolist()
+        )
+        rel_params = tune(finite, FEATURES, target=RELATIVE_TARGET)
+        booster_rel = fit_booster(
+            feature_frame(finite, FEATURES), finite[RELATIVE_TARGET].to_numpy("float64"), rel_params
+        )
+    metadata = ArtifactMetadata(
+        version=version,
+        experimental=experimental,
+        profile_schema_version=PROFILE_SCHEMA_VERSION,
+        learner_spec_version=learner.version,
+        learner_spec_sha256=learner_sha256(learner),
+        corpus_snapshot=corpus_snapshot,
+        trained_at=datetime.now(UTC).isoformat(),
+        datasets=sorted(int(d) for d in runs["dataset_id"].unique()),
+        n_runs=len(runs),
+        features=list(FEATURES),
+        conformal_quantile=quantile,
+        coverage_summary=nested_coverage_summary(meta_rows),
+        ood_k=ood_k,
+        ood_threshold=ood_threshold(ood_scores, ood_percentile),
+        ood_threshold_basis=f"p{ood_percentile:g} skor OOD leave-one-dataset-out, k={ood_k}",
+        noise_floor_statistic=noise_floor_statistic,
+        noise_floor_seeds=noise_floor_seeds,
+        meta_params={k: v for k, v in params.items()},
+        calibration_basis="residu absolut LODO bersarang (lodo_result), bobot sama per dataset",
+        relative_quantile=q_rel,
+        finding_order="volume" if finding_order == "volume" else "potential",
+    )
+    save_artifact(out_dir, metadata, booster, calibration, profiles, learner, booster_rel, cal_rel)
+    return metadata
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    import argparse
+    import json
+
+    from ceteris.store import REPO_ROOT, RunStore
+    from ceteris.train import load_learner_spec
+
+    parser = argparse.ArgumentParser(prog="python -m ceteris.metamodel")
+    sub = parser.add_subparsers(dest="command", required=True)
+    build = sub.add_parser("build", help="bangun artefak v1 dari run store dan lodo_result")
+    build.add_argument("--store", type=Path, required=True)
+    build.add_argument("--out", type=Path, required=True)
+    build.add_argument("--version", required=True)
+    build.add_argument("--ood-percentile", type=float, required=True)
+    build.add_argument("--finding-order", choices=["potential", "volume"], required=True)
+    build.add_argument("--relative", action="store_true", help="sertakan meta-model ΔAUC relatif")
+    build.add_argument(
+        "--final", action="store_true", help="tanpa label eksperimental (hanya setelah G3)"
+    )
+    args = parser.parse_args(argv)
+    store = RunStore(args.store)
+    runs = store.read("corruption_run").sort_values("run_id").reset_index(drop=True)
+    metadata = build_artifact_v1(
+        runs,
+        store.read("lodo_result"),
+        load_learner_spec(REPO_ROOT / "configs" / "learner.yaml"),
+        args.out,
+        version=args.version,
+        corpus_snapshot=corpus_snapshot_tag(store.read("corpus_dataset")),
+        ood_percentile=args.ood_percentile,
+        finding_order=args.finding_order,
+        relative=args.relative,
+        experimental=not args.final,
+    )
+    print(json.dumps(metadata.model_dump(), indent=1, ensure_ascii=False), flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

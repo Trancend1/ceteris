@@ -127,6 +127,8 @@ Hal yang dibawa ke Phase 3:
 
 ### Phase 4 — Korpus penuh dan artefak v1
 
+**Status: selesai; G3 disetujui pemilik repo 14/11/2026.** E1, LODO bersarang, laporan H1–H5, register klaim, dan artefak final `1.0.0` selesai. H1a, H1b, H2b, H4 (lemah), dan H5 lolos; H2 dan H3 gagal ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md), [register klaim](claims-register.md)).
+
 | | |
 | --- | --- |
 | Scope | Pelatihan pada korpus penuh; F-S08, F-S10 (penuh, termasuk skor OOD), F-S11 evaluator LODO bersarang, F-S12 potensi pemulihan |
@@ -137,11 +139,20 @@ Hal yang dibawa ke Phase 3:
 
 ### Phase 5 — Validasi data kotor asli dan tinjauan H1
 
+**Status: selesai; G4 disetujui pemilik repo 14/11/2026.** Epoch 0 ditutup dengan dua salinan arsip.
+- E4 tidak memenuhi kriteria galat, sehingga KL-10 ditolak.
+- BR-16 lolos.
+- Holdout epoch 1 tersegel (15 dataset).
+- Epoch 0 ditutup.
+- H1 lolos, sehingga tinjauan H1 tidak memicu fallback `product.md` 5.2.
+
+Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 0](epochs/epoch-0/closure.md).
+
 | | |
 | --- | --- |
-| Scope | E4 pada 3–5 pasangan data kotor-bersih nyata; uji konsistensi jalur akhir |
-| Deliverable | Laporan validasi eksternal; pembaruan laporan akurasi; `ScanReport` `schema_version` 1.0 yang dibekukan untuk dikonsumsi produk |
-| Kriteria selesai | Galat ≤ 2× MAE LODO pada pasangan nyata, atau hasil negatif dilaporkan apa adanya; jalur riset dan jalur scan konsisten (BR-16); klaim akurasi pada data nyata hanya tampil sesuai bukti |
+| Scope | E4 pada 3–5 pasangan data kotor-bersih nyata; uji konsistensi jalur akhir; penyegelan dataset holdout; penutupan epoch 0 ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)). X1 dipindah ke epoch 1 (ADR 0013 butir 3) |
+| Deliverable | Laporan validasi eksternal; pembaruan laporan akurasi; `ScanReport` `schema_version` 1.0 yang dibekukan untuk dikonsumsi produk; `docs/epochs/epoch-0/` (manifest, log insight, laporan penutupan) dan arsip epoch 0 di luar git |
+| Kriteria selesai | Galat ≤ 2× MAE LODO pada pasangan nyata, atau hasil negatif dilaporkan apa adanya; jalur riset dan jalur scan konsisten (BR-16); klaim akurasi pada data nyata hanya tampil sesuai bukti; daftar holdout disegel dan epoch 0 ditutup menurut kriteria tutup ADR 0013 butir 6 |
 | **Gerbang G4** | Lihat `product.md` 5.1 |
 | **Tinjauan H1** | Bila H1 gagal, lakukan bagian 5.2 `product.md` (klaim diganti "indikasi risiko" tanpa angka) dan tinjau ulang urutan Sprint C–D sebelum melanjutkan |
 
@@ -216,8 +227,10 @@ Hal yang dibawa ke Phase 3:
 | **Ditutup [K] 12/11/2026:** hiperparameter probe kebocoran dan ambang tetap 0,99 (BR #6, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
 | **Ditutup [K] 12/11/2026:** `bagging_fraction` 0,8 untuk learner acuan (BR #11, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
 | **Ditutup [K] 12/11/2026:** statistik noise floor dan seed probe (BR #1), kuantil conformal (BR #4), pemotongan interval (BR #5), dan mesin komputasi (arsitektur #7) ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | Phase 3 (G2) |
-| Inferensi tipe kolom input CSV (BR #12) | Phase 5 (sebelum E4) |
-| Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | Phase 4 (G3) |
+| Inferensi tipe kolom input CSV (BR #12) | **Ditutup [K] 14/11/2026** ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)) |
+| Lokasi arsip epoch dan jumlah dataset holdout | **Ditutup [K] 14/11/2026** ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)) |
+| Posisi epoch 1 terhadap Sprint C (ADR 0013) | Tinjauan H1 akhir Phase 5 (G4) |
+| Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | **Ditutup di G3** (ADR 0012) |
 | Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |
 | Label status UI, presisi angka, tampilan histori | Phase 9 (G6) |
 | Perilaku gate saat layanan mati (`fail_mode`), keputusan gate untuk scan ditolak (BR #8), tabel effort (BR #9) | Di luar rencana ini (sebelum R2) |

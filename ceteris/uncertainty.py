@@ -74,6 +74,10 @@ class OODReference:
             _knn_mean_distance(self.standardise(np.asarray(vector)), self.points, self.k)[0]
         )
 
+    def scores(self, matrix: np.ndarray) -> np.ndarray:
+        """Skor OOD untuk banyak profil sekaligus (baris = profil, kolom = `features`)."""
+        return _knn_mean_distance(self.standardise(matrix), self.points, self.k)
+
 
 def fit_ood_reference(profiles: pd.DataFrame, features: Sequence[str], k: int) -> OODReference:
     """Standarisasi z per fitur dari profil referensi; fitur konstan memakai skala 1."""

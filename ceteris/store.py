@@ -166,6 +166,46 @@ BASELINE_D_RUN = pa.schema(
     ]
 )
 
+# Ablation per komponen campuran (H2b, ADR 0006): satu baris per (run campuran, jenis yang
+# dipulihkan). Kunci = `ablation_id`.
+ABLATION_RUN = pa.schema(
+    [
+        ("ablation_id", pa.string()),
+        ("run_id", pa.string()),
+        ("dataset_id", pa.int64()),
+        ("config_id", pa.string()),
+        ("seed_index", pa.int64()),
+        ("removed_kind", pa.string()),
+        ("finding", pa.string()),
+        ("auc_full", pa.float64()),  # AUC model data kotor campuran penuh (= auc_dirty run)
+        ("auc_ablated", pa.float64()),  # AUC setelah satu jenis tidak disuntikkan
+        ("gain", pa.float64()),  # auc_ablated − auc_full: keuntungan nyata memulihkan jenis itu
+        ("affected_row_frac_ablated", pa.float64()),
+        ("missing_row_frac_full", pa.float64()),  # volume temuan missing pada data kotor penuh
+        ("seconds", pa.float64()),
+        ("git_commit", pa.string()),
+        ("git_dirty", pa.bool_()),
+        ("created_at", pa.string()),
+    ]
+)
+
+# Prediksi LODO bersarang (F-S11, BR-81): satu berkas per (metode, dataset uji).
+LODO_RESULT = pa.schema(
+    [
+        ("run_id", pa.string()),
+        ("dataset_id", pa.int64()),
+        ("method", pa.string()),
+        ("actual", pa.float64()),
+        ("predicted", pa.float64()),
+        ("lo", pa.float64()),
+        ("hi", pa.float64()),
+        ("ood_score", pa.float64()),
+        ("fold_params_json", pa.string()),
+        ("calibration_datasets_json", pa.string()),
+        ("created_at", pa.string()),
+    ]
+)
+
 TABLES: dict[str, pa.Schema] = {
     "corpus_dataset": CORPUS_DATASET,
     "experiment_config": EXPERIMENT_CONFIG,
@@ -173,6 +213,8 @@ TABLES: dict[str, pa.Schema] = {
     "run_log": RUN_LOG,
     "noise_floor": NOISE_FLOOR,
     "baseline_d_run": BASELINE_D_RUN,
+    "ablation_run": ABLATION_RUN,
+    "lodo_result": LODO_RESULT,
 }
 
 
@@ -335,6 +377,27 @@ class RunStore:
         if not row.get("git_commit"):
             raise StoreError("baseline_d_run wajib mencatat git_commit")
         self._write("baseline_d_run", str(row["run_id"]), row, overwrite=False)
+
+    def has_ablation(self, ablation_id: str) -> bool:
+        return self._path("ablation_run", ablation_id).exists()
+
+    def write_ablation(self, row: dict[str, Any]) -> None:
+        if not row.get("git_commit"):
+            raise StoreError("ablation_run wajib mencatat git_commit")
+        self._write("ablation_run", str(row["ablation_id"]), row, overwrite=False)
+
+    def write_lodo_result(self, key: str, frame: pd.DataFrame) -> None:
+        """Tulis prediksi LODO satu (metode, dataset uji); ditimpa bila dievaluasi ulang."""
+        expected = set(LODO_RESULT.names)
+        if set(frame.columns) != expected:
+            raise StoreError(f"lodo_result: kolom harus {sorted(expected)}")
+        path = self._path("lodo_result", key)
+        tmp = path.with_suffix(".tmp")
+        table = pa.Table.from_pandas(
+            frame[LODO_RESULT.names], schema=LODO_RESULT, preserve_index=False
+        )
+        pq.write_table(table, tmp)
+        os.replace(tmp, path)
 
     def has_noise_floor(self, nf_id: str) -> bool:
         return self._path("noise_floor", nf_id).exists()

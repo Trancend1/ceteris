@@ -1,0 +1,47 @@
+# Protokol korpus penuh E1 (Phase 4, execution-plan.md). Mengikuti rencana analisis yang dibekukan
+# di G2 (analysis-plan.md, ADR 0011): grid korupsi 1.0.0 (45 tunggal + 10 campuran final dari
+# configs/corruption.yaml), 5 seed per konfigurasi, noise floor terukur 10 seed, noise floor
+# estimasi 5 seed probe (G2-1), baseline (d) pada seed index 0 (G2-7), dan ablation campuran
+# untuk H2b (ADR 0006) pada kelima seed.
+version: "1.0.0"
+# 31 dataset lolos saringan Phase 1. Urutan = urutan eksekusi: proxy biaya terbesar di depan
+# (baris × kolom × kelas efektif, ceteris.evaluate.cost_proxy) agar beban paralel merata.
+datasets:
+  - 40979  # mfeat-pixel: 2000 baris, 240 kolom, 10 kelas
+  - 12     # mfeat-factors: 2000 baris, 216 kolom, 10 kelas
+  - 1486   # nomao: 34465 baris, 118 kolom, 2 kelas
+  - 28     # optdigits: 5620 baris, 64 kolom, 10 kelas
+  - 40499  # texture: 5500 baris, 40 kolom, 11 kelas
+  - 1475   # first-order-theorem-proving: 6118 baris, 51 kolom, 6 kelas
+  - 32     # pendigits: 10992 baris, 16 kolom, 10 kelas
+  - 40670  # dna: 3186 baris, 180 kolom, 3 kelas
+  - 4538   # GesturePhaseSegmentationProcessed: 9873 baris, 32 kolom, 5 kelas
+  - 14     # mfeat-fourier: 2000 baris, 76 kolom, 10 kelas
+  - 182    # satimage: 6430 baris, 36 kolom, 6 kelas
+  - 1485   # madelon: 2600 baris, 500 kolom, 2 kelas
+  - 16     # mfeat-karhunen: 2000 baris, 64 kolom, 10 kelas
+  - 22     # mfeat-zernike: 2000 baris, 47 kolom, 10 kelas
+  - 41027  # jungle_chess_2pcs_raw_endgame_complete: 44819 baris, 6 kolom, 3 kelas
+  - 1461   # bank-marketing: 45211 baris, 16 kolom, 2 kelas
+  - 1590   # adult: 48842 baris, 14 kolom, 2 kelas
+  - 46     # splice: 3190 baris, 60 kolom, 3 kelas
+  - 1497   # wall-robot-navigation: 5456 baris, 24 kolom, 4 kelas
+  - 151    # electricity: 45312 baris, 8 kolom, 2 kelas
+  - 4534   # PhishingWebsites: 11055 baris, 30 kolom, 2 kelas
+  - 40984  # segment: 2310 baris, 18 kolom, 7 kelas
+  - 44     # spambase: 4601 baris, 57 kolom, 2 kelas
+  - 1053   # jm1: 10885 baris, 21 kolom, 2 kelas
+  - 1487   # ozone-level-8hr: 2534 baris, 72 kolom, 2 kelas
+  - 18     # mfeat-morphological: 2000 baris, 6 kolom, 10 kelas
+  - 3      # kr-vs-kp: 3196 baris, 36 kolom, 2 kelas
+  - 40701  # churn: 5000 baris, 20 kolom, 2 kelas
+  - 1067   # kc1: 2109 baris, 21 kolom, 2 kelas
+  - 1489   # phoneme: 5404 baris, 5 kolom, 2 kelas
+  - 40983  # wilt: 4839 baris, 5 kolom, 2 kelas
+seeds_per_config: 5
+measured_seeds: 10                    # G2-1: noise floor terukur 10 seed
+estimated_seeds: 5                    # G2-1: noise floor estimasi 5 seed probe (sama dengan scan)
+estimated_seed_indices: [0]           # noise floor estimasi pada run seed index 0 tiap konfigurasi
+baseline_d_seed_indices: [0]          # G2-7: 1 seed × semua konfigurasi × semua dataset
+ablation_seed_indices: [0, 1, 2, 3, 4]  # H2b: ablation tiap run campuran
+# mixture_candidates kosong: campuran final dari configs/corruption.yaml (G2-3).
