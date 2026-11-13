@@ -15,7 +15,7 @@ import argparse
 import hashlib
 import json
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -25,9 +25,14 @@ import pandas as pd
 
 from ceteris.artifact import Artifact, load_artifact
 from ceteris.corpus import (
+    CC18_SUITE_ID,
+    OPENML_API,
+    OpenMLFetcher,
     RawDataset,
     SplitSpec,
+    _http_get_json,
     frame_sha256,
+    list_suite_dataset_ids,
     load_experiment_config,
     make_split,
     prepare_dataset,
@@ -167,16 +172,23 @@ def load_pair(candidate: Candidate, root: Path, split: SplitSpec) -> Pair:
             "n_test": int(np.sum(test)),
             "n_features": int(clean_base.shape[1] - 1),
             "n_classes": int(clean_base[target].nunique()),
-            "changed_train_cells": int(
-                (
-                    dirty_base.loc[train].astype(str).to_numpy()
-                    != clean_base.loc[train].astype(str).to_numpy()
-                ).sum()
+            "changed_train_cells": changed_cells(
+                dirty_base.loc[train].reset_index(drop=True),
+                clean_base.loc[train].reset_index(drop=True),
             ),
         },
     )
     pair.meta["test_sha256"] = frame_sha256(pair.clean_test)
     return pair
+
+
+def changed_cells(dirty: pd.DataFrame, clean: pd.DataFrame) -> int:
+    """Jumlah sel yang berbeda; dua sel kosong dianggap sama (deskriptif, bukan kriteria)."""
+    total = 0
+    for name in dirty.columns:
+        a, b = dirty[name].astype(object), clean[name].astype(object)
+        total += int((~((a == b) | (a.isna() & b.isna()))).sum())
+    return total
 
 
 def _profile_check(
@@ -398,6 +410,110 @@ def paths_report(
     return payload
 
 
+# --- dataset holdout epoch 1 (ADR 0013 butir 5, ADR 0014 butir 3) ---
+
+HOLDOUT_STUDIES = (14, 218, 271)
+HOLDOUT_TARGET = 15
+
+
+def holdout_pool(
+    corpus_names: Sequence[str], fetch_json: Callable[[str], dict[str, Any]] | None = None
+) -> list[dict[str, Any]]:
+    """Kandidat holdout yang lolos pra-saring kualitas OpenML; data tidak diunduh.
+
+    Kumpulan = studi 14, 218, 271 − OpenML-CC18 − nama dataset korpus epoch 0.
+    """
+    getter = fetch_json or _http_get_json
+    cfg = load_experiment_config(REPO_ROOT / "configs" / "experiment.yaml").filter
+    pool: set[int] = set()
+    for study in HOLDOUT_STUDIES:
+        pool.update(list_suite_dataset_ids(study, getter))
+    pool -= set(list_suite_dataset_ids(CC18_SUITE_ID, getter))
+    excluded = {name.lower() for name in corpus_names}
+    ids = ",".join(str(i) for i in sorted(pool))
+    listing = getter(f"{OPENML_API}/data/list/data_id/{ids}/limit/1000")["data"]["dataset"]
+    rows = []
+    for item in listing:
+        q = {d["name"]: float(d["value"]) for d in item.get("quality", []) if d.get("value")}
+        n, f = q.get("NumberOfInstances", 0.0), q.get("NumberOfFeatures", 0.0) - 1
+        k, minority = q.get("NumberOfClasses", 0.0), q.get("MinorityClassSize", 0.0)
+        missing = q.get("NumberOfMissingValues", 0.0) / max(n * max(f, 1.0), 1.0)
+        reasons = []
+        if item.get("status") != "active":
+            reasons.append(f"status {item.get('status')}")
+        if str(item["name"]).lower() in excluded:
+            reasons.append("nama sama dengan dataset korpus")
+        if not cfg.min_rows <= n <= cfg.max_rows:
+            reasons.append(f"rows {n:.0f}")
+        if f > cfg.max_features:
+            reasons.append(f"features {f:.0f}")
+        if not cfg.min_classes <= k <= cfg.max_classes:
+            reasons.append(f"classes {k:.0f}")
+        if minority < cfg.min_class_count:
+            reasons.append(f"minority {minority:.0f}")
+        if missing > cfg.max_missing_cell_frac:
+            reasons.append(f"missing {missing:.4f}")
+        rows.append(
+            {
+                "dataset_id": int(item["did"]),
+                "name": str(item["name"]),
+                "version": int(item["version"]),
+                "prescreen_passed": not reasons,
+                "prescreen_reasons": reasons,
+            }
+        )
+    return sorted(rows, key=lambda r: r["dataset_id"])
+
+
+def seal_holdout(root: Path, corpus_root: Path, out: Path) -> dict[str, Any]:
+    """Pilih dan segel holdout: undian berseed, lalu saringan penuh sampai 15 lolos.
+
+    Yang dihitung hanya atribut saringan (`prepare_dataset`); tidak ada korupsi atau profil.
+    """
+    cfg = load_experiment_config(REPO_ROOT / "configs" / "experiment.yaml")
+    corpus_names = [
+        json.loads(p.read_text(encoding="utf-8"))["name"]
+        for p in Path(corpus_root).glob("*/meta.json")
+        if json.loads(p.read_text(encoding="utf-8"))["passed"]
+    ]
+    pool = holdout_pool(corpus_names)
+    eligible = [r["dataset_id"] for r in pool if r["prescreen_passed"]]
+    rng = np.random.default_rng(derive_seed("holdout", "epoch-1"))
+    order = [int(i) for i in rng.permutation(sorted(eligible))]
+    fetcher = OpenMLFetcher(Path(root) / "_openml")
+    tried: list[dict[str, Any]] = []
+    sealed: list[dict[str, Any]] = []
+    for dataset_id in order:
+        if len(sealed) == HOLDOUT_TARGET:
+            break
+        try:
+            prepared = prepare_dataset(dataset_id, fetcher, Path(root), cfg.filter, cfg.split)
+        except Exception as err:  # unduhan atau target tidak tunggal: dicatat, tidak dipakai
+            tried.append({"dataset_id": dataset_id, "passed": False, "reasons": [repr(err)]})
+            continue
+        keys = ("name", "version", "passed", "reasons", "n_rows", "n_features", "n_classes")
+        entry = {"dataset_id": dataset_id, **{k: prepared.meta[k] for k in keys}}
+        tried.append(entry)
+        if prepared.passed:
+            hashes = ("source_checksum", "licence", "split_seed", "d0_sha256", "train_sha256")
+            sealed.append({**entry, **{k: prepared.meta[k] for k in (*hashes, "test_sha256")}})
+    payload = {
+        "epoch": 1,
+        "rule": "ADR 0013 butir 5; ADR 0014 butir 3",
+        "seed": derive_seed("holdout", "epoch-1"),
+        "studies": list(HOLDOUT_STUDIES),
+        "target_count": HOLDOUT_TARGET,
+        "sealed_count": len(sealed),
+        "shortfall": max(0, HOLDOUT_TARGET - len(sealed)),
+        "sealed": sealed,
+        "tried": tried,
+        "pool": pool,
+    }
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    Path(out).write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    return payload
+
+
 class _NoFetch:
     """Dataset korpus harus sudah disiapkan; tidak ada unduhan ulang."""
 
@@ -429,6 +545,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     e4.add_argument("--artifact", type=Path, default=REPO_ROOT / "artifacts" / "metamodel-1.0.0")
     e4.add_argument("--e1-report", type=Path, default=REPO_ROOT / "runs" / "e1" / "report.json")
     e4.add_argument("--out", type=Path, default=REPO_ROOT / "runs" / "e4")
+    hold = sub.add_parser("holdout", help="pilih dan segel holdout epoch 1 (ADR 0014)")
+    hold.add_argument("--root", type=Path, default=REPO_ROOT / "data" / "holdout-epoch-1")
+    hold.add_argument("--corpus", type=Path, default=REPO_ROOT / "data" / "corpus")
+    hold.add_argument(
+        "--out", type=Path, default=REPO_ROOT / "docs" / "epochs" / "epoch-0" / "holdout.json"
+    )
     paths = sub.add_parser("paths", help="uji konsistensi jalur akhir pada korpus (BR-16)")
     paths.add_argument("--store", type=Path, default=REPO_ROOT / "runs" / "e1")
     paths.add_argument("--corpus", type=Path, default=REPO_ROOT / "data" / "corpus")
@@ -437,6 +559,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "e4":
         payload = e4_report(args.root, args.artifact, args.e1_report, args.out)
+    elif args.command == "holdout":
+        payload = seal_holdout(args.root, args.corpus, args.out)
+        payload = {k: v for k, v in payload.items() if k not in {"pool", "tried"}}
     else:
         payload = paths_report(args.store, args.corpus, args.artifact, args.out)
         payload = {k: v for k, v in payload.items() if k != "datasets"}

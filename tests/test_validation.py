@@ -68,3 +68,62 @@ def test_pair_without_clean_version_or_alignment_is_ineligible(tmp_path: Path) -
 def test_candidates_follow_the_pre_registered_order() -> None:
     names = [c.name for c in CANDIDATES]
     assert names == ["Company", "University", "Movie", "Restaurant", "Clothing", "Citation"]
+
+
+def test_changed_cells_treats_two_missing_cells_as_equal() -> None:
+    from ceteris.validation import changed_cells
+
+    dirty = pd.DataFrame({"a": ["x", None, "z"], "b": [1.0, float("nan"), 3.0]})
+    clean = pd.DataFrame({"a": ["x", None, "Z"], "b": [1.0, float("nan"), 4.0]})
+    assert changed_cells(dirty, clean) == 2
+
+
+def test_holdout_pool_excludes_cc18_and_corpus_names_before_download() -> None:
+    """ADR 0014 butir 3: pra-saring hanya dari kualitas OpenML."""
+    from ceteris.validation import holdout_pool
+
+    def quality(n: int, f: int, k: int, minority: int, missing: int) -> list[dict[str, str]]:
+        values = {
+            "NumberOfInstances": n,
+            "NumberOfFeatures": f,
+            "NumberOfClasses": k,
+            "MinorityClassSize": minority,
+            "NumberOfMissingValues": missing,
+        }
+        return [{"name": key, "value": str(v)} for key, v in values.items()]
+
+    listing = [
+        {
+            "did": 1,
+            "name": "ok",
+            "version": 1,
+            "status": "active",
+            "quality": quality(3000, 11, 2, 900, 0),
+        },
+        {
+            "did": 2,
+            "name": "Small",
+            "version": 1,
+            "status": "active",
+            "quality": quality(500, 11, 2, 200, 0),
+        },
+        {
+            "did": 3,
+            "name": "JM1",
+            "version": 1,
+            "status": "active",
+            "quality": quality(3000, 11, 2, 900, 0),
+        },
+    ]
+
+    def fake(url: str) -> dict:
+        if url.endswith("/study/99"):
+            return {"study": {"data": {"data_id": [4]}}}
+        if "/study/" in url:
+            return {"study": {"data": {"data_id": [1, 2, 3, 4]}}}
+        assert "data_id/1,2,3" in url  # anggota CC18 (4) sudah dikeluarkan
+        return {"data": {"dataset": listing}}
+
+    rows = holdout_pool(["jm1"], fake)
+    passed = {r["dataset_id"]: r["prescreen_passed"] for r in rows}
+    assert passed == {1: True, 2: False, 3: False}
