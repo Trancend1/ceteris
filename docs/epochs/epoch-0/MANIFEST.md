@@ -7,7 +7,28 @@ Manifest arsip epoch 0 ([ADR 0013](../../decisions/0013-epoch-eksperimen-dan-pel
 | Salinan | Lokasi | Status per 14/11/2026 |
 | --- | --- | --- |
 | Lokal | `D:\DevSpace\Archive\ceteris\epoch-0\` | Dibuat dan diverifikasi |
-| Awan | Google Drive milik pemilik repo, folder "Ceteris Epoch Experiment". Tautan sengaja tidak dicatat di repo publik ini karena arsip memuat data CleanML yang lisensinya tidak tercantum (ADR 0014 butir 1) | Folder dibuat; **berkas belum terunggah** per 14/11/2026, sehingga belum diverifikasi |
+| Awan | Google Drive milik pemilik repo, folder "Ceteris Epoch Experiment". Tautan sengaja tidak dicatat di repo publik ini karena arsip memuat data CleanML yang lisensinya tidak tercantum (ADR 0014 butir 1) | Terunggah 14/11/2026 sebagai lima zip (tabel di bawah). Ukuran tiap zip di Drive sama persis dengan zip lokal |
+
+## Salinan awan: lima zip
+
+Kelima zip bersama-sama memuat seluruh 36.600 berkas arsip dengan path relatif yang sama.
+
+**Cara memulihkan:**
+1. Ekstrak kelimanya ke satu folder.
+2. Cocokkan SHA-256 setiap zip dengan tabel di bawah.
+3. Jalankan `sha256sum -c SHA256SUMS.txt` di folder tersebut.
+
+| Zip | Isi | Byte | SHA-256 |
+| --- | --- | --- | --- |
+| `epoch-0-runs-e0.zip` | `runs/e0` | 15.622.578 | `d76d1768e52e38180a1b5c32e889a8b13454101cf53fbe8e631c9b142194f131` |
+| `epoch-0-runs-e1.zip` | `runs/e1` | 89.578.147 | `8730e94c19d794237b58c0c2c4423a727d5f1cfe8d43b69b2bfccac9ef75c545` |
+| `epoch-0-runs-e4-logs.zip` | `runs/e4` dan tujuh log runner | 25.304.125 | `86a6f6e3198203b5a9e6fb0e947c56d3a8b1ef6a7b19a7c8a1537d703fa8f83b` |
+| `epoch-0-artifacts-snapshot.zip` | `artifacts/`, `repo-snapshot/`, `SHA256SUMS.txt` | 3.730.526 | `5bc1dd4e74ac5b9dcf390ca77ef5c4882d3fcc02665ff6fdfb08a9551e2ae138` |
+| `epoch-0-sources.zip` | `sources/` | 228.533.706 | `422717581a985814f2b12c54c903e0dce10338719ab77d8148bf857ec79060f1` |
+
+**Verifikasi salinan awan 14/11/2026:**
+- Ukuran kelima zip di Drive dibaca lewat API Drive dan sama dengan zip lokal.
+- SHA-256 isi zip di Drive tidak dapat dibaca tanpa mengunduhnya. Pemeriksaan hash per berkas dilakukan saat pemulihan (langkah 2 dan 3).
 
 ## Integritas
 

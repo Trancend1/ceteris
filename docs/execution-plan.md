@@ -139,11 +139,11 @@ Hal yang dibawa ke Phase 3:
 
 ### Phase 5 — Validasi data kotor asli dan tinjauan H1
 
-**Status: selesai; G4 disetujui pemilik repo 14/11/2026.** Salinan arsip awan epoch 0 masih menunggu unggahan.
+**Status: selesai; G4 disetujui pemilik repo 14/11/2026.** Epoch 0 ditutup dengan dua salinan arsip.
 - E4 tidak memenuhi kriteria galat, sehingga KL-10 ditolak.
 - BR-16 lolos.
 - Holdout epoch 1 tersegel (15 dataset).
-- Epoch 0 ditutup kecuali salinan awan.
+- Epoch 0 ditutup.
 - H1 lolos, sehingga tinjauan H1 tidak memicu fallback `product.md` 5.2.
 
 Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 0](epochs/epoch-0/closure.md).
