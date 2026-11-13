@@ -1,0 +1,1043 @@
+{
+  "epoch": 1,
+  "rule": "ADR 0013 butir 5; ADR 0014 butir 3",
+  "seed": 297083057,
+  "studies": [
+    14,
+    218,
+    271
+  ],
+  "target_count": 15,
+  "sealed_count": 15,
+  "shortfall": 0,
+  "sealed": [
+    {
+      "dataset_id": 1476,
+      "name": "gas-drift",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 13910,
+      "n_features": 128,
+      "n_classes": 6,
+      "source_checksum": "e205264c230a3e15c7546c18ddceedaf",
+      "licence": "Public",
+      "split_seed": 1613342248,
+      "d0_sha256": "4d695967b3e251426a446ceb1ce09122610d44a497cdef82b98e3a1d73aafe0a",
+      "train_sha256": "7e4ff6ab1eb2e5a19468864f06ee53de62f4193e380eb00d520fb2fd1837fb35",
+      "test_sha256": "65d1fa5b54105e4402d0f7fd985b5d8f2d55100cda689b6baa26ae00f2e488e5"
+    },
+    {
+      "dataset_id": 4135,
+      "name": "Amazon_employee_access",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 32769,
+      "n_features": 9,
+      "n_classes": 2,
+      "source_checksum": "5502ee73e563ddf5b699ffe0c633905b",
+      "licence": "Public",
+      "split_seed": 622752313,
+      "d0_sha256": "7314e3db2aff2020167858809d20e4d2466f624b9a12d3bddb3b130f08785621",
+      "train_sha256": "163c6021770657597552a250873824deb0f87e4357e3cf1e02fb916d2d9f61d5",
+      "test_sha256": "9a5cb027198aa1414c86c1a39799c9351b09c90bf6729eff2a246b598192b05b"
+    },
+    {
+      "dataset_id": 41146,
+      "name": "sylvine",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 5124,
+      "n_features": 20,
+      "n_classes": 2,
+      "source_checksum": "0788a60caa253cea1aa2e2fc2c1ecc69",
+      "licence": "Public",
+      "split_seed": 521381708,
+      "d0_sha256": "e869c468127d9d3ed15748285cebf518186c4ff42c71b5468e565ce84a3273b7",
+      "train_sha256": "23d8796bf496ca0fcd0efb3b029063445a5e1efce0e45dc43a4cc762f3d8250e",
+      "test_sha256": "8e0ca1f8aa8c790778ca3307a002c6416d80dd7fe86d87ca9095f1758ec71f73"
+    },
+    {
+      "dataset_id": 1120,
+      "name": "MagicTelescope",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 19020,
+      "n_features": 10,
+      "n_classes": 2,
+      "source_checksum": "f6dee76810bd7211716fee7b2b0317cb",
+      "licence": "Public",
+      "split_seed": 1637005645,
+      "d0_sha256": "cd371507763e61e6e8d37247108c4464665244f539454798c28e739c10e52446",
+      "train_sha256": "8515a52e40ab6a1b53b7e296e80fb0e32f860024dc76a6b7b626954fa3f8959c",
+      "test_sha256": "5298b81be9b3132d652a8ba14879faebd707b90a6b59418fa9976153f09f192d"
+    },
+    {
+      "dataset_id": 41143,
+      "name": "jasmine",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 2984,
+      "n_features": 144,
+      "n_classes": 2,
+      "source_checksum": "9bd95589ae1a6c7076f172f1ce2f37d8",
+      "licence": "Public",
+      "split_seed": 414224308,
+      "d0_sha256": "daaa74d6f80c8ef235ca248a03785ea5752f63e6b7113b3aee8a0edcfcb3f3dd",
+      "train_sha256": "388adb388143394ba9c1ab59d0a00ab532832923cfb4c6245c3bfbd9243decce",
+      "test_sha256": "5e47bbf91bc2edd5a51a6198b1c23be46707a7b5c7d44a512a79812955f5f1c5"
+    },
+    {
+      "dataset_id": 375,
+      "name": "JapaneseVowels",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 9961,
+      "n_features": 14,
+      "n_classes": 9,
+      "source_checksum": "8b59d000ae5310afb26ec66e97fc7724",
+      "licence": "Public",
+      "split_seed": 282754136,
+      "d0_sha256": "253d9fc8e4858be2a06b788f48017f447dcd1e02daf1b0dba22ccf7e2bbf650a",
+      "train_sha256": "f5f8ab0b560ffcf62872fb2750e1593abc9743eaa41ee537e8b4eb491772f6af",
+      "test_sha256": "24cbf2975c08f64a141f70342827515f485b4a962bbba4f9f44aa3c00796c9e5"
+    },
+    {
+      "dataset_id": 60,
+      "name": "waveform-5000",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 5000,
+      "n_features": 40,
+      "n_classes": 3,
+      "source_checksum": "996d42ae027122265c642efb845897ef",
+      "licence": "Public",
+      "split_seed": 870366614,
+      "d0_sha256": "6160337c58d7ba90fdae4c35ef4fa014d2efaefad4b8cd3cb2352b0b150cecd6",
+      "train_sha256": "a58a3dc05d226847a12e7171a5bf539f875fe1f00a016814bd69dff5f1094b82",
+      "test_sha256": "8c9df27490794acec8f6a434aa1070db7db870bdd5e2c4400efdd18fa2462f54"
+    },
+    {
+      "dataset_id": 40536,
+      "name": "SpeedDating",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 8378,
+      "n_features": 120,
+      "n_classes": 2,
+      "source_checksum": "0c5590a0c81750687ee1b0ee68168a5d",
+      "licence": "Public",
+      "split_seed": 1408160038,
+      "d0_sha256": "a84f16577535d46af08b3aed712aae960aeb593e5ac24ec8b9b64481d36cfaed",
+      "train_sha256": "052ff9663968f5475f115c729789eb3d2144689841ed85a4fd93cf665ab74846",
+      "test_sha256": "aefa63fbf834d6cb50e8538cce15c773970ea388b8ab1b17e424540518152bcd"
+    },
+    {
+      "dataset_id": 42733,
+      "name": "Click_prediction_small",
+      "version": 10,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 39948,
+      "n_features": 11,
+      "n_classes": 2,
+      "source_checksum": "8e4f8ea8a01f19d351c8bac7c4560c0d",
+      "licence": "Public",
+      "split_seed": 879611964,
+      "d0_sha256": "7a45b6294fc3120dc8aface42e36a978aabd1e89b9d7246b6f7a71d1c2c72ebc",
+      "train_sha256": "81b91ed6d5a38cc72ff8a493b38f4a83ca1f5e943d1b5dc1653bc8905af5b2a2",
+      "test_sha256": "d42dafc2076ee836416bee118e6126ad29846926577dd9cf20e44d6d8dd408c5"
+    },
+    {
+      "dataset_id": 24,
+      "name": "mushroom",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 8124,
+      "n_features": 22,
+      "n_classes": 2,
+      "source_checksum": "c8e898e453167e76d617eff67d198579",
+      "licence": "Public",
+      "split_seed": 2102330932,
+      "d0_sha256": "c27c428934dc8f72f437cffef877752d70fd4578f67101f7a96edd6f540bef61",
+      "train_sha256": "3d502b8bc3f5e90fb1e5a2d9aa7dad812c91e9b28ecfeed1578e19928b8fef4a",
+      "test_sha256": "8b86c621cf08500d84815e24cbb0c406ebe3405852b3f67d6f263f86811cced7"
+    },
+    {
+      "dataset_id": 1471,
+      "name": "eeg-eye-state",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 14980,
+      "n_features": 14,
+      "n_classes": 2,
+      "source_checksum": "32086b7bec4daaa9cbe5f19efa63368c",
+      "licence": "Public",
+      "split_seed": 2058263277,
+      "d0_sha256": "d88dcfa1aa76b5c8f130053919648fe47ebc7fd46935eade8e0323e8c0ede06c",
+      "train_sha256": "4c6567fb1e318a1287365944fb656545e940599ebb9f2dc1bad065ad50fbaba6",
+      "test_sha256": "5341e8e1f209f01d1941af2a395ec7af4a1d31c846914a5130da2512a4fdd368"
+    },
+    {
+      "dataset_id": 1466,
+      "name": "cardiotocography",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 2126,
+      "n_features": 35,
+      "n_classes": 10,
+      "source_checksum": "b0cca84576bffc429099af497278763c",
+      "licence": "Public",
+      "split_seed": 915439401,
+      "d0_sha256": "813ca6af325873ffd6552c70bde15accea8ff18c962fdf3ddeff31b94072b577",
+      "train_sha256": "1faf74f1567e5e79d87b2684de705fd822b40bdd6676fa6939f2c4870712333b",
+      "test_sha256": "83c25e1878b3cc998201a87f253cb1b41b805ca3e28d2f79090110b38d865d80"
+    },
+    {
+      "dataset_id": 41145,
+      "name": "philippine",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 5832,
+      "n_features": 308,
+      "n_classes": 2,
+      "source_checksum": "82cbcec6a94818f97f67dd44c4ca847b",
+      "licence": "Public",
+      "split_seed": 1792650971,
+      "d0_sha256": "0d581f8e5ca2403d7e442f370922d88a2f4bdd8395233519e3462efa77fbda76",
+      "train_sha256": "203bcaeeeeb71752ed6c76be0e2b558c46ce8a95d69285bb4b2e49307e86acda",
+      "test_sha256": "b206ebf9e17eede1c7bb9b630757f5cb3089228efa1d84fb99399fd6c3cb6d73"
+    },
+    {
+      "dataset_id": 41144,
+      "name": "madeline",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 3140,
+      "n_features": 259,
+      "n_classes": 2,
+      "source_checksum": "7eb54c51e9db2d9b66c2835379ceaa79",
+      "licence": "Public",
+      "split_seed": 1013779285,
+      "d0_sha256": "c06a2d782de2e67a834176ab55eafe3970956a4452ec9b33e28cf79ed84e6ef9",
+      "train_sha256": "c558f3cf96621ce6353503c83e364bf67e11bcf1c54a62a89350e3fe88cee0d4",
+      "test_sha256": "0aa1cdf6452e3773f54f99f13d15df5d0f4ab4ac6b9f0e116dac6156b31893fb"
+    },
+    {
+      "dataset_id": 40900,
+      "name": "Satellite",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 5100,
+      "n_features": 36,
+      "n_classes": 2,
+      "source_checksum": "7a4e6eb8113b885d48b74fb2eb754570",
+      "licence": "Public",
+      "split_seed": 251678006,
+      "d0_sha256": "cd1aa7260103974f362d91fedeb212b01655fd34cf1c75eaac57582ce0521bfb",
+      "train_sha256": "c61bc8cd0a396821a600a1f05a617fe07b9fc5d70f141d5209ab024c53b9c757",
+      "test_sha256": "df360e4401cf65fe314099e87b2f71c751527992557bc0552959aead5e6a64bf"
+    }
+  ],
+  "tried": [
+    {
+      "dataset_id": 1476,
+      "name": "gas-drift",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 13910,
+      "n_features": 128,
+      "n_classes": 6
+    },
+    {
+      "dataset_id": 4135,
+      "name": "Amazon_employee_access",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 32769,
+      "n_features": 9,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 41146,
+      "name": "sylvine",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 5124,
+      "n_features": 20,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 1120,
+      "name": "MagicTelescope",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 19020,
+      "n_features": 10,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 41143,
+      "name": "jasmine",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 2984,
+      "n_features": 144,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 375,
+      "name": "JapaneseVowels",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 9961,
+      "n_features": 14,
+      "n_classes": 9
+    },
+    {
+      "dataset_id": 60,
+      "name": "waveform-5000",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 5000,
+      "n_features": 40,
+      "n_classes": 3
+    },
+    {
+      "dataset_id": 40536,
+      "name": "SpeedDating",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 8378,
+      "n_features": 120,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 42733,
+      "name": "Click_prediction_small",
+      "version": 10,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 39948,
+      "n_features": 11,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 24,
+      "name": "mushroom",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 8124,
+      "n_features": 22,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 1471,
+      "name": "eeg-eye-state",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 14980,
+      "n_features": 14,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 1466,
+      "name": "cardiotocography",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 2126,
+      "n_features": 35,
+      "n_classes": 10
+    },
+    {
+      "dataset_id": 41145,
+      "name": "philippine",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 5832,
+      "n_features": 308,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 41144,
+      "name": "madeline",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 3140,
+      "n_features": 259,
+      "n_classes": 2
+    },
+    {
+      "dataset_id": 40900,
+      "name": "Satellite",
+      "version": 1,
+      "passed": true,
+      "reasons": [],
+      "n_rows": 5100,
+      "n_features": 36,
+      "n_classes": 2
+    }
+  ],
+  "pool": [
+    {
+      "dataset_id": 20,
+      "name": "mfeat-pixel",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "nama sama dengan dataset korpus"
+      ]
+    },
+    {
+      "dataset_id": 24,
+      "name": "mushroom",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 36,
+      "name": "segment",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "nama sama dengan dataset korpus"
+      ]
+    },
+    {
+      "dataset_id": 42,
+      "name": "soybean",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 683",
+        "minority 8",
+        "missing 0.0978"
+      ]
+    },
+    {
+      "dataset_id": 60,
+      "name": "waveform-5000",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 181,
+      "name": "yeast",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 1484",
+        "minority 5"
+      ]
+    },
+    {
+      "dataset_id": 312,
+      "name": "scene",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 333,
+      "name": "monks-problems-1",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 556"
+      ]
+    },
+    {
+      "dataset_id": 334,
+      "name": "monks-problems-2",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 601"
+      ]
+    },
+    {
+      "dataset_id": 335,
+      "name": "monks-problems-3",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 554"
+      ]
+    },
+    {
+      "dataset_id": 375,
+      "name": "JapaneseVowels",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 377,
+      "name": "synthetic_control",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 600"
+      ]
+    },
+    {
+      "dataset_id": 451,
+      "name": "irish",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 500"
+      ]
+    },
+    {
+      "dataset_id": 470,
+      "name": "profb",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 672",
+        "missing 0.1984"
+      ]
+    },
+    {
+      "dataset_id": 1038,
+      "name": "gina_agnostic",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "features 970"
+      ]
+    },
+    {
+      "dataset_id": 1046,
+      "name": "mozilla4",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 1111,
+      "name": "KDDCup09_appetency",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "missing 0.6978"
+      ]
+    },
+    {
+      "dataset_id": 1112,
+      "name": "KDDCup09_churn",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "missing 0.6978"
+      ]
+    },
+    {
+      "dataset_id": 1114,
+      "name": "KDDCup09_upselling",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "missing 0.6978"
+      ]
+    },
+    {
+      "dataset_id": 1120,
+      "name": "MagicTelescope",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 1169,
+      "name": "airlines",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 539383"
+      ]
+    },
+    {
+      "dataset_id": 1457,
+      "name": "amazon-commerce-reviews",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 1500",
+        "features 10000",
+        "classes 50"
+      ]
+    },
+    {
+      "dataset_id": 1459,
+      "name": "artificial-characters",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 1466,
+      "name": "cardiotocography",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 1467,
+      "name": "climate-model-simulation-crashes",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 540"
+      ]
+    },
+    {
+      "dataset_id": 1471,
+      "name": "eeg-eye-state",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 1476,
+      "name": "gas-drift",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 1479,
+      "name": "hill-valley",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 1212"
+      ]
+    },
+    {
+      "dataset_id": 1491,
+      "name": "one-hundred-plants-margin",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 1600",
+        "classes 100",
+        "minority 16"
+      ]
+    },
+    {
+      "dataset_id": 1492,
+      "name": "one-hundred-plants-shape",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 1600",
+        "classes 100",
+        "minority 16"
+      ]
+    },
+    {
+      "dataset_id": 1493,
+      "name": "one-hundred-plants-texture",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 1599",
+        "classes 100",
+        "minority 15"
+      ]
+    },
+    {
+      "dataset_id": 1504,
+      "name": "steel-plates-fault",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 1941"
+      ]
+    },
+    {
+      "dataset_id": 1515,
+      "name": "micro-mass",
+      "version": 2,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 571",
+        "features 1300",
+        "minority 11"
+      ]
+    },
+    {
+      "dataset_id": 1596,
+      "name": "covertype",
+      "version": 4,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 581012"
+      ]
+    },
+    {
+      "dataset_id": 4135,
+      "name": "Amazon_employee_access",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 4541,
+      "name": "Diabetes130US",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 101766"
+      ]
+    },
+    {
+      "dataset_id": 23380,
+      "name": "cjs",
+      "version": 3,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "missing 0.7164"
+      ]
+    },
+    {
+      "dataset_id": 23512,
+      "name": "higgs",
+      "version": 2,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 98050"
+      ]
+    },
+    {
+      "dataset_id": 40496,
+      "name": "LED-display-domain-7digit",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 500"
+      ]
+    },
+    {
+      "dataset_id": 40498,
+      "name": "wine-quality-white",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "minority 5"
+      ]
+    },
+    {
+      "dataset_id": 40536,
+      "name": "SpeedDating",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 40685,
+      "name": "shuttle",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 58000",
+        "minority 10"
+      ]
+    },
+    {
+      "dataset_id": 40900,
+      "name": "Satellite",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 40981,
+      "name": "Australian",
+      "version": 4,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 690"
+      ]
+    },
+    {
+      "dataset_id": 41138,
+      "name": "APSFailure",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 76000",
+        "missing 0.0835"
+      ]
+    },
+    {
+      "dataset_id": 41142,
+      "name": "christine",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "features 1636"
+      ]
+    },
+    {
+      "dataset_id": 41143,
+      "name": "jasmine",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 41144,
+      "name": "madeline",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 41145,
+      "name": "philippine",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 41146,
+      "name": "sylvine",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 41147,
+      "name": "albert",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 425240",
+        "missing 0.0824"
+      ]
+    },
+    {
+      "dataset_id": 41150,
+      "name": "MiniBooNE",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 130064"
+      ]
+    },
+    {
+      "dataset_id": 41156,
+      "name": "ada",
+      "version": 1,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 41157,
+      "name": "arcene",
+      "version": 2,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 100",
+        "features 10000"
+      ]
+    },
+    {
+      "dataset_id": 41158,
+      "name": "gina",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "features 970"
+      ]
+    },
+    {
+      "dataset_id": 41159,
+      "name": "guillermo",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "features 4296"
+      ]
+    },
+    {
+      "dataset_id": 41161,
+      "name": "riccardo",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "features 4296"
+      ]
+    },
+    {
+      "dataset_id": 41162,
+      "name": "kick",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 72983",
+        "missing 0.0639"
+      ]
+    },
+    {
+      "dataset_id": 41163,
+      "name": "dilbert",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "features 2000"
+      ]
+    },
+    {
+      "dataset_id": 41164,
+      "name": "fabert",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "features 800"
+      ]
+    },
+    {
+      "dataset_id": 41165,
+      "name": "robert",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "features 7200"
+      ]
+    },
+    {
+      "dataset_id": 41166,
+      "name": "volkert",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 58310"
+      ]
+    },
+    {
+      "dataset_id": 41167,
+      "name": "dionis",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 416188",
+        "classes 355"
+      ]
+    },
+    {
+      "dataset_id": 41168,
+      "name": "jannis",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 83733"
+      ]
+    },
+    {
+      "dataset_id": 41169,
+      "name": "helena",
+      "version": 1,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 65196",
+        "classes 100"
+      ]
+    },
+    {
+      "dataset_id": 42732,
+      "name": "sf-police-incidents",
+      "version": 6,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 2215023"
+      ]
+    },
+    {
+      "dataset_id": 42733,
+      "name": "Click_prediction_small",
+      "version": 10,
+      "prescreen_passed": true,
+      "prescreen_reasons": []
+    },
+    {
+      "dataset_id": 42734,
+      "name": "okcupid-stem",
+      "version": 3,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 50789",
+        "missing 0.1597"
+      ]
+    },
+    {
+      "dataset_id": 42742,
+      "name": "porto-seguro",
+      "version": 3,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 595212"
+      ]
+    },
+    {
+      "dataset_id": 42746,
+      "name": "KDDCup99",
+      "version": 5,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 4898431",
+        "classes 23",
+        "minority 2"
+      ]
+    },
+    {
+      "dataset_id": 42769,
+      "name": "Higgs",
+      "version": 3,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "rows 1000000"
+      ]
+    },
+    {
+      "dataset_id": 43072,
+      "name": "KDDCup09-Upselling",
+      "version": 3,
+      "prescreen_passed": false,
+      "prescreen_reasons": [
+        "features 14891"
+      ]
+    }
+  ]
+}
