@@ -47,7 +47,7 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | BR-23 | Profil dan artefak model harus memiliki `profile_schema_version` yang sama. Jika berbeda, scan gagal dengan galat eksplisit, bukan estimasi. | Uji unit versi tidak cocok |
 | BR-24 | **Skor OOD** = jarak kNN profil ke profil korpus pelatihan meta-model. Skor OOD bukan input meta-model. | Uji unit; daftar fitur meta-model |
 
-**[K]** Kuantil conformal memberi bobot sama pada setiap dataset kalibrasi: skor run berbobot 1 / (jumlah run datasetnya), titik baru berbobot rata-rata bobot run, dan kuantil adalah skor terkecil yang bobot kumulatifnya mencapai 90% dari total bobot. Bila setiap dataset punya jumlah run yang sama, hasilnya sama dengan Contoh 3 (keputusan pemilik repo 12/11/2026, [ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)). **[K]** Batas bawah interval tidak dipotong di nol, karena ΔAUC bisa negatif (misalnya saat missingness informatif) dan pemotongan menggeser coverage (ADR 0011). **[T]** Besar pelebaran interval saat OOD tinggi dan nilai ambang "OOD tinggi" tetap terbuka sampai G3. Selama pilot, scan memakai ambang sementara berlabel eksperimental: persentil ke-95 skor OOD leave-one-dataset-out pada profil pilot (ADR 0011).
+**[K]** Kuantil conformal memberi bobot sama pada setiap dataset kalibrasi: skor run berbobot 1 / (jumlah run datasetnya), titik baru berbobot rata-rata bobot run, dan kuantil adalah skor terkecil yang bobot kumulatifnya mencapai 90% dari total bobot. Bila setiap dataset punya jumlah run yang sama, hasilnya sama dengan Contoh 3 (keputusan pemilik repo 12/11/2026, [ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)). **[K]** Batas bawah interval tidak dipotong di nol, karena ΔAUC bisa negatif (misalnya saat missingness informatif) dan pemotongan menggeser coverage (ADR 0011). **[K]** Ambang "OOD tinggi" adalah persentil ke-95 skor OOD LODO bersarang di korpus E1, dan interval tidak dilebarkan saat OOD tinggi karena BR-33 sudah memaksa `tidak_yakin` (G3-2 dan G3-3, [ADR 0012](decisions/0012-phase-4-dan-gate-g3.md)). Klaim bahwa skor OOD menandai estimasi kurang andal (KL-05) belum dibuka.
 
 ## 4. Status hasil scan
 
@@ -62,7 +62,7 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | BR-32 | `tidak_material` jika dan hanya jika batas atas interval `hi < T`. | Contoh 2 |
 | BR-33 | `tidak_yakin` jika interval memotong `T` (termasuk `lo = T` atau `hi = T`), jika skor OOD tinggi, atau jika BR-15 terpicu. OOD diperiksa lebih dulu dan mengalahkan BR-31 dan BR-32. | Contoh 2 |
 | BR-34 | Interval yang memotong ambang **tidak pernah dibulatkan** ke material atau tidak material. | Uji properti pada interval acak |
-| BR-35 | Sebelum gerbang G3, setiap status dan angka mode learned membawa `model.experimental = true`. | Contract test pada artefak pra-G3 |
+| BR-35 | Sebelum gerbang G3, setiap status dan angka mode learned membawa `model.experimental = true`. Setelah G3, flag tetap `true` selama klaim interval (KL-02) atau status (KL-04) belum dibuka di register klaim ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md)). | Contract test pada artefak pra-G3 |
 
 ## 5. Potensi pemulihan dan prioritas
 
@@ -73,6 +73,7 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | BR-42 | Potensi pemulihan antar-temuan **tidak dijumlahkan** dan tidak dibandingkan dengan ΔAUC total sebagai persentase. | Tidak ada field total di `ScanReport` |
 | BR-43 | Urutan temuan di laporan memakai potensi pemulihan, bukan volume (`rows_affected_pct`). | E2 (hipotesis H2b) |
 | BR-44 | Setiap hasil simulator what-if melewati cek OOD dan berlabel "simulasi". Simulator berada di luar klaim yang dibuktikan skripsi. | Field `ood_score` wajib di respons simulasi |
+| BR-45 | Potensi pemulihan ≤ 0 tampil **tanpa angka** (`recovery_potential = null`). Urutan temuan tetap memakai nilai aslinya. Angka ≤ 0 adalah artefak kontrafaktual: profil yang dinormalkan bisa jatuh di luar manifold korpus ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md) G3-6). | `test_br45_*` di `tests/test_recovery.py` |
 
 **[T]** Tabel effort per `issue_type` untuk urutan potensi/effort (fitur F-L08) belum ada. **[K]** Nilai "tanpa temuan" bersifat struktural dan tidak bergantung data (misalnya fraksi missing, duplikat, dan label noise estimasi = 0); fitur tanpa nilai ideal struktural tidak ikut dinormalkan, dan daftar akhirnya dibekukan di G1 ([ADR 0006](decisions/0006-kerangka-pengujian-rq2b-dan-h5.md)).
 
@@ -197,8 +198,8 @@ Keputusan gate untuk scan yang sama:
 | # | Hal terbuka | Aturan terdampak | Diputuskan paling lambat |
 | --- | --- | --- | --- |
 | 1 | **Ditutup [K]**: rata-rata \|selisih\| antar-pasangan seed; 10 seed terukur, 5 seed estimasi ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-04, BR-05 | — |
-| 2 | Validitas noise floor estimasi (H5) | BR-05, BR-31 sampai BR-33 | G3 |
-| 3 | Ambang "OOD tinggi" dan besar pelebaran interval (pilot memakai ambang sementara, ADR 0011) | BR-24, BR-33 | G3 |
+| 2 | **Ditutup [K]**: noise floor estimasi valid (H5 lolos); BR-05 tetap. Kappa tidak informatif karena hampir semua `T` = 0,01 ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md)) | BR-05, BR-31 sampai BR-33 | — |
+| 3 | **Ditutup [K]**: persentil ke-95 skor OOD LODO; interval tidak dilebarkan ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md)) | BR-24, BR-33 | — |
 | 4 | **Ditutup [K]**: kuantil conformal berbobot sama per dataset ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-22 | — |
 | 5 | **Ditutup [K]**: interval tidak dipotong di nol ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-22 | — |
 | 6 | **Ditutup [K]**: probe kebocoran memakai pohon `max_depth` 4, `min_samples_leaf` 0,01, dan ambang tetap 0,99 ([ADR 0010](decisions/0010-gate-g1.md)) | BR-15 | — |

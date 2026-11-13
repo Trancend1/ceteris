@@ -33,7 +33,7 @@ from ceteris.dqprofile import (
     noise_floor_value,
     prepare_input,
 )
-from ceteris.recovery import missing_row_frac, ranked_findings
+from ceteris.recovery import displayed_potential, missing_row_frac, ranked_findings
 
 SCHEMA_VERSION: Final = "1.0"
 CONDITION: Final = "dibanding model yang dilatih pada versi bersih dan dievaluasi pada data bersih"
@@ -193,7 +193,7 @@ def findings_for(
             column=None,
             rows_affected_pct=f.rows_affected_pct,
             observed_or_estimated=f.observed_or_estimated,
-            recovery_potential=f.recovery_potential,
+            recovery_potential=displayed_potential(f.recovery_potential),
         )
         for f in ranked
     ]

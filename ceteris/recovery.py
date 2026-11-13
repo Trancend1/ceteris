@@ -114,6 +114,11 @@ def recovery_potentials(
     }
 
 
+def displayed_potential(potential: float) -> float | None:
+    """BR-45 (G3-6): potensi ≤ 0 tidak diberi angka; urutan tetap memakai nilai aslinya."""
+    return potential if potential > 0.0 else None
+
+
 @dataclass(frozen=True)
 class RankedFinding:
     issue_type: str

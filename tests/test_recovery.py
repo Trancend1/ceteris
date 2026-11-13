@@ -11,6 +11,7 @@ from ceteris.dqprofile import FEATURES, NO_FINDING
 from ceteris.recovery import (
     FINDING_FEATURES,
     RECOVERY_LABEL,
+    displayed_potential,
     finding_volumes,
     missing_row_frac,
     normalised,
@@ -78,3 +79,23 @@ def test_volumes_are_row_proportions() -> None:
 def test_missing_row_frac_ignores_the_target() -> None:
     frame = pd.DataFrame({"a": [1.0, None, 3.0, 4.0], "b": [1, 2, 3, None], "y": [None, 1, 1, 0]})
     assert missing_row_frac(frame, "y") == pytest.approx(0.5)
+
+
+@pytest.mark.parametrize(("potential", "shown"), [(0.022, 0.022), (0.0, None), (-0.004, None)])
+def test_br45_non_positive_potential_has_no_number(potential: float, shown: float | None) -> None:
+    """BR-45 (G3-6, ADR 0012): potensi ≤ 0 tampil tanpa angka."""
+    assert displayed_potential(potential) == shown
+
+
+def test_br45_order_keeps_raw_potential() -> None:
+    """BR-45: urutan tetap memakai nilai asli, termasuk potensi negatif."""
+    values = {"label_noise_rate": -0.01, "dup_conflict_rate": -0.03}
+
+    def predict(features: Mapping[str, float]) -> float:
+        return sum(values[k] * features[k] for k in values)
+
+    profile = _profile(label_noise_rate=1.0, dup_conflict_rate=1.0)
+    ranked = ranked_findings(profile, missing_rows=0.0, predict=predict)
+    order = [f.issue_type for f in ranked if f.issue_type in {"label_noise", "duplicate_conflict"}]
+    assert order == ["label_noise", "duplicate_conflict"]
+    assert all(displayed_potential(f.recovery_potential) is None for f in ranked)

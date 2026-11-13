@@ -1,13 +1,13 @@
 # ADR 0012: Phase 4 — korpus penuh E1, LODO bersarang, artefak v1, dan gate G3
 
-- **Status:** Diusulkan **[T]**. Keputusan implementasi di bawah adalah usulan agent; hasil E1 dan keputusan G3 diisi setelah E1 selesai dan dibawa ke pemilik repo.
+- **Status:** Diterima **[K]**. Gate G3 disetujui pemilik repo 14/11/2026: semua rekomendasi G3-1 sampai G3-7 dan opsi 3 untuk H3.
 - **Tanggal:** 13/11/2026
 - **Rilis terdampak:** R0, Phase 4
 - **Rujukan:** `execution-plan.md` Phase 4; BR-02, BR-22, BR-23, BR-24, BR-33, BR-40–BR-43, BR-64, BR-81, BR-85; ADR 0006, 0011; [analysis-plan.md](../analysis-plan.md)
 
 G3 membuka klaim angka dan interval (`product.md` 5.1). Gerbang ini butuh artefak v1, laporan akurasi, register klaim, dan hasil H1–H5 yang dilaporkan apa adanya.
 
-## Keputusan implementasi **[K]** (diusulkan agent, ditinjau di G3)
+## Keputusan implementasi **[K]**
 
 ### E1 korpus penuh
 
@@ -127,9 +127,9 @@ Folder `artifacts/metamodel-1.0.0-rc1`, tidak di-commit.
 
 Scan end-to-end selesai dalam ±15 detik. Churn termasuk data latih artefak, jadi hasil scan itu bukan bukti akurasi.
 
-## Keputusan G3 yang harus ditutup **[T]**
+## Keputusan G3 **[K]**
 
-Rekomendasi agent ada di bawah tabel; semuanya menunggu keputusan pemilik repo.
+Opsi yang ditimbang ada di tabel pertama. Rekomendasi agent di tabel kedua **disetujui seluruhnya oleh pemilik repo pada 14/11/2026**.
 
 | # | Butir | Opsi | Dasar keputusan dari E1 |
 | --- | --- | --- | --- |
@@ -169,6 +169,10 @@ Rekomendasi agent ada di bawah tabel; semuanya menunggu keputusan pemilik repo.
 - **86% prediksi berstatus `tidak_yakin`** karena interval lebih lebar dari `T`. Ini risiko utama produk (`product.md` 6.2, tingkat tidak yakin), terpisah dari OOD.
 
 ## Konsekuensi
+
+- **Artefak final `1.0.0`** dibangun dari run store E1 dengan urutan temuan menurut potensi, tanpa meta-model relatif (G3-4), dan ambang OOD p95 (G3-2).
+- **Label eksperimental tetap menyala di tingkat artefak.** `ScanReport` hanya punya satu flag `model.experimental` (BR-35), sedangkan interval (KL-02) dan status (KL-04) tetap eksperimental karena H3 gagal. Pencabutan label per klaim butuh perubahan kontrak `ScanReport` dan diputuskan terpisah.
+- **Potensi pemulihan ≤ 0 tampil tanpa angka** (BR-45, G3-6); urutan tetap memakai nilai aslinya.
 
 - Bila H1 gagal, klaim "ΔAUC diperkirakan X ± Y" tidak dibuka; produk memakai "indikasi risiko" tanpa angka (`product.md` 5.2), dan tinjauan H1 di Phase 5 menentukan urutan Sprint C.
 - Artefak v1 tidak di-commit (folder `artifacts/` diabaikan git). Artefak dibangun ulang dari run store E1 dengan `python -m ceteris.metamodel build`.

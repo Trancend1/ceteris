@@ -127,7 +127,7 @@ Hal yang dibawa ke Phase 3:
 
 ### Phase 4 — Korpus penuh dan artefak v1
 
-**Status: menunggu keputusan G3 (13/11/2026).** E1, LODO bersarang, laporan H1–H5, dan artefak v1 kandidat `1.0.0-rc1` (eksperimental) selesai. H1a, H1b, H2b, H4 (lemah), dan H5 lolos; H2 dan H3 gagal ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md), [register klaim](claims-register.md)).
+**Status: selesai; G3 disetujui pemilik repo 14/11/2026.** E1, LODO bersarang, laporan H1–H5, register klaim, dan artefak final `1.0.0` selesai. H1a, H1b, H2b, H4 (lemah), dan H5 lolos; H2 dan H3 gagal ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md), [register klaim](claims-register.md)).
 
 | | |
 | --- | --- |
@@ -219,7 +219,7 @@ Hal yang dibawa ke Phase 3:
 | **Ditutup [K] 12/11/2026:** `bagging_fraction` 0,8 untuk learner acuan (BR #11, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
 | **Ditutup [K] 12/11/2026:** statistik noise floor dan seed probe (BR #1), kuantil conformal (BR #4), pemotongan interval (BR #5), dan mesin komputasi (arsitektur #7) ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | Phase 3 (G2) |
 | Inferensi tipe kolom input CSV (BR #12) | Phase 5 (sebelum E4) |
-| Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | Phase 4 (G3) |
+| Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | **Ditutup di G3** (ADR 0012) |
 | Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |
 | Label status UI, presisi angka, tampilan histori | Phase 9 (G6) |
 | Perilaku gate saat layanan mati (`fail_mode`), keputusan gate untuk scan ditolak (BR #8), tabel effort (BR #9) | Di luar rencana ini (sebelum R2) |
