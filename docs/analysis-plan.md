@@ -100,6 +100,7 @@ Ukuran pendukung H1a, dilaporkan tanpa uji: RMSE, bias, Spearman prediksi vs akt
 | 12/11/2026 | Nilai P1–P9 diisi dari keputusan G2 (ADR 0011); rencana dibekukan saat G2 disetujui |
 | 14/11/2026 | Bagian 10 ditambahkan: protokol analisis eksploratif X1 (conformal ternormalisasi) setelah H3 gagal di E1 ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md)). Ditulis sebelum X1 dijalankan; bagian 1–8 dan verdict H1–H5 tidak berubah |
 | 14/11/2026 | Jadwal X1 dipindah dari Phase 5 ke epoch 1 dan validasinya memakai dataset holdout ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)). X1 belum dijalankan; metodenya tidak berubah. Rencana ini menjadi rencana analisis epoch 0 |
+| 14/11/2026 | Bagian 11 ditambahkan: operasionalisasi RQ4 (E4) dan uji konsistensi jalur akhir (BR-16) yang di bagian 4 hanya disebut ukurannya ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)). Ditulis sebelum data CleanML diunduh; ukuran dan kriteria bagian 4 tidak berubah |
 
 ## 10. Analisis eksploratif setelah pembekuan
 
@@ -142,3 +143,65 @@ Analisis di bagian ini ditulis setelah hasil E1 diketahui, sehingga berlabel **e
 - Bila X1-1 gagal, hasilnya dilaporkan apa adanya dan interval tetap eksperimental.
 - **Data:** run store E1 saja; tidak ada run korupsi baru. Keacakan, bila ada, memakai `derive_seed("x1", dataset_id)` (BR-84).
 - **Jadwal:** epoch 1, bukan Phase 5 ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md) butir 3). Selain run store E1, X1 juga dievaluasi pada dataset holdout dengan ukuran X1-1 sampai X1-5; rinciannya ditetapkan di rencana analisis epoch 1 sebelum dijalankan. Metode di atas tidak berubah.
+
+## 11. Operasionalisasi E4 dan konsistensi jalur (epoch 0)
+
+Bagian 4 menetapkan ukuran dan kriteria RQ4 dan BR-16. Bagian ini menetapkan cara menjalankannya. Ditulis 14/11/2026, sebelum data CleanML diunduh atau dilihat ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)).
+
+### E4 — data kotor asli (RQ4, eksploratif)
+
+**Sumber dan kandidat [K]:**
+- Benchmark CleanML (arsip `CleanML-datasets-2020.zip`, repositori `chu-data-lab/CleanML`).
+- Kandidat tetap, dalam urutan ini:
+  1. Company (inkonsistensi);
+  2. University (inkonsistensi);
+  3. Movie (inkonsistensi);
+  4. Restaurant (inkonsistensi);
+  5. Clothing (label salah nyata);
+  6. Citation (duplikat).
+- Varian label noise sintetis (`*_uniform`, `*_major`, `*_minor`) dan pasangan yang versi bersihnya hasil imputasi atau deteksi outlier otomatis tidak dipakai.
+
+**Kelayakan pasangan, diperiksa hanya dari struktur, sebelum ΔAUC apa pun dihitung:**
+
+1. Dokumentasi CleanML (`DatasetDescriptions.pdf` atau makalahnya) menyatakan versi bersih dibuat manual atau sebagai ground truth. Bila tidak, pasangan menjadi bukti sekunder berlabel "bukan ground truth".
+2. Baris versi kotor dapat dipetakan ke baris versi bersih: urutan sama dengan jumlah baris sama, atau lewat kolom kunci CleanML (`key_columns`). Pasangan yang tidak bisa dipetakan tidak layak.
+3. Setelah protokol D₀ (`ceteris.corpus.to_base_dataset`) dan kolom `drop_variables` CleanML dikeluarkan, partisi latih kotor lolos kontrak input scan (BR-10, BR-11). Batas baris korpus (2.000–50.000) **tidak** diterapkan. Data di luar rentang itu sah untuk RQ4 dan dicatat.
+
+Bila lebih dari 5 pasangan layak, 5 diambil dengan undian berseed `derive_seed("e4", "pairs")`, dengan pasangan ground truth didahulukan. Pasangan yang tidak layak dicatat beserta alasannya.
+
+**Data dan split:**
+- Label memakai kolom label skema CleanML.
+- Kolom yang skema CleanML tandai kategorikal, serta kolom non-numerik, disimpan sebagai kategorikal di Parquet (BR #12, ADR 0014).
+- Split 80/20 berstrata dibuat atas **entitas** (baris versi bersih) dengan seed `derive_seed("e4", nama_pasangan)`.
+- Test set = baris bersih entitas uji. Latih bersih = baris bersih entitas latih. Latih kotor = semua baris kotor yang terpetakan ke entitas latih.
+- Test set tidak pernah diubah (BR-80).
+
+**ΔAUC nyata:**
+- Rata-rata ΔAUC learner acuan (BR-01) atas 5 seed learner `derive_seed("e4", nama_pasangan, i)`, i = 0–4.
+- Galat per seed juga dilaporkan.
+- Noise floor terukur: 10 seed model bersih (bagian 5); `T` acuan = max(0,01; noise floor terukur).
+
+**Prediksi:**
+- `ceteris.scan.scan_file` pada Parquet partisi latih kotor, memakai artefak `metamodel-1.0.0`.
+- Status, interval, skor OOD, dan temuan dibaca dari `ScanReport`.
+
+**Ukuran per pasangan:**
+- galat absolut |prediksi − ΔAUC nyata|;
+- apakah ΔAUC nyata di dalam interval;
+- skor OOD dan flag OOD tinggi;
+- status scan dibandingkan status acuan dari ΔAUC nyata (`material` bila ΔAUC nyata > `T` acuan, selain itu `tidak_material`). Scan berstatus `tidak_yakin` dihitung terpisah sebagai "tanpa keputusan".
+
+**Kriteria (bagian 4, tidak berubah):**
+- Galat ≤ 2× MAE LODO.
+- MAE LODO dibaca dari `runs/e1/report.json` (`methods`, baris `metamodel`, kolom `mae`), tidak diketik ulang.
+- Dilaporkan per pasangan dan sebagai median antar-pasangan dengan CI bootstrap. CI dengan 3–5 pasangan hanya deskriptif.
+- Bukti utama adalah pasangan ground truth.
+
+### Konsistensi jalur akhir (BR-16)
+
+- **Korpus:**
+  - Per dataset korpus E1, satu run dipilih dengan aturan tetap: konfigurasi tunggal pertama menurut `config_id`, seed indeks 0.
+  - Data kotornya dibangun ulang lewat `ceteris.experiment.dirty_train`, ditulis ke Parquet, lalu dipindai lewat `scan_file`.
+  - Lolos bila 25 fitur profil identik dengan baris `corruption_run`, dan selisih prediksi meta-model dari fitur run store vs `ScanReport` < 1e-9.
+- **E4:** profil jalur riset (`compute_profile` pada frame di memori) vs `scan_file` dari Parquet untuk setiap pasangan, dengan kriteria yang sama.
+- **CSV (BR #12):** pindai juga salinan CSV setiap Parquet di atas. Selisih profil CSV vs Parquet dilaporkan sebagai ilustrasi; ini bukan kriteria lolos.

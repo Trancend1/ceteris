@@ -92,8 +92,8 @@ Kedua sisi diukur sebagai lengan terpisah terhadap epoch 0 sebagai pembanding, a
 
 | # | Butir | Rekomendasi agent | Ditutup sebelum |
 | --- | --- | --- | --- |
-| 1 | Lokasi arsip di luar git (drive eksternal, penyimpanan awan, atau keduanya) | Dua salinan di dua media, keduanya tercatat di manifest | Penutupan epoch 0 |
-| 2 | Jumlah dataset holdout | ±15. Dengan 10 dataset, CI Clopper–Pearson untuk kriteria proporsi seperti H3 terlalu lebar untuk informatif | Penyegelan holdout |
+| 1 | **Ditutup [K] 14/11/2026:** dua salinan, lokal dan awan ([ADR 0014](0014-phase-5-e4-dan-holdout.md)) | — | — |
+| 2 | **Ditutup [K] 14/11/2026:** ±15 dataset ([ADR 0014](0014-phase-5-e4-dan-holdout.md)) | — | — |
 | 3 | Posisi epoch 1 terhadap Sprint C | Diputuskan di tinjauan H1 akhir Phase 5 | G4 |
 
 ## Konsekuensi

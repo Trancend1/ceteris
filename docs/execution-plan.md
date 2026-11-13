@@ -218,8 +218,8 @@ Hal yang dibawa ke Phase 3:
 | **Ditutup [K] 12/11/2026:** hiperparameter probe kebocoran dan ambang tetap 0,99 (BR #6, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
 | **Ditutup [K] 12/11/2026:** `bagging_fraction` 0,8 untuk learner acuan (BR #11, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
 | **Ditutup [K] 12/11/2026:** statistik noise floor dan seed probe (BR #1), kuantil conformal (BR #4), pemotongan interval (BR #5), dan mesin komputasi (arsitektur #7) ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | Phase 3 (G2) |
-| Inferensi tipe kolom input CSV (BR #12) | Phase 5 (sebelum E4) |
-| Lokasi arsip epoch dan jumlah dataset holdout ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)) | Phase 5 (sebelum penutupan epoch 0) |
+| Inferensi tipe kolom input CSV (BR #12) | **Ditutup [K] 14/11/2026** ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)) |
+| Lokasi arsip epoch dan jumlah dataset holdout | **Ditutup [K] 14/11/2026** ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)) |
 | Posisi epoch 1 terhadap Sprint C (ADR 0013) | Tinjauan H1 akhir Phase 5 (G4) |
 | Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | **Ditutup di G3** (ADR 0012) |
 | Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |

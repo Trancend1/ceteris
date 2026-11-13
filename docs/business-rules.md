@@ -208,4 +208,4 @@ Keputusan gate untuk scan yang sama:
 | 9 | Tabel effort per `issue_type` | BR-43 | Sebelum R2 |
 | 10 | **Ditutup [K]**: estimator label noise memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) | — (fitur F-S05) | — |
 | 11 | **Ditutup [K]**: keacakan learner acuan lewat bagging baris ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) dengan `bagging_fraction` 0,8, dibekukan di G1 ([ADR 0010](decisions/0010-gate-g1.md)) | BR-03, BR-04 | — |
-| 12 | Inferensi tipe kolom pada input CSV. Kolom nominal berkode angka terbaca sebagai integer, sehingga profil dan estimasi berbeda dari Parquet ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-10, BR-14, BR-16 | Sebelum E4 (Phase 5) |
+| 12 | **Ditutup [K]**: scan CSV membaca tipe apa adanya dan memberi peringatan `csv_integer_low_cardinality` untuk kolom integer dengan ≤ 20 nilai unik; E4 memakai Parquet bertipe eksplisit ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)) | BR-10, BR-14, BR-16 | — |
