@@ -80,11 +80,56 @@ Butir ini memperjelas pelaksanaan rencana analisis yang dibekukan. Ukuran dan kr
 
 ## Hasil E1 **[F]**
 
-Belum ada. E1 sedang berjalan. Angka diisi dari `runs/e1/report.json` (`python -m ceteris.evaluate e1`) setelah E1 dan LODO bersarang selesai, bukan diketik manual.
+Sumber: `runs/e1/report.json`, dihasilkan dari run store oleh `python -m ceteris.evaluate e1 --store runs/e1` (kode `10ce452`), dan `runs/e1/lodo_recovery.parquet`. Semua angka berlabel **eksperimental** sampai G3 disetujui (BR-35). Ringkasan per dataset memakai median antar-dataset (BR-85).
+
+### Eksekusi dan provenance
+
+- **Durasi:** 13.516 tugas selesai dalam ±22 jam dinding dengan 6 proses (13/11/2026). Waktunya sedikit di atas proyeksi 17–20 jam, tetapi waktu CPU-nya masih di bawah batas 2× proyeksi (G2-6).
+- **Penolakan:** 13.136 tugas berhasil dan 380 ditolak. Semua penolakan bersifat struktural: korupsi outlier butuh kolom numerik, sedangkan empat dataset hanya berisi kolom kategorikal (kr-vs-kp, splice, PhishingWebsites, dna). Masing-masing kehilangan 10 konfigurasi outlier, yaitu 95 tugas per dataset. Tidak ada kegagalan lain.
+- **Isi run store:** 8.325 run korupsi dan 3.325 baris ablation.
+- **Provenance:** semua baris `run_log` mencatat commit `df626f2` dengan `git_dirty = false`.
+- **Konsistensi ablation:** `auc_full` ablation sama persis dengan `auc_dirty` run-nya (selisih maksimum 0).
+- **Profil:** tidak ada fitur profil yang kosong atau NaN. Log memuat `ConstantInputWarning` dari korelasi Spearman pada kolom konstan, tetapi peringatan itu tidak memengaruhi nilai fitur.
+
+### Hipotesis
+
+| Hipotesis | Hasil | Lolos? |
+| --- | --- | --- |
+| **H1a** | Median MAE per dataset: meta-model 0,0035; (a) 0,0102; (b) 0,0101; (c) 0,0046. Median selisih terhadap (a) −0,0071 (CI 95% −0,0079 s.d. −0,0057), menang di 31/31 dataset. Terhadap (b) −0,0068, menang 31/31. Terhadap (c) −0,0010 (CI −0,0018 s.d. −0,0002), menang 22/31. p Holm: 1,4·10⁻⁹; 1,4·10⁻⁹; 0,004 | **Ya** |
+| **H1b** | Median selisih MAE (meta − d) −0,0074, CI 95% −0,0144 s.d. −0,0050; batas atas < 0,005. Baseline (d) butuh median 8,6 detik per estimasi, meta-model 0,0056 detik (±1.550× lebih murah, di luar profil yang dipakai keduanya) | **Ya** |
+| **H2** | Median ΔAUC pada `affected_row_frac` 0,10 (27 dataset): label uniform 0,0091; label class-conditional 0,0059; duplikat-konflik 0,0039; missing MAR 0,00007; missing MCAR 0,00006; duplikat eksak 0,000002; outlier −0,000004. Friedman p = 1,8·10⁻²². Label noise tertinggi, tetapi **terendah adalah outlier, bukan MCAR**. MCAR, MAR, outlier, dan duplikat eksak tidak berbeda bermakna satu sama lain (p Holm ≥ 0,39), dan keempatnya ≈ 0. Empat dataset kategorikal dikeluarkan karena tidak punya outlier | **Tidak**, menurut kriteria yang dibekukan |
+| **H2b** (eksploratif) | Median τ per dataset: urutan potensi 0,27, urutan volume −0,12. Median selisih 0,28 (CI 0,21 s.d. 0,47), Wilcoxon satu sisi p = 1,3·10⁻⁶; 1.450 run campuran, 31 dataset | **Ya** |
+| **H3** | Coverage per dataset median 0,956, rentang 0,53–1,00. Hanya **7 dari 31** dataset (23%, CI 10–41%) dalam rentang 85–95%. 17 dataset di atas 95%: umumnya multikelas dengan ΔAUC kecil. 7 dataset di bawah 85%: phoneme 0,53, kc1 0,55, jm1 0,61, madelon 0,66, wilt 0,78, ozone 0,79, first-order 0,84; umumnya biner dengan ΔAUC besar. Kuantil conformal berbobot dataset menjamin coverage rata-rata, bukan coverage tiap dataset | **Tidak** |
+| **H4** | Spearman skor OOD vs galat absolut 0,186, CI 95% 0,001 s.d. 0,355 (10.000 resample dataset). Batas bawah nyaris 0. Hubungannya tidak monoton: desil OOD 5–8 punya MAE 0,007–0,011 dan coverage 0,85–0,88, tetapi desil teratas kembali baik (MAE 0,004, coverage 0,97). 5% skor teratas didominasi segment dan electricity, dengan MAE lebih rendah dan coverage lebih tinggi daripada sisanya | **Ya**, tetapi lemah |
+| **H5** | Selisih absolut median noise floor estimasi vs terukur 0,0003 (CI 0,0002–0,0004); bias −0,0002. Subset dekat 0,01 (8 dataset): selisih 0,0021, bias −0,0019 (estimasi lebih rendah). Kappa = 1,0 di keduanya, tetapi tidak informatif: hanya madelon yang noise floor terukurnya di atas 0,01 (0,0116), sehingga `T` hampir selalu 0,01 apa pun noise floor-nya | **Ya**, dengan catatan |
+
+### Ukuran pendukung (tanpa uji)
+
+- **Meta-model:** RMSE 0,0067, bias 0,0005, Spearman per dataset 0,66.
+- **Status material:** precision 0,93 dan recall 0,47 pada `T` = 0,01. Sebanyak **86% prediksi LODO berstatus `tidak_yakin`**, karena median lebar interval (0,034) lebih besar dari `T`.
+- **Per jenis korupsi:**
+  - label noise dan duplikat-konflik punya Spearman 0,77–0,94 dan MAE 0,005–0,006;
+  - missing, outlier, dan duplikat eksak punya MAE ≤ 0,0012 tetapi Spearman ≈ 0, karena ΔAUC-nya hampir nol.
+- **Meta-model ΔAUC relatif:** MAE 0,0070 (dalam satuan relatif), coverage median 0,97.
+- **Potensi pemulihan:** 32% potensi LODO negatif: duplikat-konflik 69%, missing 59%, outlier 38%, label noise 8%, duplikat eksak 8%.
+
+### Artefak v1 kandidat
+
+Folder `artifacts/metamodel-1.0.0-rc1`, tidak di-commit.
+
+- Status: `experimental = true`.
+- `corpus_snapshot`: `openml-cc18:31:ca50952a4348`.
+- Data latih: 8.325 run.
+- Hiperparameter: `num_leaves` 7, `learning_rate` 0,03, `min_data_in_leaf` 10.
+- Kuantil conformal: 0,0158.
+- Ambang OOD: 4,68 (p95 skor OOD LODO dengan standarisasi referensi akhir).
+- Tanpa meta-model relatif; urutan temuan menurut potensi.
+
+Scan end-to-end selesai dalam ±15 detik. Churn termasuk data latih artefak, jadi hasil scan itu bukan bukti akurasi.
 
 ## Keputusan G3 yang harus ditutup **[T]**
 
-Rekomendasi agent ditulis setelah hasil E1 tersedia. Opsi di bawah sudah bisa dinilai sekarang.
+Rekomendasi agent ada di bawah tabel; semuanya menunggu keputusan pemilik repo.
 
 | # | Butir | Opsi | Dasar keputusan dari E1 |
 | --- | --- | --- | --- |
@@ -95,6 +140,28 @@ Rekomendasi agent ditulis setelah hasil E1 tersedia. Opsi di bawah sudah bisa di
 | G3-5 | Urutan temuan (fallback H2b) | A: H2b lolos, urutan potensi. B: H2b gagal, `finding_order = volume` dan klaim urutan tidak ditampilkan | `h2b` |
 | G3-6 | Potensi pemulihan negatif | A: dilaporkan apa adanya. B: dipotong di 0 dan ditandai. C: temuan berpotensi ≤ 0 tidak diberi angka | Proporsi potensi negatif di `lodo_recovery`. Dry run pada artefak uji E0 memberi potensi `label_noise` negatif pada churn label noise 30%: normalisasi satu fitur menghasilkan profil di luar manifold korpus |
 | G3-7 | Label eksperimental | Dicabut hanya untuk klaim yang hipotesisnya lolos (BR-64). Klaim yang gagal mengikuti `product.md` 5.2 | Hasil H1–H5 dan register klaim |
+
+### Rekomendasi agent (13/11/2026)
+
+| # | Rekomendasi | Alasan |
+| --- | --- | --- |
+| G3-1 | **A**: BR-05 tetap, dengan catatan bahwa kappa tidak informatif | Selisih jauh di bawah 0,005 di kedua kelompok. Hanya satu dataset yang noise floor-nya di atas 0,01, sehingga dalam praktik `T` ≈ 0,01. Bias negatif di subset dekat 0,01 dicatat |
+| G3-2 | **A**: p95, dengan KL-05 tetap tertutup | Tidak ada ambang yang memisahkan estimasi buruk: galat terbesar ada di desil tengah, bukan desil teratas. p95 dipertahankan karena konservatif sesuai BR-33, dan klaim bahwa skor OOD menandai estimasi tidak andal belum didukung |
+| G3-3 | **A**: tidak dilebarkan | Desil OOD teratas tidak kekurangan coverage (0,97) |
+| G3-4 | **B**: tetap null | Interval ΔAUC absolut saja gagal H3. Menambah angka relatif yang tidak punya hipotesis sendiri menambah klaim tanpa bukti |
+| G3-5 | **A**: urutan potensi, berlabel eksploratif | H2b lolos dengan selisih τ yang besar |
+| G3-6 | **C**: potensi ≤ 0 tidak diberi angka | 32% potensi negatif. Angka negatif tidak bermakna sebagai "potensi pemulihan", sedangkan memotongnya ke 0 menyembunyikan bahwa itu artefak kontrafaktual. Urutan tetap memakai nilai aslinya |
+| G3-7 | Buka KL-01 (estimasi titik) dan KL-03 (H1b). KL-02 interval, KL-04 status, dan KL-09 dampak per jenis tetap tertutup atau eksperimental. KL-06 urutan dibuka dengan label eksploratif | H1a dan H1b lolos; H2 dan H3 gagal |
+
+**Butir baru yang butuh keputusan pemilik repo (AGENTS.md bagian 8):**
+
+- **H3 gagal, dan `product.md` 5.2 hanya mengatur fallback bila H1 gagal.** Status (BR-31–BR-33) memakai interval, sehingga kegagalan coverage per dataset menyentuh status dan keputusan gate `block` setelah G3 (BR-51). Opsi:
+  1. interval dan status tetap berlabel eksperimental setelah G3, dan gate tidak `block`;
+  2. coverage kondisional, misalnya kuantil per kelompok profil (Mondrian conformal) diuji di Phase 5. Ini analisis eksploratif setelah pembekuan (BR-86) dan butuh revisi rencana analisis bertanggal;
+  3. keduanya.
+
+  Rekomendasi agent: **3**.
+- **86% prediksi berstatus `tidak_yakin`** karena interval lebih lebar dari `T`. Ini risiko utama produk (`product.md` 6.2, tingkat tidak yakin), terpisah dari OOD.
 
 ## Konsekuensi
 
