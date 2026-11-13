@@ -98,3 +98,46 @@ Ukuran pendukung H1a, dilaporkan tanpa uji: RMSE, bias, Spearman prediksi vs akt
 | --- | --- |
 | 12/11/2026 | Draf pertama untuk gate G2 |
 | 12/11/2026 | Nilai P1–P9 diisi dari keputusan G2 (ADR 0011); rencana dibekukan saat G2 disetujui |
+| 14/11/2026 | Bagian 10 ditambahkan: protokol analisis eksploratif X1 (conformal ternormalisasi) setelah H3 gagal di E1 ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md)). Ditulis sebelum X1 dijalankan; bagian 1–8 dan verdict H1–H5 tidak berubah |
+
+## 10. Analisis eksploratif setelah pembekuan
+
+Analisis di bagian ini ditulis setelah hasil E1 diketahui, sehingga berlabel **eksploratif** (BR-86) dan tidak dapat mengubah verdict hipotesis di bagian 4.
+
+### X1 — Conformal ternormalisasi untuk coverage per dataset
+
+**Latar:**
+- H3 gagal: 7 dari 31 dataset dalam rentang 85–95%, sedangkan coverage marginal 0,90.
+- Diagnostik E1 menunjukkan coverage per dataset turun seiring kesulitan dataset (Spearman vs MAE −0,87) karena lebar interval sama untuk semua run.
+- X1 menguji apakah lebar yang menyesuaikan kesulitan memperbaiki coverage per dataset.
+
+**Metode (ditetapkan sebelum dijalankan) [K]:**
+
+1. **Protokol luar sama dengan bagian 2.** Fold LODO, pembagian proper-train dan kalibrasi, hiperparameter meta-model per fold (`fold_params_json` di `lodo_result`), dan prediksi titik dipakai ulang dari E1. Prediksi titik tidak dilatih ulang.
+2. **Model kesulitan σ̂(x).**
+   - Residu out-of-fold meta-model di proper-train dihitung dengan grouped CV 3 lipatan per dataset (pembagian seperti P6).
+   - LightGBM regresi dilatih pada fitur profil yang sama → |residu| OOF, dengan hiperparameter meta-model fold itu, tanpa tuning tambahan.
+   - σ̂(x) = max(prediksi, ε), dengan ε = 0,001.
+3. **Kalibrasi.**
+   - Skor nonconformity di dataset kalibrasi: s = |ΔAUC − ŷ| / σ̂(x).
+   - Kuantil 90% berbobot sama per dataset (BR-22) memberi q̃.
+   - Interval: ŷ ± q̃ · σ̂(x).
+4. **Status.** Status dari interval baru memakai aturan BR-30–BR-34 dan `T` per dataset yang sama dengan E1.
+5. **Satu kali jalan.** ε, model σ̂, dan pembagian fold tidak diubah setelah hasil terlihat. Varian lain (misalnya Mondrian per tipe tugas, atau kalibrasi dari residu LODO semua dataset) butuh revisi bertanggal baru sebelum dijalankan.
+
+**Ukuran dan kriteria:**
+
+| # | Ukuran | Kriteria / pelaporan |
+| --- | --- | --- |
+| X1-1 | Proporsi dataset dengan coverage 85–95%, CI Clopper–Pearson | **Lolos eksploratif** bila ≥ 80% dataset (kriteria H3) |
+| X1-2 | Coverage marginal, rata-rata berbobot sama per dataset | Dilaporkan; diharapkan ≈ 0,90 |
+| X1-3 | Selisih per dataset \|coverage − 0,90\| (X1 − E1), median dengan CI 95% bootstrap (bagian 1) | Dilaporkan |
+| X1-4 | Lebar interval median per dataset dan proporsi status `tidak_yakin` | Dibandingkan dengan E1 (86% `tidak_yakin`) |
+| X1-5 | Spearman coverage per dataset vs MAE per dataset | Dilaporkan sebagai diagnostik ketergantungan pada kesulitan |
+
+**Tafsiran:**
+- Verdict H3 tetap **tidak lolos**, apa pun hasil X1.
+- Bila X1-1 lolos, metode ini menjadi kandidat kalibrasi artefak berikutnya. KL-02 dan KL-04 tetap tertutup sampai validasi ulang di G4 (RQ4) dan keputusan pemilik repo.
+- Bila X1-1 gagal, hasilnya dilaporkan apa adanya dan interval tetap eksperimental.
+- **Data:** run store E1 saja; tidak ada run korupsi baru. Keacakan, bila ada, memakai `derive_seed("x1", dataset_id)` (BR-84).
+- **Jadwal:** Phase 5, sebelum tinjauan hasil.

@@ -81,7 +81,7 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 | ID | Aturan | Verifikasi |
 | --- | --- | --- |
 | BR-50 | Gate memakai aturan status bagian 4 dengan ambang `T_gate = max(T, ambang kebijakan)`. Ambang kebijakan di bawah `T` ditolak saat disimpan. | Contoh 5; uji API kebijakan |
-| BR-51 | Pemetaan status ke keputusan: `tidak_material` → **allow**; `tidak_yakin` → **warn**; `material` → **warn** sebelum G3 dan **block** sesudah G3. | Uji tabel keputusan |
+| BR-51 | Pemetaan status ke keputusan: `tidak_material` → **allow**; `tidak_yakin` → **warn**; `material` → **warn** sampai klaim interval (KL-02) dan status (KL-04) dibuka di register klaim, lalu **block**. H3 gagal di E1, sehingga setelah G3 `material` tetap **warn** ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md)). | Uji tabel keputusan |
 | BR-52 | Setiap keputusan gate menyertakan alasan dan tautan laporan. | Contract test `GET /gate/{id}` |
 | BR-53 | Gate tidak pernah mengubah data. Quarantine dan saran fix hanya dijalankan atas persetujuan; auto-apply hanya opt-in dan tercatat di audit log. | Uji integrasi: tidak ada operasi tulis ke sumber |
 | BR-54 | Perubahan kebijakan gate tercatat di audit log dengan aktor, waktu, dan nilai sebelum-sesudah. | Uji integrasi |

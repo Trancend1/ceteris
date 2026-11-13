@@ -141,7 +141,7 @@ Hal yang dibawa ke Phase 3:
 
 | | |
 | --- | --- |
-| Scope | E4 pada 3–5 pasangan data kotor-bersih nyata; uji konsistensi jalur akhir |
+| Scope | E4 pada 3–5 pasangan data kotor-bersih nyata; uji konsistensi jalur akhir; analisis eksploratif X1 conformal ternormalisasi (`analysis-plan.md` bagian 10, setelah H3 gagal) |
 | Deliverable | Laporan validasi eksternal; pembaruan laporan akurasi; `ScanReport` `schema_version` 1.0 yang dibekukan untuk dikonsumsi produk |
 | Kriteria selesai | Galat ≤ 2× MAE LODO pada pasangan nyata, atau hasil negatif dilaporkan apa adanya; jalur riset dan jalur scan konsisten (BR-16); klaim akurasi pada data nyata hanya tampil sesuai bukti |
 | **Gerbang G4** | Lihat `product.md` 5.1 |

@@ -161,6 +161,11 @@ Rekomendasi agent ada di bawah tabel; semuanya menunggu keputusan pemilik repo.
   3. keduanya.
 
   Rekomendasi agent: **3**.
+
+  **[K] Diputuskan pemilik repo 14/11/2026: opsi 3, dengan conformal ternormalisasi sebagai kandidat utama (bukan Mondrian).**
+  - Verdict H3 tetap **tidak lolos**. Interval (KL-02) dan status (KL-04) tetap berlabel eksperimental setelah G3. `material` dipetakan ke **warn**, bukan **block** (BR-51), sampai interval lolos validasi.
+  - Penyebab kegagalan menurut diagnostik: satu lebar interval untuk dataset dengan tingkat kesulitan berbeda (Spearman coverage per dataset vs MAE −0,87, vs sd ΔAUC −0,78), ditambah kuantil fold yang tidak stabil karena hanya dari 6 dataset kalibrasi (0,005–0,038 antar-fold). Coverage marginal tepat 0,90.
+  - Analisis lanjutan X1 dijalankan di Phase 5 sebagai analisis eksploratif menurut protokol yang ditulis lebih dulu di `analysis-plan.md` bagian 10. Hasilnya tidak mengubah verdict H3. Bila X1 lolos, KL-02 paling cepat dibuka di G4 setelah divalidasi ulang.
 - **86% prediksi berstatus `tidak_yakin`** karena interval lebih lebar dari `T`. Ini risiko utama produk (`product.md` 6.2, tingkat tidak yakin), terpisah dari OOD.
 
 ## Konsekuensi
