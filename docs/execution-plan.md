@@ -139,7 +139,7 @@ Hal yang dibawa ke Phase 3:
 
 ### Phase 5 — Validasi data kotor asli dan tinjauan H1
 
-**Status: pekerjaan selesai 14/11/2026; menunggu keputusan G4 dan salinan arsip awan.**
+**Status: selesai; G4 disetujui pemilik repo 14/11/2026.** Salinan arsip awan epoch 0 masih menunggu unggahan.
 - E4 tidak memenuhi kriteria galat, sehingga KL-10 ditolak.
 - BR-16 lolos.
 - Holdout epoch 1 tersegel (15 dataset).

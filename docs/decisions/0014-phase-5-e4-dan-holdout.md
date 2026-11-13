@@ -1,6 +1,6 @@
 # ADR 0014: Phase 5 — sumber E4, tipe kolom CSV, holdout epoch 1, dan arsip epoch 0
 
-- **Status:** Diterima **[K]** oleh pemilik repo 14/11/2026 (empat pilihan di bawah). Rincian pelaksanaan diusulkan agent.
+- **Status:** Diterima **[K]** oleh pemilik repo 14/11/2026 (empat pilihan di bawah). Rincian pelaksanaan diusulkan agent. **Gate G4 disetujui pemilik repo 14/11/2026**, dengan KL-10 tetap ditolak.
 - **Tanggal:** 14/11/2026
 - **Rilis terdampak:** R0, Phase 5
 - **Rujukan:** BR-10, BR-11, BR-14, BR-16, BR-80, BR-81, BR-84; hal terbuka #12 `business-rules.md`; [ADR 0008](0008-protokol-korpus-dan-semantik-korupsi.md), [ADR 0013](0013-epoch-eksperimen-dan-pelestarian.md); [analysis-plan.md](../analysis-plan.md) bagian 11

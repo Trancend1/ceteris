@@ -34,4 +34,4 @@ Verdict ini tidak diubah oleh epoch berikutnya.
 ## Yang tersisa untuk pemilik repo
 
 - Unggah salinan arsip ke awan, lalu catat lokasinya di `MANIFEST.md`. Setelah itu, verifikasi `SHA256SUMS.txt` pada salinan tersebut.
-- Keputusan G4 dan tinjauan H1 (`execution-plan.md` Phase 5).
+- ~~Keputusan G4~~: disetujui 14/11/2026, KL-10 tetap ditolak. Tinjauan H1: H1 lolos, tanpa fallback.

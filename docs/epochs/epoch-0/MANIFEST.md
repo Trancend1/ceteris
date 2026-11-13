@@ -7,7 +7,7 @@ Manifest arsip epoch 0 ([ADR 0013](../../decisions/0013-epoch-eksperimen-dan-pel
 | Salinan | Lokasi | Status per 14/11/2026 |
 | --- | --- | --- |
 | Lokal | `D:\DevSpace\Archive\ceteris\epoch-0\` | Dibuat dan diverifikasi |
-| Awan | Diisi pemilik repo setelah diunggah | **Belum** |
+| Awan | Google Drive milik pemilik repo, folder "Ceteris Epoch Experiment". Tautan sengaja tidak dicatat di repo publik ini karena arsip memuat data CleanML yang lisensinya tidak tercantum (ADR 0014 butir 1) | Folder dibuat; **berkas belum terunggah** per 14/11/2026, sehingga belum diverifikasi |
 
 ## Integritas
 
