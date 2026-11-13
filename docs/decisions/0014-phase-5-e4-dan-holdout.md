@@ -46,6 +46,38 @@ Pelaksanaan aturan seleksi ADR 0013 butir 5:
 - **Salinan awan:** diunggah pemilik repo. Lokasinya dicatat di `MANIFEST.md` setelah diunggah.
 - Kedua salinan diverifikasi terhadap SHA-256 di manifest.
 
+## Hasil Phase 5 **[F]** (eksperimental, BR-35)
+
+**Sumber:**
+- `runs/e4/e4_report.json` (commit `0b269b1`, `git_dirty` false);
+- `runs/e4/paths_report.json` (commit `eaeb979`, `git_dirty` false);
+- `docs/epochs/epoch-0/holdout.json`.
+
+**Kelayakan pasangan E4:**
+- Makalah CleanML menyatakan inkonsistensi dibersihkan dengan OpenRefine (clustering text facet, lalu merge ke nilai terbanyak), duplikat dengan key collision atau ZeroER, dan label salah dengan cleanlab. Tidak ada yang dinyatakan sebagai ground truth.
+- Clothing tidak ada di arsip, dan Citation tidak punya berkas versi bersih. Keduanya tidak layak.
+- Company, University, Movie, dan Restaurant selaras per baris. Keempatnya dipakai sebagai **bukti sekunder** ("bukan ground truth").
+
+**E4 per pasangan:**
+
+| Pasangan | Baris latih | Sel berubah | ΔAUC nyata | Prediksi | Galat | Di interval | Skor OOD | Status scan |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Company | 103.111 | 308 | 0,0005 | 0,0097 | 0,0092 | ya | 11,4 | `tidak_yakin` (OOD) |
+| University | 168 | 52 | 0,0000 | 0,0113 | 0,0113 | ya | 415,6 | `tidak_yakin` (OOD) |
+| Movie | 7.463 | 3.832 | −0,0002 | 0,0256 | 0,0259 | tidak | 862,4 | `tidak_yakin` (OOD) |
+| Restaurant | 9.605 | 488 | −0,0007 | 0,0258 | 0,0265 | tidak | 864,7 | `tidak_yakin` (OOD) |
+
+**Ringkasan E4:**
+- Median galat 0,0186 (CI bootstrap 0,0092–0,0265; deskriptif karena hanya 4 pasangan). Batasnya 2× MAE LODO = 0,0070. **Kriteria tidak terpenuhi**, dan tidak ada pasangan dalam batas.
+- Status acuan keempatnya `tidak_material`. Scan tidak memberi status yang keliru karena skor OOD semuanya jauh di atas ambang 4,68.
+- Meta-model melebih-lebihkan dampak inkonsistensi kategorikal. Jenis kekotoran ini tidak ada di grid korupsi dan tidak punya fitur profil sendiri.
+
+**Konsistensi jalur akhir (BR-16):**
+- Lolos pada 31 dataset korpus dan 4 pasangan E4: profil identik dan selisih prediksi 0.
+- Salinan CSV memberi estimasi berbeda (≤ 0,0005) pada 4 dataset korpus dan memunculkan peringatan `csv_integer_low_cardinality`.
+
+**Holdout:** 15 dataset tersegel tanpa kekurangan. Kelimabelasnya lolos saringan penuh pada percobaan pertama dari permutasi.
+
 ## Konsekuensi
 
 - Hal terbuka #12 `business-rules.md` ditutup. Hal terbuka ADR 0013 #1 dan #2 ditutup.

@@ -22,7 +22,7 @@ Daftar klaim yang boleh ditampilkan produk, buktinya, dan gerbang setelah klaim 
 | KL-07 | Angka "potensi pemulihan ideal hingga X" per temuan, tanpa total (BR-41, BR-42) | KL-01 boleh tampil; keputusan G3-6 (potensi negatif) | G3 | **Boleh tampil dengan label "potensi pemulihan ideal"** untuk potensi > 0; potensi ≤ 0 tanpa angka (BR-45) |
 | KL-08 | "ΔAUC relatif Y" (BR-02) | Keputusan G3-4; MAE dan coverage meta-model relatif di laporan E1 | G3 | **Ditolak untuk R0** (G3-4: tetap null) |
 | KL-09 | Pernyataan tentang dampak per jenis korupsi (misalnya "label noise paling merusak pada proporsi baris yang sama") | H2 lolos (`h2`) | G3 | **Ditolak** (H2 gagal: dampak terendah outlier, bukan MCAR). Pengganti: tidak ada klaim urutan per jenis |
-| KL-10 | Klaim akurasi pada data kotor asli | Galat ≤ 2× MAE LODO pada pasangan nyata (E4) | G4 | Belum boleh tampil |
+| KL-10 | Klaim akurasi pada data kotor asli | Galat ≤ 2× MAE LODO pada pasangan nyata (E4) | G4 | **Ditolak di epoch 0**: E4 tidak memenuhi kriteria galat (median 0,0186 > 0,0070), dan tidak ada pasangan ground truth ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), `runs/e4/e4_report.json`) |
 
 ## 2. Kalimat yang tidak pernah boleh tampil
 
@@ -39,3 +39,4 @@ Kalimat di bawah dilarang apa pun hasil eksperimennya. Daftar lengkap istilah ya
 | 13/11/2026 | Draf pertama Phase 4; semua klaim belum boleh tampil sampai G3 |
 | 14/11/2026 | Status diperbarui setelah G3 disetujui (ADR 0012) |
 | 14/11/2026 | KL-02: X1 dipindah ke epoch 1 dengan validasi holdout (ADR 0013) |
+| 14/11/2026 | KL-10 ditolak di epoch 0 setelah E4 (ADR 0014) |

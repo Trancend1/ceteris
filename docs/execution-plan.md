@@ -139,6 +139,15 @@ Hal yang dibawa ke Phase 3:
 
 ### Phase 5 — Validasi data kotor asli dan tinjauan H1
 
+**Status: pekerjaan selesai 14/11/2026; menunggu keputusan G4 dan salinan arsip awan.**
+- E4 tidak memenuhi kriteria galat, sehingga KL-10 ditolak.
+- BR-16 lolos.
+- Holdout epoch 1 tersegel (15 dataset).
+- Epoch 0 ditutup kecuali salinan awan.
+- H1 lolos, sehingga tinjauan H1 tidak memicu fallback `product.md` 5.2.
+
+Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 0](epochs/epoch-0/closure.md).
+
 | | |
 | --- | --- |
 | Scope | E4 pada 3–5 pasangan data kotor-bersih nyata; uji konsistensi jalur akhir; penyegelan dataset holdout; penutupan epoch 0 ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)). X1 dipindah ke epoch 1 (ADR 0013 butir 3) |

@@ -31,8 +31,8 @@ Epoch tidak menggantikan sprint, phase, atau gerbang; ia mengelompokkan pekerjaa
 | Pilot E0 dan keputusan G2 | ADR 0011 | Selesai |
 | E1 korpus penuh, LODO bersarang, H1–H5 (termasuk analisis E2 dan E3 atas run store E1) | ADR 0012 | Selesai |
 | Diagnostik deskriptif yang hanya membaca run store (penyebab H3, akurasi per jenis, bin OOD, penolakan struktural) | ADR 0012 | Selesai |
-| E4 / RQ4 pada pasangan data kotor-bersih nyata | `analysis-plan.md` bagian 4 | Phase 5 |
-| Uji konsistensi jalur akhir (BR-16) | `analysis-plan.md` bagian 4 | Phase 5 |
+| E4 / RQ4 pada pasangan data kotor-bersih nyata | `analysis-plan.md` bagian 4 | Selesai 14/11/2026; tidak lolos kriteria ([ADR 0014](0014-phase-5-e4-dan-holdout.md)) |
+| Uji konsistensi jalur akhir (BR-16) | `analysis-plan.md` bagian 4 | Selesai 14/11/2026; lolos ([ADR 0014](0014-phase-5-e4-dan-holdout.md)) |
 
 Yang **tidak** termasuk epoch 0: X1 (`analysis-plan.md` bagian 10) dan setiap perubahan pada meta-model, kalibrasi, skor OOD, grid korupsi, korpus, atau learner.
 
