@@ -99,6 +99,7 @@ Ukuran pendukung H1a, dilaporkan tanpa uji: RMSE, bias, Spearman prediksi vs akt
 | 12/11/2026 | Draf pertama untuk gate G2 |
 | 12/11/2026 | Nilai P1–P9 diisi dari keputusan G2 (ADR 0011); rencana dibekukan saat G2 disetujui |
 | 14/11/2026 | Bagian 10 ditambahkan: protokol analisis eksploratif X1 (conformal ternormalisasi) setelah H3 gagal di E1 ([ADR 0012](decisions/0012-phase-4-dan-gate-g3.md)). Ditulis sebelum X1 dijalankan; bagian 1–8 dan verdict H1–H5 tidak berubah |
+| 14/11/2026 | Jadwal X1 dipindah dari Phase 5 ke epoch 1 dan validasinya memakai dataset holdout ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)). X1 belum dijalankan; metodenya tidak berubah. Rencana ini menjadi rencana analisis epoch 0 |
 
 ## 10. Analisis eksploratif setelah pembekuan
 
@@ -137,7 +138,7 @@ Analisis di bagian ini ditulis setelah hasil E1 diketahui, sehingga berlabel **e
 
 **Tafsiran:**
 - Verdict H3 tetap **tidak lolos**, apa pun hasil X1.
-- Bila X1-1 lolos, metode ini menjadi kandidat kalibrasi artefak berikutnya. KL-02 dan KL-04 tetap tertutup sampai validasi ulang di G4 (RQ4) dan keputusan pemilik repo.
+- Bila X1-1 lolos, metode ini menjadi kandidat kalibrasi artefak berikutnya. KL-02 dan KL-04 tetap tertutup sampai validasi pada dataset holdout epoch 1 dan keputusan pemilik repo ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)).
 - Bila X1-1 gagal, hasilnya dilaporkan apa adanya dan interval tetap eksperimental.
 - **Data:** run store E1 saja; tidak ada run korupsi baru. Keacakan, bila ada, memakai `derive_seed("x1", dataset_id)` (BR-84).
-- **Jadwal:** Phase 5, sebelum tinjauan hasil.
+- **Jadwal:** epoch 1, bukan Phase 5 ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md) butir 3). Selain run store E1, X1 juga dievaluasi pada dataset holdout dengan ukuran X1-1 sampai X1-5; rinciannya ditetapkan di rencana analisis epoch 1 sebelum dijalankan. Metode di atas tidak berubah.

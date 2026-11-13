@@ -1,6 +1,6 @@
 # ADR 0012: Phase 4 — korpus penuh E1, LODO bersarang, artefak v1, dan gate G3
 
-- **Status:** Diterima **[K]**. Gate G3 disetujui pemilik repo 14/11/2026: semua rekomendasi G3-1 sampai G3-7 dan opsi 3 untuk H3.
+- **Status:** Diterima **[K]**. Gate G3 disetujui pemilik repo 14/11/2026: semua rekomendasi G3-1 sampai G3-7 dan opsi 3 untuk H3. Jadwal X1 diubah oleh [ADR 0013](0013-epoch-eksperimen-dan-pelestarian.md) (dari Phase 5 ke epoch 1).
 - **Tanggal:** 13/11/2026
 - **Rilis terdampak:** R0, Phase 4
 - **Rujukan:** `execution-plan.md` Phase 4; BR-02, BR-22, BR-23, BR-24, BR-33, BR-40–BR-43, BR-64, BR-81, BR-85; ADR 0006, 0011; [analysis-plan.md](../analysis-plan.md)

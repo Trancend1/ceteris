@@ -111,6 +111,9 @@ Istilah teknis berbahasa Inggris dipertahankan bila itu bentuk yang dipakai di k
 | **E0–E4** | Eksperimen: E0 pilot, E1 akurasi, E2 dampak per jenis, E3 ketidakpastian, E4 data kotor asli dan konsistensi jalur. | — |
 | **Uji konsistensi jalur** | Pemeriksaan bahwa jalur riset dan jalur scan memberi profil dan prediksi yang sama untuk data yang sama. | BR-16 |
 | **Rencana analisis** | Dokumen bertanggal berisi uji statistik dan kriteria; dibekukan di G2. | BR-86 |
+| **Epoch** | Satu putaran eksperimen utuh: satu rencana analisis yang dibekukan, satu protokol, satu set `corpus_snapshot`, dan semua hipotesisnya dilaporkan. Refinement selalu masuk epoch berikutnya. Epoch 0 = E0–E4 menurut rencana analisis G2 ([ADR 0013](../decisions/0013-epoch-eksperimen-dan-pelestarian.md)). | BR-86 |
+| **Arsip epoch / manifest epoch** | Arsip: salinan tidak berubah dari run store, log, artefak, dan config sebuah epoch, disimpan di luar git. Manifest: daftar berkas arsip beserta SHA-256, commit, dan versi, di `docs/epochs/epoch-N/`. Setelah epoch ditutup, arsipnya hanya boleh dibaca. | AC-12 |
+| **Dataset holdout** | Dataset di luar korpus yang dipilih dan disegel sebelum refinement sebuah epoch dirancang, dan hanya dipakai untuk evaluasi konfirmatorinya. Berbeda dengan `n_holdout` di baseline (d), yaitu potongan hold-out baris di dalam satu dataset. | BR-81, BR-86 |
 
 ## 6. Proses
 

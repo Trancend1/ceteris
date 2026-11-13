@@ -141,9 +141,9 @@ Hal yang dibawa ke Phase 3:
 
 | | |
 | --- | --- |
-| Scope | E4 pada 3–5 pasangan data kotor-bersih nyata; uji konsistensi jalur akhir; analisis eksploratif X1 conformal ternormalisasi (`analysis-plan.md` bagian 10, setelah H3 gagal) |
-| Deliverable | Laporan validasi eksternal; pembaruan laporan akurasi; `ScanReport` `schema_version` 1.0 yang dibekukan untuk dikonsumsi produk |
-| Kriteria selesai | Galat ≤ 2× MAE LODO pada pasangan nyata, atau hasil negatif dilaporkan apa adanya; jalur riset dan jalur scan konsisten (BR-16); klaim akurasi pada data nyata hanya tampil sesuai bukti |
+| Scope | E4 pada 3–5 pasangan data kotor-bersih nyata; uji konsistensi jalur akhir; penyegelan dataset holdout; penutupan epoch 0 ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)). X1 dipindah ke epoch 1 (ADR 0013 butir 3) |
+| Deliverable | Laporan validasi eksternal; pembaruan laporan akurasi; `ScanReport` `schema_version` 1.0 yang dibekukan untuk dikonsumsi produk; `docs/epochs/epoch-0/` (manifest, log insight, laporan penutupan) dan arsip epoch 0 di luar git |
+| Kriteria selesai | Galat ≤ 2× MAE LODO pada pasangan nyata, atau hasil negatif dilaporkan apa adanya; jalur riset dan jalur scan konsisten (BR-16); klaim akurasi pada data nyata hanya tampil sesuai bukti; daftar holdout disegel dan epoch 0 ditutup menurut kriteria tutup ADR 0013 butir 6 |
 | **Gerbang G4** | Lihat `product.md` 5.1 |
 | **Tinjauan H1** | Bila H1 gagal, lakukan bagian 5.2 `product.md` (klaim diganti "indikasi risiko" tanpa angka) dan tinjau ulang urutan Sprint C–D sebelum melanjutkan |
 
@@ -219,6 +219,8 @@ Hal yang dibawa ke Phase 3:
 | **Ditutup [K] 12/11/2026:** `bagging_fraction` 0,8 untuk learner acuan (BR #11, [ADR 0010](decisions/0010-gate-g1.md)) | Phase 2 (G1) |
 | **Ditutup [K] 12/11/2026:** statistik noise floor dan seed probe (BR #1), kuantil conformal (BR #4), pemotongan interval (BR #5), dan mesin komputasi (arsitektur #7) ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | Phase 3 (G2) |
 | Inferensi tipe kolom input CSV (BR #12) | Phase 5 (sebelum E4) |
+| Lokasi arsip epoch dan jumlah dataset holdout ([ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)) | Phase 5 (sebelum penutupan epoch 0) |
+| Posisi epoch 1 terhadap Sprint C (ADR 0013) | Tinjauan H1 akhir Phase 5 (G4) |
 | Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | **Ditutup di G3** (ADR 0012) |
 | Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |
 | Label status UI, presisi angka, tampilan histori | Phase 9 (G6) |

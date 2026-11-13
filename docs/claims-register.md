@@ -14,7 +14,7 @@ Daftar klaim yang boleh ditampilkan produk, buktinya, dan gerbang setelah klaim 
 | ID | Klaim yang boleh tampil | Bukti yang dibutuhkan | Gerbang | Status per 14/11/2026 |
 | --- | --- | --- | --- | --- |
 | KL-01 | "ΔAUC diperkirakan X" (estimasi titik), selalu dengan kalimat kondisi BR-06 | H1a lolos di laporan E1 (`runs/e1/report.json`, `h1a`) | G3 | **Boleh tampil** (H1a lolos). Label eksperimental tingkat artefak tetap menyala karena KL-02 dan KL-04 belum dibuka (BR-35) |
-| KL-02 | "Interval 90% [lo; hi]", selalu bersama flag OOD (BR-65) | H3 lolos (`h3`) | G3 | **Ditolak** (H3 gagal). Interval tampil hanya dengan label eksperimental. Analisis eksploratif X1 di Phase 5; dibuka paling cepat di G4 (`analysis-plan.md` bagian 10) |
+| KL-02 | "Interval 90% [lo; hi]", selalu bersama flag OOD (BR-65) | H3 lolos (`h3`) | G3 | **Ditolak** (H3 gagal). Interval tampil hanya dengan label eksperimental. Analisis X1 di epoch 1; dibuka paling cepat setelah X1 lolos validasi pada dataset holdout dan disetujui pemilik repo (`analysis-plan.md` bagian 10, [ADR 0013](decisions/0013-epoch-eksperimen-dan-pelestarian.md)) |
 | KL-03 | "Estimasi ini setara dengan melatih ulang bertingkat, dengan biaya jauh lebih murah" | H1b lolos (`h1b`) | G3 | **Boleh tampil** (H1b lolos) |
 | KL-04 | Status `material`, `tidak_material`, atau `tidak_yakin` dari interval dan `T` | H1a dan H3 lolos; G3-1 diputuskan (`T` dari noise floor estimasi atau lantai 0,01) | G3 | **Tampil dengan label eksperimental** (H3 gagal). `material` → warn, bukan block (BR-51) |
 | KL-05 | "Skor OOD tinggi: estimasi kurang andal" | H4 lolos (`h4`); ambang G3-2 diputuskan | G3 | **Belum boleh tampil.** H4 lolos lemah dan tidak monoton; ambang p95 dipakai hanya untuk memaksa `tidak_yakin` (BR-33) |
@@ -38,3 +38,4 @@ Kalimat di bawah dilarang apa pun hasil eksperimennya. Daftar lengkap istilah ya
 | --- | --- |
 | 13/11/2026 | Draf pertama Phase 4; semua klaim belum boleh tampil sampai G3 |
 | 14/11/2026 | Status diperbarui setelah G3 disetujui (ADR 0012) |
+| 14/11/2026 | KL-02: X1 dipindah ke epoch 1 dengan validasi holdout (ADR 0013) |
