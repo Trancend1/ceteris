@@ -24,6 +24,13 @@
 4. **Bucket dibuat oleh API dan worker lewat klien S3** saat konteks proses dibangun (`S3ObjectStore.ensure_bucket`). Ini menggantikan layanan `minio-init` (`mc`) yang ikut hilang.
 5. **Backend `local:<folder>` tetap didukung** sebagai alternatif tanpa S3 untuk self-host satu mesin. Compose bawaan memakai SeaweedFS agar jalur S3 benar-benar teruji.
 
+## Validasi **[F]** (14/11/2026)
+
+- `docker compose up --build` dengan `chrislusf/seaweedfs:4.53`: layanan `objectstore` sehat.
+- Registry dan snapshot tersimpan di bucket `ceteris`.
+- Scan lewat API container dan worker selesai `done`.
+- Uji `integration` lulus, termasuk pembuatan bucket `ceteris-it` lewat `S3ObjectStore.ensure_bucket`.
+
 ## Konsekuensi
 
 - `architecture.md` (tabel kontainer dan stack), ADR 0018, backlog R1 US8.3, dan `compose.yaml` diselaraskan.

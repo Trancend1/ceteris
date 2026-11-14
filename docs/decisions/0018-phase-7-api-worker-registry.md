@@ -82,12 +82,15 @@
   - uji impor AC-3 yang diperluas ke server.
 - **Pemeriksaan statis:** ruff dan mypy strict bersih untuk `ceteris` dan `ceteris_server`.
 - **Uji asap lokal:** artefak `metamodel-1.0.0` dirilis ke registry lokal. Uvicorn lalu memindai satu dataset korpus lewat `POST /v1/scans` sampai berstatus `done` dalam ±5 detik, dengan `trace_id` tercatat di log.
-- **Belum dijalankan:** `docker compose up` dan uji `integration` dengan Postgres, Redis, dan MinIO sungguhan, karena daemon Docker tidak berjalan di mesin pengembangan per 14/11/2026. `docker compose config` valid.
+- **Docker Compose (14/11/2026, setelah [ADR 0019](0019-object-store-seaweedfs.md)):**
+  - `docker compose up --build` menjalankan Postgres, Redis, SeaweedFS, API, dan worker; semua layanan sehat.
+  - Artefak `1.0.0` dirilis ke registry di SeaweedFS.
+  - Scan satu dataset korpus lewat API container dan worker RQ selesai `done` dalam ±9 detik. ΔAUC-nya identik dengan uji asap lokal, dan `trace_id` tercatat di log worker.
+  - Uji `integration` (`pytest -m integration`) lulus terhadap Postgres, Redis, dan SeaweedFS sungguhan, termasuk pembuatan bucket lewat klien S3.
 
 ## Konsekuensi
 
 - Phase 8 menambah login (US8.1), histori (US2.1), penyimpanan profil untuk BR-62, migrasi berversi, dan uji beban NFR-1.
-- Kriteria Phase 7 yang bergantung pada layanan sungguhan baru tuntas setelah uji `integration` dan `docker compose up` dijalankan.
 
 ## Alternatif yang ditolak
 
