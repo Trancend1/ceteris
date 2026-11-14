@@ -18,7 +18,8 @@ from __future__ import annotations
 import json
 import sys
 import uuid
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, Final, Literal
 
@@ -138,6 +139,34 @@ def decide_status(
 # --- orkestrasi scan (F-S13) ---
 
 
+@dataclass(frozen=True)
+class ProfileEstimate:
+    """Estimasi dari satu profil: dipakai scan baru dan estimasi ulang profil lama (BR-62)."""
+
+    delta: float
+    interval: tuple[float, float]
+    ood_score: float
+    status: StatusValue
+    reasons: list[str]
+
+
+def estimate_from_profile(
+    features: Mapping[str, float],
+    artifact: Artifact,
+    threshold: float,
+    *,
+    leakage_flagged: bool,
+) -> ProfileEstimate:
+    """Satu jalur estimasi dari fitur profil: ΔAUC, interval, OOD, dan status (BR-30–BR-34)."""
+    delta = artifact.predict(features)
+    lo, hi = artifact.interval(delta)
+    ood_score = artifact.ood_score(features)
+    value, reasons = decide_status(
+        lo, hi, threshold, ood_high=artifact.ood_high(ood_score), leakage_flagged=leakage_flagged
+    )
+    return ProfileEstimate(delta, (lo, hi), ood_score, value, reasons)
+
+
 def scan(
     data: pd.DataFrame,
     target: str,
@@ -151,25 +180,29 @@ def scan(
     parsial (BR-10, BR-11). Profil dihitung dengan seed tetap (BR-12, AC-12) dan dicocokkan
     dengan versi artefak (BR-23).
     """
+    return scan_with_profile(data, target, artifact, scan_id, extra_warnings)[0]
+
+
+def scan_with_profile(
+    data: pd.DataFrame,
+    target: str,
+    artifact: Artifact,
+    scan_id: str | None = None,
+    extra_warnings: Sequence[str] = (),
+) -> tuple[ScanReport, ScanProfile]:
+    """Seperti `scan`, ditambah profil agregat yang disimpan platform untuk BR-62."""
     profile = compute_profile(data, target, learner=artifact.learner, seed=PROFILE_SEED)
     artifact.check_profile(profile.schema_version)
     meta = artifact.metadata
-    delta = artifact.predict(profile.features)
-    lo, hi = artifact.interval(delta)
-    ood_score = artifact.ood_score(profile.features)
     aucs = estimate_noise_floor(
         data, target, learner=artifact.learner, seeds=noise_floor_seeds(meta.noise_floor_seeds)
     )
     noise_floor = noise_floor_value(aucs, meta.noise_floor_statistic)
     threshold = materiality_threshold(noise_floor)
-    value, reasons = decide_status(
-        lo,
-        hi,
-        threshold,
-        ood_high=artifact.ood_high(ood_score),
-        leakage_flagged=profile.leakage.flagged,
+    est = estimate_from_profile(
+        profile.features, artifact, threshold, leakage_flagged=profile.leakage.flagged
     )
-    return ScanReport(
+    report = ScanReport(
         scan_id=scan_id or f"scn_{uuid.uuid4().hex}",
         model=ModelInfo(
             version=meta.version,
@@ -177,13 +210,16 @@ def scan(
             profile_schema_version=meta.profile_schema_version,
         ),
         estimate=Estimate(
-            delta=delta,
+            delta=est.delta,
             delta_relative=artifact.predict_relative(profile.features),
-            interval_90=(lo, hi),
-            ood_score=ood_score,
+            interval_90=est.interval,
+            ood_score=est.ood_score,
         ),
         status=Status(
-            value=value, threshold=threshold, noise_floor_estimated=noise_floor, reasons=reasons
+            value=est.status,
+            threshold=threshold,
+            noise_floor_estimated=noise_floor,
+            reasons=est.reasons,
         ),
         findings=findings_for(data, target, profile.features, artifact),
         input_warnings=[
@@ -193,6 +229,21 @@ def scan(
         ],
         condition=CONDITION,
     )
+    stored = ScanProfile(
+        profile_schema_version=profile.schema_version,
+        features=dict(profile.features),
+        leakage_flagged=profile.leakage.flagged,
+    )
+    return report, stored
+
+
+@dataclass(frozen=True)
+class ScanProfile:
+    """Profil agregat sebuah scan (tanpa data mentah, AC-6), untuk estimasi ulang BR-62."""
+
+    profile_schema_version: str
+    features: dict[str, float]
+    leakage_flagged: bool
 
 
 def findings_for(
@@ -262,9 +313,16 @@ def scan_file(
     path: Path, target: str, artifact_path: Path, scan_id: str | None = None
 ) -> ScanReport:
     """Python API: baca berkas, muat artefak, dan jalankan scan."""
+    return scan_file_with_profile(path, target, artifact_path, scan_id)[0]
+
+
+def scan_file_with_profile(
+    path: Path, target: str, artifact_path: Path, scan_id: str | None = None
+) -> tuple[ScanReport, ScanProfile]:
+    """Seperti `scan_file`, ditambah profil agregat (dipakai worker platform, BR-62)."""
     data = read_table(path)
     extra = csv_type_warnings(data, target) if Path(path).suffix.lower() == ".csv" else []
-    return scan(data, target, load_artifact(artifact_path), scan_id, extra)
+    return scan_with_profile(data, target, load_artifact(artifact_path), scan_id, extra)
 
 
 # --- CLI ---

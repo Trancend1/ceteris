@@ -20,17 +20,15 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 
 from ceteris.scan import ScanReport
-from ceteris_server.api import create_app
 from ceteris_server.objects import object_store
 from ceteris_server.registry import RegistryPublisher
 from ceteris_server.settings import Settings
 from ceteris_server.worker import RQQueue, build_context
 from tests.conftest import SmallPilot
 from tests.test_scan import _dirty_frame
-from tests.test_server import ACCURACY
+from tests.test_server import ACCURACY, authed_client
 
 pytestmark = pytest.mark.integration
 
@@ -50,7 +48,7 @@ def test_full_scan_through_postgres_redis_and_s3(small_pilot: SmallPilot) -> Non
     context = build_context(
         Settings(**{**settings.__dict__, "artifact_version": "0.0.1-test"}), queue
     )
-    client = TestClient(create_app(context))
+    client = authed_client(context, email="integrasi@example.com")
     frame, _ = _dirty_frame(small_pilot, 0)
     buffer = io.BytesIO()
     frame.to_parquet(buffer, index=False)

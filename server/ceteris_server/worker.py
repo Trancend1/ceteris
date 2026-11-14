@@ -16,8 +16,17 @@ from typing import Any, Protocol
 
 from ceteris.artifact import ArtifactError
 from ceteris.dqprofile import InputContractError
-from ceteris.scan import ScanReport, scan_file
-from ceteris_server.db import Database, Finding, ImpactEstimate, ModelVersion, Scan, new_id, now
+from ceteris.scan import ScanProfile, ScanReport, scan_file_with_profile
+from ceteris_server.db import (
+    Database,
+    Finding,
+    ImpactEstimate,
+    ModelVersion,
+    Scan,
+    ScanProfileRow,
+    new_id,
+    now,
+)
 from ceteris_server.logs import configure_logging
 from ceteris_server.objects import ObjectStore, ObjectStoreError, object_store
 from ceteris_server.registry import Registry, RegistryError
@@ -51,7 +60,7 @@ def build_context(settings: Settings | None = None, queue: JobQueue | None = Non
     cfg = settings or Settings()
     store = object_store(cfg)
     db = Database(cfg.database_url)
-    db.create_all()
+    db.migrate()
     context = ServerContext(cfg, db, store, Registry(store, cfg.artifact_cache))
     context.queue = queue or (RQQueue(cfg.redis_url) if cfg.redis_url else SyncQueue())
     _CONTEXT = context
@@ -112,7 +121,7 @@ def run_scan(scan_id: str, trace_id: str = "") -> str:
         snapshot_key, target = scan.snapshot_key, _target(session, scan)
     log.info("scan mulai", extra=extra)
     try:
-        report = _scan(context, snapshot_key, target, scan_id)
+        report, profile = _scan(context, snapshot_key, target, scan_id)
     except InputContractError as err:
         return _fail(context, scan_id, "input_contract", str(err), list(err.reasons), extra)
     except (ArtifactError, RegistryError) as err:
@@ -122,7 +131,7 @@ def run_scan(scan_id: str, trace_id: str = "") -> str:
     except Exception as err:  # galat tak terduga tetap tercatat, bukan hilang diam-diam
         log.exception("scan gagal", extra=extra)
         return _fail(context, scan_id, "internal", type(err).__name__, [], extra)
-    _store_report(context, scan_id, report)
+    _store_report(context, scan_id, report, profile)
     log.info("scan selesai", extra={**extra, "status": report.status.value})
     return "done"
 
@@ -134,13 +143,15 @@ def _target(session: Any, scan: Scan) -> str:
     return str(dataset.target)
 
 
-def _scan(context: ServerContext, snapshot_key: str, target: str, scan_id: str) -> ScanReport:
+def _scan(
+    context: ServerContext, snapshot_key: str, target: str, scan_id: str
+) -> tuple[ScanReport, ScanProfile]:
     artifact_dir = context.registry.fetch(context.settings.artifact_version or None)
     suffix = PurePosixPath(snapshot_key).suffix
     with tempfile.TemporaryDirectory(prefix="ceteris-scan-") as tmp:
         local = Path(tmp) / f"snapshot{suffix}"
         context.store.download(snapshot_key, local)
-        return scan_file(local, target, artifact_dir, scan_id)
+        return scan_file_with_profile(local, target, artifact_dir, scan_id)
 
 
 def _fail(
@@ -160,7 +171,9 @@ def _fail(
     return "failed"
 
 
-def _store_report(context: ServerContext, scan_id: str, report: ScanReport) -> None:
+def _store_report(
+    context: ServerContext, scan_id: str, report: ScanReport, profile: ScanProfile
+) -> None:
     payload = report.model_dump(mode="json")
     model = report.model
     with context.db.session() as session:
@@ -178,6 +191,14 @@ def _store_report(context: ServerContext, scan_id: str, report: ScanReport) -> N
             return
         scan.status, scan.finished_at = "done", now()
         scan.model_version, scan.report = model.version, payload
+        session.add(
+            ScanProfileRow(
+                scan_id=scan_id,
+                profile_schema_version=profile.profile_schema_version,
+                features=profile.features,
+                leakage_flagged=profile.leakage_flagged,
+            )
+        )
         for rank, item in enumerate(report.findings):
             session.add(
                 Finding(

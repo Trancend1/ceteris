@@ -189,6 +189,11 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 
 ### Phase 8 — Histori, login, dan self-host
 
+**Status: implementasi selesai 14/11/2026; NFR-1 tidak lolos tipis dan G5 menunggu pemilik repo** ([ADR 0020](decisions/0020-phase-8-histori-login-self-host.md)).
+- Login akun lokal dan token, histori dan perbandingan (BR-61, BR-62), migrasi Alembic, TLS lewat Caddy, CI, dan panduan [self-host](self-host.md) sudah ada; semuanya tervalidasi di Docker Compose.
+- Uji beban NFR-1: median 304,6 detik, batasnya 300 detik.
+- Helm chart ditunda (K1).
+
 | | |
 | --- | --- |
 | Scope | F-L03 histori dan perbandingan antar-scan, F-L05 login dan paket self-host |
