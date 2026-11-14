@@ -6,9 +6,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
+# Pembaruan keamanan Debian ikut dipasang (NFR-6: Trivy menolak kerentanan HIGH yang sudah ada
+# perbaikannya). setuptools dan wheel milik Python sistem dihapus: aplikasi berjalan dari .venv
+# hasil uv, sedangkan paket bawaan itu membawa dependensi rentan (jaraco.context, wheel).
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && python -m pip uninstall -y setuptools wheel
 
 COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /usr/local/bin/uv
 
