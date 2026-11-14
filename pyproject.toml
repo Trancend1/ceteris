@@ -26,6 +26,8 @@ ceteris = "ceteris.scan:app"
 
 [project.optional-dependencies]
 server = [
+    "alembic>=1.13",
+    "argon2-cffi>=23.1",
     "fastapi>=0.115",
     "minio>=7.2",
     "pg8000>=1.31",
@@ -64,10 +66,11 @@ packages = ["ceteris", "server/ceteris_server"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = [".", "server"]
-addopts = "-ra --strict-markers -m 'not network and not integration'"
+addopts = "-ra --strict-markers -m 'not network and not integration and not load'"
 markers = [
     "network: uji yang menghubungi OpenML; jalankan manual dengan -m network",
-    "integration: uji dengan Postgres, Redis, dan MinIO sungguhan (Docker Compose)",
+    "integration: uji dengan Postgres, Redis, dan object store S3 sungguhan (Docker Compose)",
+    "load: uji beban NFR-1; jalankan manual dengan -m load",
 ]
 
 [tool.coverage.run]
@@ -87,6 +90,10 @@ line-ending = "lf"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI memakai pemanggilan ini sebagai nilai bawaan parameter dependensi.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Form", "fastapi.File"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["ceteris", "ceteris_server", "tests"]

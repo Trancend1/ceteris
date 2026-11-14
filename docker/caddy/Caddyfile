@@ -1,0 +1,10 @@
+# Reverse proxy TLS untuk API Ceteris (NFR-5, ADR 0020).
+# CETERIS_DOMAIN kosong atau "localhost": sertifikat dari CA internal Caddy (jaringan lokal).
+# Domain publik: sertifikat otomatis (ACME). Caddy memakai TLS 1.2 sebagai versi minimum.
+{$CETERIS_DOMAIN:localhost} {
+	encode gzip
+	request_body {
+		max_size 520MB
+	}
+	reverse_proxy api:8000
+}

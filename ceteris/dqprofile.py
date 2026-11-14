@@ -11,9 +11,10 @@ untuk versi bersih atau level korupsi (BR-20, AC-2).
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+import threading
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -163,10 +164,13 @@ def compute_profile(
     learner: LearnerSpec,
     seed: int,
     config: ProfileConfig | None = None,
+    n_jobs: int = 1,
 ) -> QualityProfile:
     """Terapkan kontrak input (BR-10–BR-17) lalu hitung quality profile v1 dari data kotor.
 
-    Pelanggaran berat menghasilkan `InputContractError` tanpa profil parsial.
+    Pelanggaran berat menghasilkan `InputContractError` tanpa profil parsial. `n_jobs` hanya
+    memengaruhi waktu probe kebocoran (thread untuk pohon scikit-learn), bukan hasilnya; fit
+    LightGBM selalu berurutan (ADR 0020).
     """
     cfg = config or ProfileConfig()
     prepared = prepare_input(dirty, target, cfg)
@@ -190,7 +194,9 @@ def compute_profile(
     values["outlier_row_frac_iforest"] = _iforest_rate(sample, features, sub_seed(seed, "iforest"))
     values.update(_duplicate_type_features(frame, target, features))
 
-    leakage = _leakage_probe(sample, target, features, cfg, label_noise, sub_seed(seed, "leakage"))
+    leakage = _leakage_probe(
+        sample, target, features, cfg, label_noise, sub_seed(seed, "leakage"), n_jobs
+    )
     warnings = list(prepared.warnings)
     if leakage.flagged:
         warnings.append(f"target_leakage_suspected: {leakage.feature}")
@@ -439,21 +445,53 @@ def _missing_features(
 
 
 def _missing_feature_assoc(frame: pd.DataFrame, features: list[str], rates: pd.Series) -> float:
-    """Asosiasi missingness dengan fitur numerik lain (indikasi MAR): |Spearman| maksimum."""
+    """Asosiasi missingness dengan fitur numerik lain (indikasi MAR): |Spearman| maksimum.
+
+    Nilainya identik dengan `Series.corr(method="spearman")` (pasangan lengkap, lalu
+    `scipy.stats.spearmanr`), tetapi peringkat tiap kolom numerik dihitung sekali dan peringkat
+    indikator biner dihitung dengan rumus tertutup peringkat rata-rata (NFR-1, ADR 0020).
+    """
+    from scipy.stats import rankdata
+
     numeric = [c for c in features if _is_numeric(frame[c])]
     with_missing = rates[rates > 0].sort_values(ascending=False).index[:MAX_ASSOC_COLUMNS]
+    cache: dict[str, tuple[np.ndarray, np.ndarray | None]] = {}
     best = 0.0
     for name in with_missing:
-        indicator = pd.Series(frame[name].isna().to_numpy(dtype="float64"))
-        if indicator.std() == 0:
+        indicator = frame[name].isna().to_numpy(dtype="float64")
+        if pd.Series(indicator).std() == 0:
             continue
         for other in numeric:
             if other == name:
                 continue
-            corr = indicator.corr(_as_float(frame[other]), method="spearman")
-            if not pd.isna(corr):
-                best = max(best, abs(float(corr)))
+            if other not in cache:
+                values = _as_float(frame[other]).to_numpy()
+                valid = ~np.isnan(values)
+                kept = values[valid]
+                constant = len(kept) <= 1 or bool((kept[0] == kept).all())
+                cache[other] = (valid, None if constant else rankdata(kept))
+            valid, other_rank = cache[other]
+            corr = _spearman_binary(indicator[valid], other_rank)
+            if not np.isnan(corr):
+                best = max(best, abs(corr))
     return best
+
+
+def _spearman_binary(indicator: np.ndarray, other_rank: np.ndarray | None) -> float:
+    """`spearmanr(indicator, other)[0]` untuk indikator 0/1 dengan peringkat `other` yang sudah ada.
+
+    Mengikuti `scipy.stats.spearmanr`: input konstan atau ≤ 1 observasi memberi NaN; peringkat
+    rata-rata untuk nilai seri; `np.corrcoef` atas dua kolom lalu elemen [1, 0].
+    """
+    n = len(indicator)
+    if other_rank is None or n <= 1:
+        return float("nan")
+    n_zero = int((indicator == 0.0).sum())
+    if n_zero in (0, n):
+        return float("nan")
+    ind_rank = np.where(indicator == 0.0, 0.5 * (n_zero + 0 + 1), 0.5 * (n + n_zero + 1))
+    ranked = np.column_stack((ind_rank, other_rank))
+    return float(np.corrcoef(ranked, rowvar=False)[1, 0])
 
 
 def _as_float(column: pd.Series) -> pd.Series:
@@ -572,6 +610,7 @@ def _leakage_probe(
     config: ProfileConfig,
     label_noise: float,
     seed: int,
+    n_jobs: int = 1,
 ) -> LeakageResult:
     """AUC satu fitur dengan pohon keputusan dangkal dan validasi silang berstrata."""
     from sklearn.model_selection import StratifiedKFold
@@ -588,14 +627,39 @@ def _leakage_probe(
         threshold = config.leakage_auc
     best_feature: str | None = None
     best_auc: float | None = None
-    for name in features:
-        auc = single_feature_auc(sample[name], y, folds, config, seed)
+    lock = threading.Lock()
+
+    def feature_auc(name: str) -> float:
+        with lock:  # salinan kolom per thread; DataFrame bersama tidak diakses paralel
+            column = sample[name].copy()
+        return single_feature_auc(column, y, folds, config, seed)
+
+    aucs = _thread_map(feature_auc, features, n_jobs)
+    for name, auc in zip(features, aucs, strict=True):
         if best_auc is None or auc > best_auc:
             best_feature, best_auc = name, auc
     flagged = best_auc is not None and best_auc >= threshold
     return LeakageResult(
         flagged=flagged, feature=best_feature, auc=best_auc, threshold=float(threshold)
     )
+
+
+_T = TypeVar("_T")
+_R = TypeVar("_R")
+
+
+def _thread_map(fn: Callable[[_T], _R], items: Sequence[_T], n_jobs: int) -> list[_R]:
+    """`map` dengan thread untuk pekerjaan scikit-learn yang aman di thread; urutan hasil tetap.
+
+    Tidak dipakai untuk LightGBM: pelatihan LightGBM dari beberapa thread dalam satu proses
+    menyebabkan access violation (ADR 0020).
+    """
+    if n_jobs <= 1 or len(items) <= 1:
+        return [fn(item) for item in items]
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=min(n_jobs, len(items))) as pool:
+        return list(pool.map(fn, items))
 
 
 def single_feature_auc(

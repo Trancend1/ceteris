@@ -65,6 +65,24 @@ def _context(
     return build_context(settings, queue or SyncQueue())  # type: ignore[arg-type]
 
 
+PASSWORD = "kata-sandi-uji-12"
+
+
+def authed_client(context: ServerContext, email: str = "uji@example.com") -> TestClient:
+    """Klien API yang sudah membawa token API pengguna uji (US8.1)."""
+    from ceteris_server.auth import create_user, issue_token
+    from ceteris_server.db import User
+
+    with context.db.session() as session:
+        user = session.query(User).filter_by(email=email).one_or_none()
+        if user is None:
+            user = create_user(session, email, PASSWORD)
+        token = issue_token(session, user, "api", "uji").token
+    client = TestClient(create_app(context))
+    client.headers["Authorization"] = f"Bearer {token}"
+    return client
+
+
 def _upload(client: TestClient, frame: pd.DataFrame, name: str = "data.parquet") -> dict:
     dataset = client.post("/v1/datasets", json={"name": "churn", "target": "class"}).json()
     buffer = io.BytesIO()
@@ -145,7 +163,7 @@ def test_object_store_rejects_path_traversal(tmp_path: Path) -> None:
 def test_ac5_rest_report_is_identical_to_cli(small_pilot: SmallPilot, tmp_path: Path) -> None:
     """AC-5: `ScanReport` dari REST sama dengan dari `scan_file` (CLI dan Python API)."""
     context = _context(tmp_path, small_pilot)
-    client = TestClient(create_app(context))
+    client = authed_client(context)
     frame, _ = _dirty_frame(small_pilot, 0)
     created = _upload(client, frame)
     scan_id = created["id"]
@@ -163,7 +181,7 @@ def test_ac5_rest_report_is_identical_to_cli(small_pilot: SmallPilot, tmp_path: 
 def test_ac6_metadata_store_holds_no_raw_rows(small_pilot: SmallPilot, tmp_path: Path) -> None:
     """AC-6: metadata store hanya berisi hasil agregat; snapshot ada di object store."""
     context = _context(tmp_path, small_pilot)
-    client = TestClient(create_app(context))
+    client = authed_client(context)
     frame, _ = _dirty_frame(small_pilot, 0)
     scan_id = _upload(client, frame)["id"]
     with context.db.session() as session:
@@ -185,7 +203,7 @@ def test_input_contract_failure_is_reported_not_raised(
     small_pilot: SmallPilot, tmp_path: Path
 ) -> None:
     context = _context(tmp_path, small_pilot)
-    client = TestClient(create_app(context))
+    client = authed_client(context)
     frame = pd.DataFrame({"x": range(50), "class": ["a"] * 50})  # satu kelas: BR-11
     scan = _upload(client, frame)
     status = client.get(f"/v1/scans/{scan['id']}").json()
@@ -198,7 +216,7 @@ def test_input_contract_failure_is_reported_not_raised(
 
 def test_api_errors_use_the_error_envelope(small_pilot: SmallPilot, tmp_path: Path) -> None:
     context = _context(tmp_path, small_pilot, queue=RecordingQueue())
-    client = TestClient(create_app(context))
+    client = authed_client(context)
     missing = client.get("/v1/scans/scn_nope")
     assert missing.status_code == 404 and missing.json()["error"]["code"] == "not_found"
     bad = client.post("/v1/datasets", json={"name": ""})
@@ -220,7 +238,7 @@ def test_api_errors_use_the_error_envelope(small_pilot: SmallPilot, tmp_path: Pa
 def test_k5_upload_above_the_limit_is_rejected(small_pilot: SmallPilot, tmp_path: Path) -> None:
     queue = RecordingQueue()
     context = _context(tmp_path, small_pilot, queue=queue, max_upload_bytes=1000)
-    client = TestClient(create_app(context))
+    client = authed_client(context)
     dataset = client.post("/v1/datasets", json={"name": "d", "target": "class"}).json()
     big = client.post(
         "/v1/scans", data={"dataset_id": dataset["id"]}, files={"file": ("a.csv", b"x" * 1001)}
@@ -232,7 +250,7 @@ def test_k5_upload_above_the_limit_is_rejected(small_pilot: SmallPilot, tmp_path
 def test_nfr9_trace_id_reaches_the_job(small_pilot: SmallPilot, tmp_path: Path) -> None:
     queue = RecordingQueue()
     context = _context(tmp_path, small_pilot, queue=queue)
-    client = TestClient(create_app(context))
+    client = authed_client(context)
     frame, _ = _dirty_frame(small_pilot, 0)
     scan = _upload(client, frame)
     assert scan["status"] == "queued"
@@ -243,7 +261,7 @@ def test_nfr9_trace_id_reaches_the_job(small_pilot: SmallPilot, tmp_path: Path) 
 def test_nfr2_sync_endpoints_p95_under_300ms(small_pilot: SmallPilot, tmp_path: Path) -> None:
     """NFR-2 (indikatif, in-process): p95 endpoint sinkron ≤ 300 ms."""
     context = _context(tmp_path, small_pilot, queue=RecordingQueue())
-    client = TestClient(create_app(context))
+    client = authed_client(context)
     dataset = client.post("/v1/datasets", json={"name": "d", "target": "class"}).json()
     scan = client.post(
         "/v1/scans",
@@ -261,7 +279,7 @@ def test_nfr2_sync_endpoints_p95_under_300ms(small_pilot: SmallPilot, tmp_path: 
 def test_report_contract_matches_the_frozen_schema(small_pilot: SmallPilot, tmp_path: Path) -> None:
     """BR-60, AC-10: OpenAPI `/v1` memakai `ScanReport` yang sama dengan snapshot kontrak 1.0."""
     context = _context(tmp_path, small_pilot, queue=RecordingQueue())
-    spec = TestClient(create_app(context)).get("/openapi.json").json()
+    spec = authed_client(context).get("/openapi.json").json()
     route = spec["paths"]["/v1/scans/{scan_id}/report"]["get"]["responses"]["200"]
     assert route["content"]["application/json"]["schema"]["$ref"].endswith("/ScanReport")
     stored = json.loads(
@@ -272,7 +290,13 @@ def test_report_contract_matches_the_frozen_schema(small_pilot: SmallPilot, tmp_
     assert set(served["properties"]) == set(stored["properties"])
     assert set(spec["paths"]) == {
         "/v1/health",
+        "/v1/auth/login",
+        "/v1/auth/logout",
+        "/v1/me",
+        "/v1/tokens",
+        "/v1/tokens/{token_id}",
         "/v1/datasets",
+        "/v1/datasets/{dataset_id}/scans",
         "/v1/scans",
         "/v1/scans/{scan_id}",
         "/v1/scans/{scan_id}/report",
@@ -288,7 +312,7 @@ def test_rq_queue_runs_the_scan_job(small_pilot: SmallPilot, tmp_path: Path) -> 
 
     queue = RQQueue("redis://unused", name="scans-test", connection=fakeredis.FakeRedis())
     context = _context(tmp_path, small_pilot, queue=queue)
-    client = TestClient(create_app(context))
+    client = authed_client(context)
     frame, _ = _dirty_frame(small_pilot, 0)
     scan = _upload(client, frame)
     assert scan["status"] == "queued"

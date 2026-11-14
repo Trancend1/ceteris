@@ -45,6 +45,7 @@ Empat prinsip menurunkan semua keputusan di bawah:
 | Object store | S3-compatible (SeaweedFS untuk self-host; [ADR 0019](decisions/0019-object-store-seaweedfs.md)) | Snapshot Parquet data yang dipindai, laporan HTML | — | R1 |
 | Model registry | Bucket object store + manifest ([ADR 0018](decisions/0018-phase-7-api-worker-registry.md)) | Artefak meta-model, kalibrator, referensi OOD, laporan akurasi; gate rilis BR-63 | Menerima artefak tanpa metadata wajib | R1 |
 | Web UI | Next.js + shadcn/ui (kerangka) + ECharts (grafik; [ADR 0003](decisions/0003-web-ui-shadcn.md)) | Laporan, dashboard, pengaturan kebijakan | Menghitung status sendiri | R1 |
+| Reverse proxy | Caddy | TLS 1.2+ ke luar host; satu-satunya layanan yang dibuka ke jaringan pada self-host ([ADR 0020](decisions/0020-phase-8-histori-login-self-host.md) K2) | Menyimpan data atau menghitung apa pun | R1 |
 
 Pada **R0** hanya ada SDK/CLI. Model registry digantikan folder rilis, metadata store dan object store digantikan run store Parquet + DuckDB.
 
@@ -178,14 +179,14 @@ Metadata wajib setiap artefak model: `profile_schema_version`, `learner_spec_ver
 | Store | Isi | Teknologi | Mulai |
 | --- | --- | --- | --- |
 | Run store (offline) | `corpus_dataset`, `experiment_config`, `corruption_run`, `noise_floor` (satu baris per seed, terukur atau estimasi; Phase 3), `baseline_d_run` (baseline (d) per run; Phase 3), `ablation_run` (satu baris per run campuran dan jenis yang dipulihkan; Phase 4), `lodo_result` (prediksi, interval, dan skor OOD LODO bersarang, satu berkas per metode dan dataset uji; Phase 4), `run_log`; berkas pendamping `lodo_recovery.parquet` dan `lodo_timing.parquet` | Parquet + DuckDB | R0 |
-| Metadata store (online) | `dataset`, `scan`, `finding`, `impact_estimate`, `model_version` (R1); `simulation`, `gate_policy`, `gate_run`, `audit_log` (R2); `source_connection` (R3); `feedback`, `trust_signal`, `data_contract` (R4); `cost_model` (R5) | Postgres | R1 |
+| Metadata store (online) | `dataset`, `scan`, `finding`, `impact_estimate`, `model_version`, `scan_profile` (fitur profil agregat untuk BR-62), `app_user`, `api_token` (R1); `simulation`, `gate_policy`, `gate_run`, `audit_log` (R2); `source_connection` (R3); `feedback`, `trust_signal`, `data_contract` (R4); `cost_model` (R5). Skema lewat migrasi Alembic (ADR 0020) | Postgres | R1 |
 | Object store | Snapshot data yang dipindai (dirujuk lewat `snapshot_uri`), laporan HTML | S3-compatible | R1 |
 
 `impact_estimate.finding_id = null` berarti estimasi total scan. Estimasi dipertahankan untuk audit, sehingga scan dihapus lewat *soft delete* (`deleted_at`).
 
 ### 6.4 API
 
-Semua endpoint di bawah `/v1`, memakai bearer token (pengguna) atau token layanan (CI), tanpa alias endpoint draf awal ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K6), dan mengembalikan galat dalam bentuk `{"error": {"code", "message", "details"}}`.
+Semua endpoint di bawah `/v1` memakai bearer token (sesi login atau token API; `GET /v1/health` dan `POST /v1/auth/login` terbuka; ADR 0020), tanpa alias endpoint draf awal ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K6), dan mengembalikan galat dalam bentuk `{"error": {"code", "message", "details"}}`.
 
 | Endpoint | Fungsi | Fitur | Rilis |
 | --- | --- | --- | --- |
@@ -193,6 +194,8 @@ Semua endpoint di bawah `/v1`, memakai bearer token (pengguna) atau token layana
 | `POST /scans` · `GET /scans/{id}` | Membuat scan (202) dan membaca statusnya | F-L01 | R1 |
 | `GET /scans/{id}/report` | `ScanReport` v1 (`?format=json\|html`) | F-L01, F-L02 | R1 |
 | `GET /datasets/{id}/scans` | Histori dan perbandingan terakhir | F-L03 | R1 |
+| `POST /auth/login` · `POST /auth/logout` · `GET /me` | Login akun lokal (token sesi 12 jam) dan identitas pemanggil | F-L05 | R1 |
+| `POST /tokens` · `GET /tokens` · `DELETE /tokens/{id}` | Token API pribadi (SDK, CI) | F-L05 | R1 |
 | `POST /scans/{id}/simulate` | Simulasi what-if | F-L07 | R2 |
 | `POST /gate/check` · `GET /gate/{gate_run_id}` | Meminta dan membaca keputusan gate | F-L06 | R2 |
 | `POST /findings/import` · `POST /sources` | Impor temuan Soda/GX; mendaftarkan koneksi | F-L10 | R3 |
@@ -286,7 +289,7 @@ Untuk R0 berlaku tambahan **reprodusibilitas**: seed turunan ([BR-84](business-r
 | --- | --- | --- | --- |
 | Lokal | Paket `ceteris` (`pip` atau image Docker) | Satu-satunya bentuk di R0 | R0 |
 | Self-host kecil | Docker Compose di satu VM | Tim kecil dan uji coba | R1 |
-| Self-host produksi | Helm chart di Kubernetes | Worker diskalakan horizontal | R1 |
+| Self-host produksi | Helm chart di Kubernetes | Ditunda; R1 hanya Docker Compose ([ADR 0020](decisions/0020-phase-8-histori-login-self-host.md) K1) | Setelah R1 |
 | Hosted | Cluster yang dikelola tim produk | Demo dan pengguna individu; retensi ≤ 24 jam. Tidak dibangun di R1 ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K2) | Ditinjau setelah R1 |
 
 | Lapisan | Pilihan |

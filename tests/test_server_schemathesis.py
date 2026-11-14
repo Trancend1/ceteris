@@ -30,16 +30,22 @@ def api_schema(tmp_path_factory: pytest.TempPathFactory) -> schemathesis.Schema:
         ),
         RecordingQueue(),
     )
+    from ceteris_server.auth import create_user, issue_token
+
+    with context.db.session() as session:
+        user = create_user(session, "st@example.com", "kata-sandi-uji-12")
+        TOKEN["value"] = issue_token(session, user, "api", "schemathesis").token
     return schemathesis.openapi.from_asgi("/openapi.json", create_app(context))
 
 
+TOKEN: dict[str, str] = {}
 schema = schemathesis.pytest.from_fixture("api_schema")
 
 
 @schema.parametrize()
 @settings(max_examples=25, deadline=None, suppress_health_check=list(HealthCheck))
 def test_api_conforms_to_its_openapi(case: schemathesis.Case) -> None:
-    response = case.call()
+    response = case.call(headers={"Authorization": f"Bearer {TOKEN['value']}"})
     if case.path.endswith("/report") and response.status_code == 501:
         return
     # Penolakan kontrak input (BR-10, ADR 0016 K5) tidak bisa dinyatakan di skema multipart:

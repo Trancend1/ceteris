@@ -1,13 +1,14 @@
 """Metadata store online (architecture.md 6.3): dataset, scan, finding, impact_estimate,
-model_version.
+model_version, scan_profile, app_user, api_token.
 
 Postgres di Docker Compose dan produksi; SQLite untuk pengembangan dan uji. Store ini tidak
 menyimpan data mentah yang dipindai (AC-6): snapshot hanya di object store, dirujuk lewat
 `snapshot_uri`; yang tersimpan di sini hanya hasil agregat `ScanReport`. Store online terpisah dari
 run store riset (AC-11).
 
-Skema dibuat dengan `create_all` di R1 (ADR 0018); migrasi berversi menyusul bila skema mulai
-berubah setelah data pengguna ada.
+Skema dikelola migrasi berversi Alembic (`ceteris_server/migrations`, ADR 0020): proses API dan
+worker menjalankan `Database.migrate()` saat mulai. `scan_profile` hanya berisi fitur profil
+agregat untuk estimasi ulang BR-62, bukan data mentah.
 """
 
 from __future__ import annotations
@@ -117,6 +118,49 @@ class ImpactEstimate(Base):
     model_version: Mapped[str] = mapped_column(ForeignKey("model_version.version"))
 
 
+class ScanProfileRow(Base):
+    """Profil agregat sebuah scan (BR-62): fitur profil, bukan baris data (AC-6)."""
+
+    __tablename__ = "scan_profile"
+
+    scan_id: Mapped[str] = mapped_column(ForeignKey("scan.id"), primary_key=True)
+    profile_schema_version: Mapped[str] = mapped_column(String(32))
+    features: Mapped[dict[str, float]] = mapped_column(JSON)
+    leakage_flagged: Mapped[bool] = mapped_column(Boolean)
+
+
+class User(Base):
+    """Akun lokal R1 (ADR 0016 K4). Kata sandi disimpan sebagai hash Argon2id."""
+
+    __tablename__ = "app_user"
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    email: Mapped[str] = mapped_column(String(320), unique=True)
+    password_hash: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ApiToken(Base):
+    """Token bearer: `session` (login Web UI, 12 jam) atau `api` (SDK/CI, sampai dicabut).
+
+    Hanya hash SHA-256 token yang disimpan; teks token ditampilkan sekali saat dibuat.
+    """
+
+    __tablename__ = "api_token"
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("app_user.id"))
+    kind: Mapped[str] = mapped_column(String(16))
+    name: Mapped[str] = mapped_column(String(200))
+    prefix: Mapped[str] = mapped_column(String(16))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class Database:
     """Engine dan pabrik sesi; satu per proses."""
 
@@ -129,8 +173,24 @@ class Database:
         self.engine: Engine = create_engine(url, **kwargs)
         self._sessions = sessionmaker(self.engine, expire_on_commit=False)
 
-    def create_all(self) -> None:
-        Base.metadata.create_all(self.engine)
+    def migrate(self) -> None:
+        """Jalankan migrasi Alembic sampai revisi terbaru (ADR 0020).
+
+        Basis data yang dibuat Phase 7 dengan `create_all` (ada tabel `scan` tanpa
+        `alembic_version`) ditandai berada di revisi awal lebih dulu, lalu dinaikkan.
+        """
+        from alembic import command
+        from alembic.config import Config
+        from sqlalchemy import inspect
+
+        config = Config()
+        config.set_main_option("script_location", str(Path(__file__).parent / "migrations"))
+        with self.engine.begin() as connection:
+            config.attributes["connection"] = connection
+            tables = set(inspect(connection).get_table_names())
+            if "scan" in tables and "alembic_version" not in tables:
+                command.stamp(config, "0001")
+            command.upgrade(config, "head")
 
     @contextmanager
     def session(self) -> Iterator[Session]:

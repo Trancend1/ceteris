@@ -1,0 +1,62 @@
+# CI Ceteris (NFR-6, ADR 0020): lint, tipe, uji, SAST, audit dependensi, lisensi, dan pemindaian
+# image di setiap PR dan push ke main.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+      - run: uv sync --frozen --all-extras
+      - run: uv run ruff check ceteris server tests
+      - run: uv run ruff format --check ceteris server tests
+      - run: uv run mypy
+      - run: uv run pytest -q
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+      - run: uv sync --frozen --all-extras --no-dev
+      - name: SAST (Semgrep)
+        run: uvx --from semgrep semgrep scan --config p/python --error --exclude tests ceteris server
+      - name: Audit dependensi (pip-audit)
+        run: |
+          uv export --frozen --all-extras --no-dev --no-emit-project --format requirements-txt > requirements.txt
+          uvx pip-audit --strict --disable-pip -r requirements.txt
+      - name: Lisensi dependensi (tolak GPL/AGPL, ADR 0016 K3)
+        run: >
+          uv run --with pip-licenses pip-licenses --partial-match
+          --fail-on "GNU General Public License;GNU Affero General Public License;AGPL"
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f docker/Dockerfile -t ceteris:ci .
+      - name: Pindai image (Trivy)
+        # v0.36.0, dikunci ke SHA commit (tag rilis lama pernah dibuat ulang; jangan pakai tag).
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: ceteris:ci
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"

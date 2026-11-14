@@ -44,16 +44,21 @@ def ctx_for(frame: pd.DataFrame) -> CorruptionContext:
 @pytest.mark.parametrize(
     ("function", "allowed"),
     [
-        (compute_profile, ["dirty", "target", "learner", "seed", "config"]),
+        (compute_profile, ["dirty", "target", "learner", "seed", "config", "n_jobs"]),
         (estimate_noise_floor, ["dirty", "target", "learner", "seeds", "config"]),
     ],
 )
 def test_br20_profile_accepts_only_one_dirty_dataset(function: object, allowed: list[str]) -> None:
-    """AC-2: daftar parameter tertutup; tidak ada jalur untuk versi bersih, konteks, atau level."""
+    """AC-2: daftar parameter tertutup; tidak ada jalur untuk versi bersih, konteks, atau level.
+
+    `n_jobs` (ADR 0020, NFR-1) hanya jumlah thread eksekusi, bukan data.
+    """
     params = inspect.signature(function).parameters  # type: ignore[arg-type]
     assert list(params) == allowed
     frames = [p for p in params.values() if "DataFrame" in str(p.annotation)]
     assert [p.name for p in frames] == ["dirty"]
+    if "n_jobs" in params:
+        assert str(params["n_jobs"].annotation) == "int" and params["n_jobs"].default == 1
 
 
 def test_profile_has_every_v1_feature_and_is_deterministic(fast_learner: LearnerSpec) -> None:
