@@ -1,6 +1,6 @@
 # ADR 0020: Phase 8 — histori, login, dan self-host
 
-- **Status:** Diterima **[K]** oleh pemilik repo 14/11/2026 (butir K1–K3). Rincian pelaksanaan diusulkan agent dan ditinjau lewat PR.
+- **Status:** Diterima **[K]** oleh pemilik repo 14/11/2026 (butir K1–K3). Rincian pelaksanaan diusulkan agent dan ditinjau lewat PR. **Gate G5 disetujui pemilik repo 15/11/2026**: OpenAPI `/v1` dibekukan pada snapshot `tests/contracts/openapi_v1.json`.
 - **Tanggal:** 14/11/2026
 - **Rilis terdampak:** R1, Phase 8, gerbang G5
 - **Rujukan:** `execution-plan.md` Phase 8; [backlog R1](../backlog/r1.md) US2.1, US8.1, US8.3; [ADR 0016](0016-paket-keputusan-pra-r1.md) K2, K4; [ADR 0018](0018-phase-7-api-worker-registry.md); [ADR 0019](0019-object-store-seaweedfs.md); BR-61, BR-62, BR-71, BR-72; AC-6, AC-10; NFR-1, NFR-5, NFR-6, NFR-7, NFR-9, NFR-10
@@ -105,7 +105,7 @@ Profiling satu scan 100.000 × 100 (334 detik dengan profiler): noise floor esti
 
 ## Konsekuensi
 
-- G5 menunggu persetujuan pemilik repo: OpenAPI `/v1` dibekukan, uji kontrak lulus, self-host berjalan dari repository bersih.
+- G5 disetujui 15/11/2026. Mulai saat ini, perubahan OpenAPI `/v1` yang merusak hanya boleh di versi mayor (AC-10), dan perubahan lain wajib memperbarui snapshot beserta catatan di ADR.
 - Panduan operator ada di `docs/self-host.md`.
 
 ## Alternatif yang ditolak
