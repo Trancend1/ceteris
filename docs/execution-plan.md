@@ -6,7 +6,7 @@ Penanda: **[F]** fakta terverifikasi · **[K]** keputusan desain · **[T]** terb
 
 ## 1. Prinsip
 
-1. **Berurutan.** Satu phase dimulai hanya setelah kriteria selesai phase sebelumnya terpenuhi. Tidak ada tanggal atau durasi; yang ada hanya rilis, gerbang, dan kriteria keluar (AGENTS.md bagian 4).
+1. **Berurutan.** Satu phase dimulai hanya setelah kriteria selesai phase sebelumnya terpenuhi. Tidak ada tanggal atau durasi; yang ada hanya rilis, gerbang, dan kriteria keluar (AGENTS.md bagian 4). Pengecualian: jalur riset epoch 1 berjalan sejajar dengan Phase 6–8 ([ADR 0015](decisions/0015-epoch-1-sejajar-sprint-c.md)).
 2. **Gerbang terakhir adalah Web UI R1 (G7).** Rencana ini berhenti di sana. Gate CI (R2), dashboard dan trust (R4), konektor (R3), dan KPI pengguna R1 berada di luar rencana ini.
 3. **Desain mendahului visual.** Tidak ada kode UI, instalasi Next.js, mockup visual, atau komponen sebelum dokumen desain UI disetujui (G6). Phase 9 hanya menghasilkan dokumen; Phase 10–11 hanya boleh dimulai setelah persetujuan tertulis pemilik repo.
 4. **Klaim mengikuti bukti.** Semua angka mode learned berlabel *eksperimental* sampai G3 (BR-35). Hasil negatif diterima dan dilaporkan apa adanya.
@@ -160,6 +160,11 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 
 ## Sprint C — Platform R1
 
+**Jalur sejajar: epoch 1** ([ADR 0015](decisions/0015-epoch-1-sejajar-sprint-c.md)).
+- Epoch 1 berjalan bersamaan dengan Phase 6–8 tanpa saling menahan: rencana analisis epoch 1 dibekukan, sisi model, sisi data, evaluasi pada holdout, lalu penutupan epoch 1 (ADR 0013).
+- Selama Phase 7–8, platform memakai artefak `1.0.0`.
+- Uji 5 ML engineer untuk kriteria keluar R1 menunggu epoch 1 ditutup.
+
 ### Phase 6 — Keputusan pra-R1 dan backlog
 
 | | |
@@ -229,7 +234,7 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 | **Ditutup [K] 12/11/2026:** statistik noise floor dan seed probe (BR #1), kuantil conformal (BR #4), pemotongan interval (BR #5), dan mesin komputasi (arsitektur #7) ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | Phase 3 (G2) |
 | Inferensi tipe kolom input CSV (BR #12) | **Ditutup [K] 14/11/2026** ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)) |
 | Lokasi arsip epoch dan jumlah dataset holdout | **Ditutup [K] 14/11/2026** ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)) |
-| Posisi epoch 1 terhadap Sprint C (ADR 0013) | Tinjauan H1 akhir Phase 5 (G4) |
+| Posisi epoch 1 terhadap Sprint C | **Ditutup [K] 14/11/2026:** sejajar dengan Phase 6–8 ([ADR 0015](decisions/0015-epoch-1-sejajar-sprint-c.md)) |
 | Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | **Ditutup di G3** (ADR 0012) |
 | Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |
 | Label status UI, presisi angka, tampilan histori | Phase 9 (G6) |
@@ -240,7 +245,8 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 | Risiko | Dampak | Mitigasi |
 | --- | --- | --- |
 | H1 gagal | Sprint C–D berubah isi | Tinjauan H1 di akhir Phase 5; klaim diganti "indikasi risiko" |
-| Pasangan data kotor-bersih untuk E4 sulit didapat | G4 tertahan, menunda Sprint C | **[T]** pilihan: tetap berurutan, atau mulai Phase 6 setelah G3 dan jalankan E4 paralel. Rencana ini memakai urutan ketat |
-| Estimasi kebanyakan `tidak_yakin` karena OOD | UI menampilkan terlalu banyak rentang tanpa titik | Ukur sejak Phase 5; perluas korpus bila perlu |
+| Pasangan data kotor-bersih untuk E4 sulit didapat | G4 tertahan, menunda Sprint C | **Selesai:** E4 dijalankan berurutan pada pasangan CleanML sekunder, dan G4 disetujui 14/11/2026 ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)) |
+| Estimasi kebanyakan `tidak_yakin` karena OOD | UI menampilkan terlalu banyak rentang tanpa titik | Terbukti di epoch 0 (86% `tidak_yakin`; E4 seluruhnya OOD). Epoch 1 berjalan sejajar dan uji pengguna R1 menunggu artefak epoch 1 (ADR 0015) |
+| Epoch 1 tertunda atau tidak menghasilkan artefak yang lebih baik | Uji pengguna R1 tertahan atau memakai artefak `1.0.0` | Phase produk tetap berjalan; keputusan memakai `1.0.0` dicatat (ADR 0015 butir 3) |
 | Komputasi korpus penuh (62.000–72.000 fit LightGBM) melebihi mesin yang ada | Phase 4 tertahan | Putuskan mesin di Phase 3 |
 | Desain UI disetujui terlambat | Sprint D tertahan | Phase 9 hanya berisi dokumen sehingga persetujuan bisa disiapkan sejak G5 tercapai; G6 tetap mendahului Phase 10 |
