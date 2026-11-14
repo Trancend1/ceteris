@@ -59,6 +59,19 @@
 
 `tests/test_load_nfr1.py` (marker `load`) memindai 100.000 baris × 100 kolom sintetis tiga kali dengan artefak `metamodel-1.0.0` dan mensyaratkan median ≤ 5 menit.
 
+### Optimasi scan untuk NFR-1 (hasil tidak berubah)
+
+Profiling satu scan 100.000 × 100 (334 detik dengan profiler): noise floor estimasi 169 detik (25 fit LightGBM), Spearman indikator missing 70,5 detik, probe out-of-fold ±33 detik, probe kebocoran 30,6 detik. Semua fit LightGBM berjalan berurutan dengan 1 thread, karena `configs/learner.yaml` memakai `num_threads: 1` (dibekukan di G1).
+
+- **Spearman indikator missing** (`_missing_feature_assoc`) kini menghitung peringkat tiap kolom numerik sekali saja. Peringkat indikator 0/1 dihitung dengan rumus tertutup peringkat rata-rata, lalu `np.corrcoef` dipanggil atas dua kolom seperti `scipy.stats.spearmanr`. Hasilnya identik bit demi bit dengan `Series.corr(method="spearman")` milik profil v1 (`tests/test_parallel_identical.py`).
+- **Probe kebocoran** menjalankan pohon scikit-learn per fitur di thread (`CETERIS_SCAN_THREADS`, bawaan jumlah inti; hanya jalur scan). Setiap thread memakai salinan kolomnya sendiri, dan urutan pemilihan fitur terbaik tetap. Jalur riset tetap berurutan.
+- **Fit LightGBM tetap berurutan.** Dua pendekatan dicoba lalu ditolak **[F]**:
+  - Thread untuk fit LightGBM menyebabkan *access violation* di kode C LightGBM saat beberapa thread melatih bersamaan. Terjadi pada uji konsistensi jalur di dataset 1497 dan 40701, dengan stack trace dari `faulthandler`.
+  - Pool proses memang aman dari crash, tetapi di Windows memakai *spawn*: skrip yang memanggil Python API tanpa pelindung `if __name__ == "__main__"` menjalankan ulang dirinya tanpa henti. Biaya membuat pool juga melambatkan data kecil.
+
+  Risiko itu tidak sebanding dengan percepatannya.
+- **Hasil:** scan tetap deterministik dan profilnya tidak berubah. Uji konsistensi jalur terhadap fitur profil di run store E1 dijalankan ulang untuk membuktikannya (bagian Validasi).
+
 ## Validasi **[F]** (14/11/2026)
 
 - **Uji otomatis:** 237 lulus. Uji baru mencakup login, token, kedaluwarsa sesi, kebijakan kata sandi, kata sandi dan token tidak masuk log, BR-61, BR-62 (model sama dan estimasi ulang), migrasi dari skema Phase 7, dan snapshot OpenAPI. Schemathesis mencakup 12 endpoint dan menemukan header `Allow` 405 yang tidak lengkap; bug itu sudah diperbaiki. Ruff dan mypy strict bersih.
@@ -77,11 +90,14 @@
   - pip-audit: tidak ada kerentanan yang diketahui.
   - Tidak ada dependensi berlisensi GPL atau AGPL.
   - Trivy dan job CI di GitHub belum dijalankan, karena CI baru aktif saat PR dibuka.
-- **NFR-1: tidak lolos, tipis.**
-  - Tiga scan 100.000 × 100 memakan 331,4, 304,6, dan 293,9 detik, sehingga mediannya 304,6 detik, di atas batas 300 detik.
-  - Diukur di mesin pengembangan 4 inti yang sedang menjalankan layanan Docker lain.
-  - Target NFR-1 adalah usulan awal yang disesuaikan setelah uji beban R1 (`architecture.md` 8); penyesuaian atau optimasi butuh keputusan pemilik repo **[T]**.
-  - Batas uji tidak diubah.
+- **NFR-1, pengukuran pertama: tidak lolos, tipis.** Tiga scan 100.000 × 100 memakan 331,4, 304,6, dan 293,9 detik; mediannya 304,6 detik, di atas batas 300 detik. Diukur di mesin pengembangan 4 inti yang sedang menjalankan layanan Docker lain.
+- **NFR-1, setelah optimasi (pilihan pemilik repo): lolos.**
+  - Tiga scan memakan 264,1, 260,0, dan 260,7 detik; mediannya 260,7 detik, dengan sisa ruang sekitar 13%. Kondisi mesinnya sama.
+  - Batas uji tidak diubah. Kedua pengukuran tercatat; pengukuran kedua tidak menggantikan yang pertama.
+- **Profil tidak berubah setelah optimasi:** uji konsistensi jalur (`python -m ceteris.validation paths`, 15/11/2026) lulus pada 31 dari 31 dataset korpus.
+  - Profil scan identik dengan fitur di run store E1, dan selisih prediksinya 0.
+  - Selisih estimasi CSV identik dengan run `eaeb979`.
+  - Run ini memakai kode optimasi yang belum di-commit (`git_dirty` true di laporan). Kode yang di-commit sama dengan kode itu.
 
 ## Konsekuensi
 

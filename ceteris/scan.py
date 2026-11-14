@@ -16,6 +16,7 @@ CSV dibaca dengan tipe apa adanya; kolom integer bernilai unik sedikit diberi pe
 from __future__ import annotations
 
 import json
+import os
 import sys
 import uuid
 from collections.abc import Mapping, Sequence
@@ -139,6 +140,17 @@ def decide_status(
 # --- orkestrasi scan (F-S13) ---
 
 
+def scan_threads() -> int:
+    """Jumlah thread probe kebocoran (`CETERIS_SCAN_THREADS`, bawaan: jumlah inti).
+
+    Hanya memengaruhi waktu scan, bukan hasilnya (NFR-1, AC-12, ADR 0020).
+    """
+    configured = os.environ.get("CETERIS_SCAN_THREADS", "").strip()
+    if configured:
+        return max(1, int(configured))
+    return max(1, os.cpu_count() or 1)
+
+
 @dataclass(frozen=True)
 class ProfileEstimate:
     """Estimasi dari satu profil: dipakai scan baru dan estimasi ulang profil lama (BR-62)."""
@@ -191,7 +203,10 @@ def scan_with_profile(
     extra_warnings: Sequence[str] = (),
 ) -> tuple[ScanReport, ScanProfile]:
     """Seperti `scan`, ditambah profil agregat yang disimpan platform untuk BR-62."""
-    profile = compute_profile(data, target, learner=artifact.learner, seed=PROFILE_SEED)
+    n_jobs = scan_threads()
+    profile = compute_profile(
+        data, target, learner=artifact.learner, seed=PROFILE_SEED, n_jobs=n_jobs
+    )
     artifact.check_profile(profile.schema_version)
     meta = artifact.metadata
     aucs = estimate_noise_floor(
