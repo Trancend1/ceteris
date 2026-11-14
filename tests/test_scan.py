@@ -265,3 +265,21 @@ def test_br12_csv_scan_reports_warning_but_parquet_does_not(
     from_csv = scan_file(csv, "class", small_pilot.artifact_dir, "s")
     assert "csv_integer_low_cardinality: nominal_code" in from_csv.input_warnings
     assert not any(w.startswith("csv_") for w in from_parquet.input_warnings)
+
+
+@pytest.mark.parametrize(
+    ("n_rows", "warned"), [(1999, True), (2000, False), (50000, False), (50001, True)]
+)
+def test_k5_outside_corpus_range_is_a_warning_only(n_rows: int, warned: bool) -> None:
+    """ADR 0016 K5: data di luar 2.000-50.000 baris diterima dengan peringatan."""
+    from ceteris.scan import corpus_range_warnings
+
+    warnings = corpus_range_warnings(n_rows)
+    assert bool(warnings) is warned
+    assert all(w.startswith("outside_corpus_range:") for w in warnings)
+
+
+def test_k5_small_scan_reports_outside_corpus_range(small_pilot: SmallPilot) -> None:
+    frame, _ = _dirty_frame(small_pilot, 0)  # 400 baris latih: di bawah rentang korpus
+    report = scan(frame, "class", load_artifact(small_pilot.artifact_dir), scan_id="s")
+    assert any(w.startswith("outside_corpus_range:") for w in report.input_warnings)

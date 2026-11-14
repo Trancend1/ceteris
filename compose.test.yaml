@@ -1,0 +1,10 @@
+# Override untuk uji integrasi: buka Postgres, Redis, dan object store S3 ke host (hanya 127.0.0.1).
+#   docker compose -f compose.yaml -f compose.test.yaml up -d --build
+#   uv run pytest -m integration tests/test_server_integration.py
+services:
+  postgres:
+    ports: ["127.0.0.1:5432:5432"]
+  redis:
+    ports: ["127.0.0.1:6379:6379"]
+  objectstore:
+    ports: ["127.0.0.1:8333:8333"]

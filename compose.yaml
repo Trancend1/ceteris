@@ -1,0 +1,73 @@
+# Ceteris R1 self-host kecil (architecture.md 10; ADR 0016 K2, ADR 0018, ADR 0019).
+# Kredensial di bawah hanya untuk pengembangan lokal. Ganti lewat berkas .env sebelum dipakai
+# tim; jangan commit .env (NFR-5).
+name: ceteris
+
+x-ceteris-env: &ceteris-env
+  CETERIS_DATABASE_URL: postgresql+pg8000://${POSTGRES_USER:-ceteris}:${POSTGRES_PASSWORD:-ceteris-dev}@postgres:5432/${POSTGRES_DB:-ceteris}
+  CETERIS_REDIS_URL: redis://redis:6379/0
+  CETERIS_OBJECT_STORE: s3://${CETERIS_BUCKET:-ceteris}
+  CETERIS_S3_ENDPOINT: objectstore:8333
+  CETERIS_S3_ACCESS_KEY: ${S3_ACCESS_KEY:-ceteris}
+  CETERIS_S3_SECRET_KEY: ${S3_SECRET_KEY:-ceteris-dev-secret}
+  CETERIS_S3_SECURE: "false"
+  CETERIS_ARTIFACT_VERSION: ${CETERIS_ARTIFACT_VERSION:-}
+  CETERIS_ARTIFACT_CACHE: /tmp/ceteris-artifacts
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ceteris}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ceteris-dev}
+      POSTGRES_DB: ${POSTGRES_DB:-ceteris}
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  objectstore:
+    # Object store S3-compatible (SeaweedFS, Apache-2.0; ADR 0019). Bucket dibuat oleh API/worker.
+    image: chrislusf/seaweedfs:4.53
+    entrypoint: ["/bin/sh", "/ceteris/entrypoint.sh"]
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-ceteris}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-ceteris-dev-secret}
+    volumes:
+      - objectstore-data:/data
+      - ./docker/objectstore/entrypoint.sh:/ceteris/entrypoint.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:9333/cluster/status && nc -z 127.0.0.1 8333"]
+      interval: 5s
+      retries: 20
+
+  api:
+    build: {context: ., dockerfile: docker/Dockerfile}
+    environment: *ceteris-env
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      objectstore: {condition: service_healthy}
+    volumes: ["./artifacts:/artifacts:ro"]
+
+  worker:
+    build: {context: ., dockerfile: docker/Dockerfile}
+    command: ["rq", "worker", "scans", "--url", "redis://redis:6379/0"]
+    environment: *ceteris-env
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      objectstore: {condition: service_healthy}
+
+volumes:
+  postgres-data:
+  objectstore-data:

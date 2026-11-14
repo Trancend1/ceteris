@@ -1,0 +1,12 @@
+.venv
+data
+runs
+artifacts
+.git
+.skripsi
+.hypothesis
+.pytest_cache
+.mypy_cache
+.ruff_cache
+**/__pycache__
+.env
