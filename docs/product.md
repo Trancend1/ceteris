@@ -124,7 +124,7 @@ Roadmap **tidak memakai tanggal**. Sebuah rilis selesai ketika kriteria keluarny
 | Horizon | Rilis | Tujuan | Fitur | Kriteria keluar |
 | --- | --- | --- | --- | --- |
 | **Now** | R0 | Bukti ilmiah mode learned | F-S01–F-S14 | Artefak model v1 dirilis (G3); validasi eksternal dan uji konsistensi jalur lulus (G4) |
-| **Next** | R1 Scan untuk tim | Tim ML memakai scan tanpa peneliti | F-L01–F-L05 | 5 ML engineer menjalankan scan pada data sendiri; NFR-1, NFR-5, NFR-7, NFR-10 terpenuhi |
+| **Next** | R1 Scan untuk tim | Tim ML memakai scan tanpa peneliti | F-L01–F-L05 | 5 ML engineer menjalankan scan pada data sendiri, setelah epoch 1 ditutup ([ADR 0015](decisions/0015-epoch-1-sejajar-sprint-c.md)); NFR-1, NFR-5, NFR-7, NFR-10 terpenuhi |
 | **Next** | R2 Gate | Scan menjadi keputusan di pipeline | F-L06–F-L09 | Gate dipakai di ≥ 2 pipeline nyata; tidak ada block keliru yang tidak terjelaskan |
 | **Later** | R3 Kontrol | Data engineer terlayani | F-L10, F-L11, multi-tenant | 1 design partner warehouse memakai promotion gate |
 | **Later** | R4 Trust dan exact | Dampak per tabel dan per metrik bisnis | F-L12–F-L14 | Mode exact divalidasi bersama design partner; dashboard akurasi lapangan aktif |

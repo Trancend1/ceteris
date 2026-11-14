@@ -84,7 +84,8 @@ Urutan rekomendasi yang disetujui pemilik repo. Rencana analisis v2 menetapkan u
    - skor OOD alternatif, diukur dengan H4 dan kemonotonan per desil;
    - monotone constraint meta-model untuk potensi pemulihan negatif, hanya bila syarat non-inferiority MAE (margin ditetapkan di rencana v2) ditulis lebih dulu, karena perubahan ini menyentuh H1a.
 2. **Sisi data, butuh run baru:** level korupsi yang lebih kuat, outlier untuk kolom kategorikal, dataset dengan noise floor > 0,01 untuk H5, dan learner kedua (`analysis-plan.md` bagian 8).
-3. **Konfirmasi:** semua perubahan dievaluasi pada dataset holdout. Hasil pada 31 dataset korpus epoch 0 berlabel eksploratif.
+3. **Jenis kekotoran nyata di luar grid korupsi** (ditambahkan [ADR 0015](0015-epoch-1-sejajar-sprint-c.md)): inkonsistensi representasi nilai kategorikal, dari hasil E4. Butir ini butuh skema profil v2 dan run ulang korpus, dan diukur sebagai lengan tersendiri **[T]** (masuk epoch 1 atau ditunda, diputuskan di rencana analisis epoch 1).
+4. **Konfirmasi:** semua perubahan dievaluasi pada dataset holdout. Hasil pada 31 dataset korpus epoch 0 berlabel eksploratif.
 
 Kedua sisi diukur sebagai lengan terpisah terhadap epoch 0 sebagai pembanding, agar setiap efek bisa diatribusikan ke perubahannya. Perluasan level korupsi tidak dibingkai sebagai perbaikan H2: dampak MCAR yang kecil pada LightGBM adalah temuan epoch 0 yang sah.
 
@@ -94,7 +95,7 @@ Kedua sisi diukur sebagai lengan terpisah terhadap epoch 0 sebagai pembanding, a
 | --- | --- | --- | --- |
 | 1 | **Ditutup [K] 14/11/2026:** dua salinan, lokal dan awan ([ADR 0014](0014-phase-5-e4-dan-holdout.md)) | — | — |
 | 2 | **Ditutup [K] 14/11/2026:** ±15 dataset ([ADR 0014](0014-phase-5-e4-dan-holdout.md)) | — | — |
-| 3 | Posisi epoch 1 terhadap Sprint C | Diputuskan di tinjauan H1 akhir Phase 5 | G4 |
+| 3 | **Ditutup [K] 14/11/2026:** sejajar dengan Phase 6–8; uji pengguna R1 menunggu epoch 1 ([ADR 0015](0015-epoch-1-sejajar-sprint-c.md)) | — | — |
 
 ## Konsekuensi
 
