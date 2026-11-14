@@ -167,6 +167,8 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 
 ### Phase 6 — Keputusan pra-R1 dan backlog
 
+**Status: selesai 14/11/2026.** Semua hal terbuka berbatas "Sebelum R1" ditutup di [ADR 0016](decisions/0016-paket-keputusan-pra-r1.md), dan backlog R1 ada di [backlog/r1.md](backlog/r1.md). Draf Long-MVP tidak tersedia, sehingga backlog direkonstruksi dari dokumen repository.
+
 | | |
 | --- | --- |
 | Scope | Menutup semua hal terbuka berbatas "Sebelum R1"; menulis backlog R1 |
@@ -236,7 +238,8 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 | Lokasi arsip epoch dan jumlah dataset holdout | **Ditutup [K] 14/11/2026** ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md)) |
 | Posisi epoch 1 terhadap Sprint C | **Ditutup [K] 14/11/2026:** sejajar dengan Phase 6–8 ([ADR 0015](decisions/0015-epoch-1-sejajar-sprint-c.md)) |
 | Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | **Ditutup di G3** (ADR 0012) |
-| Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | Phase 6 |
+| Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | **Ditutup [K] 14/11/2026** ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md)) |
+| Batas fitur terbuka vs komersial (ADR 0016 K3) | Sebelum fitur komersial pertama (paling cepat R2) |
 | Label status UI, presisi angka, tampilan histori | Phase 9 (G6) |
 | Perilaku gate saat layanan mati (`fail_mode`), keputusan gate untuk scan ditolak (BR #8), tabel effort (BR #9) | Di luar rencana ini (sebelum R2) |
 
