@@ -203,7 +203,7 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 | | |
 | --- | --- |
 | Scope | Desain F-L02 (unggah lewat web dan laporan HTML). **Tidak ada kode, instalasi, atau visual hi-fi.** |
-| Deliverable | Dokumen desain UI di `docs/` (alur pengguna dari unggah sampai laporan; arsitektur informasi; wireframe low-fidelity; inventaris komponen shadcn/ui per layar sesuai ADR 0003; spesifikasi tiap grafik ECharts; keadaan kosong, memuat, galat, dan penolakan kontrak input; aturan tampil ketidakpastian dan status `tidak_yakin`; rencana aksesibilitas; rencana pengujian UI); ADR bila ada keputusan baru |
+| Deliverable | Dokumen desain UI di `docs/design/ui-design.md`, dengan wireframe dari FigCraft bila syaratnya terpenuhi ([ADR 0017](decisions/0017-rencana-mcp-figcraft-untuk-wireframe.md)) (alur pengguna dari unggah sampai laporan; arsitektur informasi; wireframe low-fidelity; inventaris komponen shadcn/ui per layar sesuai ADR 0003; spesifikasi tiap grafik ECharts; keadaan kosong, memuat, galat, dan penolakan kontrak input; aturan tampil ketidakpastian dan status `tidak_yakin`; rencana aksesibilitas; rencana pengujian UI); ADR bila ada keputusan baru |
 | Keputusan yang harus ditutup | **[T]** label status UI terhadap BR-50/BR-51 dan presisi ΔAUC, tanda, koma desimal, format tanggal (ADR 0003, pedoman 7 dan 8); apakah tampilan histori (F-L03) masuk UI R1; kalimat kondisi (BR-06) dan label eksperimental (BR-35) selalu menyertai angka |
 | Kriteria selesai | Setiap layar punya daftar komponen dan keadaan; setiap grafik punya data masukan yang dipetakan ke field `ScanReport`; tidak ada kebutuhan UI yang menghitung status sendiri |
 | **Gerbang G6** | Lihat `product.md` 5.3. **Tanpa G6, Phase 10 dan 11 tidak dimulai** |
