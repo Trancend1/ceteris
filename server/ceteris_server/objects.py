@@ -1,7 +1,9 @@
 """Object store: snapshot data yang dipindai dan berkas registry (architecture.md 6.3).
 
 Dua implementasi dengan antarmuka yang sama: folder lokal (pengembangan, uji, self-host satu
-mesin) dan S3-compatible lewat klien MinIO (Docker Compose, produksi).
+mesin) dan S3-compatible lewat klien `minio` sebagai klien S3 generik (SeaweedFS di Docker Compose,
+ADR 0019). Hanya API S3 dasar yang dipakai (bucket, put, get, stat) agar layanan S3 lain, misalnya
+Cloudflare R2, tetap bisa dipakai tanpa perubahan kode.
 """
 
 from __future__ import annotations
@@ -79,7 +81,7 @@ class LocalObjectStore:
 
 
 class S3ObjectStore:
-    """Object store S3-compatible (MinIO untuk self-host)."""
+    """Object store S3-compatible; bucket dibuat bila belum ada (ADR 0019)."""
 
     def __init__(self, bucket: str, settings: Settings) -> None:
         from minio import Minio
@@ -91,6 +93,11 @@ class S3ObjectStore:
             secret_key=settings.s3_secret_key,
             secure=settings.s3_secure,
         )
+
+    def ensure_bucket(self) -> None:
+        """Buat bucket bila belum ada; menggantikan langkah inisialisasi terpisah di compose."""
+        if not self.client.bucket_exists(self.bucket):
+            self.client.make_bucket(self.bucket)
 
     def put_file(self, key: str, path: Path) -> None:
         self.client.fput_object(self.bucket, _check_key(key), str(path))
@@ -137,5 +144,7 @@ def object_store(settings: Settings) -> ObjectStore:
     if spec.startswith("local:"):
         return LocalObjectStore(Path(spec.removeprefix("local:")))
     if spec.startswith("s3://"):
-        return S3ObjectStore(spec.removeprefix("s3://").strip("/"), settings)
+        store = S3ObjectStore(spec.removeprefix("s3://").strip("/"), settings)
+        store.ensure_bucket()
+        return store
     raise ObjectStoreError(f"CETERIS_OBJECT_STORE tidak dikenal: {spec!r}")

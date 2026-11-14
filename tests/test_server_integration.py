@@ -1,15 +1,16 @@
-"""Uji integrasi dengan Postgres, Redis, dan MinIO sungguhan (marker `integration`).
+"""Uji integrasi dengan Postgres, Redis, dan object store S3 sungguhan (marker `integration`).
 
-Jalankan setelah `docker compose up -d postgres redis minio minio-init`, dengan variabel
+Jalankan setelah `docker compose -f compose.yaml -f compose.test.yaml up -d`, dengan variabel
 `CETERIS_*` menunjuk ke layanan itu dari host, misalnya:
 
     CETERIS_DATABASE_URL=postgresql+pg8000://ceteris:ceteris-dev@localhost:5432/ceteris
     CETERIS_REDIS_URL=redis://localhost:6379/0
-    CETERIS_OBJECT_STORE=s3://ceteris  CETERIS_S3_ENDPOINT=localhost:9000
+    CETERIS_OBJECT_STORE=s3://ceteris-it  CETERIS_S3_ENDPOINT=localhost:8333
     CETERIS_S3_ACCESS_KEY=ceteris  CETERIS_S3_SECRET_KEY=ceteris-dev-secret
     uv run pytest -m integration tests/test_server_integration.py
 
-Port layanan harus dibuka ke host untuk uji ini (compose bawaan hanya membuka API).
+`compose.test.yaml` membuka port layanan ke host. Bucket `ceteris-it` dibuat lewat klien S3 saat
+konteks dibangun (ADR 0019), sehingga uji ini juga menguji pembuatan bucket.
 """
 
 from __future__ import annotations
@@ -34,7 +35,7 @@ from tests.test_server import ACCURACY
 pytestmark = pytest.mark.integration
 
 
-def test_full_scan_through_postgres_redis_and_minio(small_pilot: SmallPilot) -> None:
+def test_full_scan_through_postgres_redis_and_s3(small_pilot: SmallPilot) -> None:
     from rq import SimpleWorker
 
     settings = Settings()

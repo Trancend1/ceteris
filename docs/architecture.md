@@ -42,7 +42,7 @@ Empat prinsip menurunkan semua keputusan di bawah:
 | API | FastAPI | Autentikasi, validasi permintaan, kebijakan, membuat job, menyajikan laporan dan keputusan gate | Menghitung profil atau estimasi | R1 |
 | Antrian | Redis Queue | Job scan dan job terjadwal | Menyimpan data mentah | R1 |
 | Metadata store | Postgres | Dataset, scan, temuan, estimasi, kebijakan, audit | Menyimpan data mentah yang dipindai | R1 |
-| Object store | S3-compatible (MinIO untuk self-host) | Snapshot Parquet data yang dipindai, laporan HTML | — | R1 |
+| Object store | S3-compatible (SeaweedFS untuk self-host; [ADR 0019](decisions/0019-object-store-seaweedfs.md)) | Snapshot Parquet data yang dipindai, laporan HTML | — | R1 |
 | Model registry | Bucket object store + manifest ([ADR 0018](decisions/0018-phase-7-api-worker-registry.md)) | Artefak meta-model, kalibrator, referensi OOD, laporan akurasi; gate rilis BR-63 | Menerima artefak tanpa metadata wajib | R1 |
 | Web UI | Next.js + shadcn/ui (kerangka) + ECharts (grafik; [ADR 0003](decisions/0003-web-ui-shadcn.md)) | Laporan, dashboard, pengaturan kebijakan | Menghitung status sendiri | R1 |
 
@@ -300,7 +300,7 @@ Untuk R0 berlaku tambahan **reprodusibilitas**: seed turunan ([BR-84](business-r
 | Notebook | Jupyter + papermill, nbstripout |
 | Lingkungan | uv (lock file), Docker |
 | Uji | pytest, hypothesis; mulai R1: schemathesis, Playwright, Locust, Semgrep, pip-audit, Trivy |
-| Server (R1+) | FastAPI, Redis Queue, Postgres, MinIO/S3, Next.js + shadcn/ui (kerangka) + ECharts (grafik; [ADR 0003](decisions/0003-web-ui-shadcn.md)) |
+| Server (R1+) | FastAPI, Redis Queue, Postgres, object store S3-compatible (SeaweedFS di self-host, ADR 0019), Next.js + shadcn/ui (kerangka) + ECharts (grafik; [ADR 0003](decisions/0003-web-ui-shadcn.md)) |
 
 **[F]** cleanlab berlisensi Apache-2.0 sejak versi 2.8.0 (08/01/2026); versi sampai 2.7.1 berlisensi AGPL-3.0 (dicek 12/11/2026 di PyPI dan GitHub). Bila dipakai di produk, hanya versi ≥ 2.8.0 yang bebas kewajiban AGPL. **[K]** F-S05 memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)).
 

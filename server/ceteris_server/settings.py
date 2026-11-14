@@ -1,7 +1,8 @@
 """Konfigurasi server dari variabel lingkungan `CETERIS_*`.
 
 Nilai bawaan cocok untuk pengembangan lokal (SQLite, object store folder lokal, antrian sinkron).
-Docker Compose menimpanya dengan Postgres, Redis, dan MinIO (ADR 0018).
+Docker Compose menimpanya dengan Postgres, Redis, dan object store S3 SeaweedFS
+(ADR 0018, ADR 0019).
 """
 
 from __future__ import annotations

@@ -20,7 +20,7 @@
 | redis | MIT | klien Redis |
 | sqlalchemy | MIT | metadata store |
 | pg8000 | BSD-3-Clause | driver Postgres |
-| minio | Apache-2.0 | object store S3-compatible |
+| minio | Apache-2.0 | klien S3 generik (hanya API S3 dasar; ADR 0019) |
 | python-multipart | Apache-2.0 | unggahan berkas |
 
 - **Dependensi uji baru (grup `dev`):** httpx (BSD-3-Clause), fakeredis (BSD-3-Clause), schemathesis (MIT).
@@ -30,7 +30,7 @@
 
 - Semua konfigurasi lewat variabel lingkungan `CETERIS_*` (`ceteris_server.settings`).
 - **Nilai bawaan untuk pengembangan dan uji:** SQLite, object store berupa folder lokal, dan antrian sinkron di dalam proses.
-- **Docker Compose** menimpanya dengan Postgres, Redis Queue, dan MinIO, sesuai stack terkunci.
+- **Docker Compose** menimpanya dengan Postgres, Redis Queue, dan object store S3-compatible. Layanannya SeaweedFS, karena image MinIO tidak lagi tersedia ([ADR 0019](0019-object-store-seaweedfs.md)).
 - Uji tanpa Docker memakai SQLite, folder lokal, dan fakeredis. Uji dengan layanan sungguhan diberi marker `integration`.
 
 ### 3. Model registry dan gate rilis (BR-63)
