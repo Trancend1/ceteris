@@ -3,6 +3,8 @@ name = "ceteris"
 version = "0.0.0"
 description = "Data quality intelligence: menaksir seberapa besar kekotoran data merugikan hasil."
 readme = "AGENTS.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.11,<3.12"
 dependencies = [
     "polars>=1.0",

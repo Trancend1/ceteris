@@ -103,7 +103,7 @@ Setiap fitur dipetakan ke kebutuhan (persona, RQ, atau user story), ke komponen 
 | F-L02 | Laporan HTML dan unggah lewat web | Scan | P1 · US1.2, US1.3 | Web UI, reporter | BR-06, BR-35, BR-72 | R1 |
 | F-L03 | Histori dan perbandingan antar-scan | Impact Engine | P1 · US2.1 | API, metadata store | BR-61, BR-62 | R1 |
 | F-L04 | Model registry dan versi model | Impact Engine | US2.2 | Model registry | BR-23, BR-63 | R1 |
-| F-L05 | Login dan paket self-host | Platform | US8.1, US8.3 | API, deployment | BR-71 | R1 |
+| F-L05 | Login (akun lokal dan token API; OIDC di R2) dan paket self-host | Platform | US8.1, US8.3 | API, deployment | BR-71 | R1 |
 | F-L06 | Gate CI, kebijakan per dataset, notifikasi | Control | P1 · US3.1–US3.3; M2 | API (gate), worker | BR-50–BR-54 | R2 |
 | F-L07 | Simulator what-if | Control | P1 · US4.1 | API, Impact Engine | BR-44 | R2 |
 | F-L08 | Prioritizer (potensi pemulihan / effort) | Control | P2 · US4.2; M1 | `ceteris.recovery` + tabel effort | BR-41–BR-43 | R2 |
@@ -115,7 +115,7 @@ Setiap fitur dipetakan ke kebutuhan (persona, RQ, atau user story), ke komponen 
 | F-L14 | Umpan balik akurasi lapangan | Trust | US6.2 | API, metadata store | BR-64, BR-73 | R4 |
 | F-L15 | Mode cost (rupiah) | Translate | P3 · US7.2 | Cost model | BR-64 | R5 |
 
-User story `US x.y` dan acceptance criteria-nya dirinci di draft Long-MVP dan dipindahkan ke backlog saat rilis terkait dimulai.
+User story `US x.y` dan acceptance criteria-nya dipindahkan ke backlog saat rilis terkait dimulai. Backlog R1 ada di [backlog/r1.md](backlog/r1.md); isinya direkonstruksi dari dokumen repository karena draf Long-MVP tidak tersedia ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K7).
 
 ## 5. Prioritas: Now / Next / Later
 
@@ -207,9 +207,9 @@ Tingkat OOD adalah KPI yang paling menentukan nilai produk: bila sebagian besar 
 
 | # | Hal terbuka **[T]** | Diputuskan paling lambat |
 | --- | --- | --- |
-| 1 | Model distribusi: open-core, self-host berlisensi, atau keduanya | Sebelum R1 |
+| 1 | **Ditutup [K]**: open-core; repository berlisensi Apache-2.0 ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K3) | — |
 | 2 | **Ditutup [K]**: estimator label noise memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) | — |
-| 3 | Apakah R1 memerlukan versi hosted | Sebelum R1 |
+| 3 | **Ditutup [K]**: R1 tanpa hosted ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K2) | — |
 | 4 | Design partner warehouse untuk R3–R4 | Pencarian dimulai saat R1 |
 | 5 | Tabel effort per jenis temuan: ditetapkan tim atau dipelajari dari umpan balik | Sebelum R2 |
 | 6 | Laporan HTML untuk demo sidang (diambil dari F-L02 setelah G4, bukan dibangun di R0) | G4 |

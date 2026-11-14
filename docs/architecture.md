@@ -23,7 +23,7 @@ Empat prinsip menurunkan semua keputusan di bawah:
 | ML engineer (P1) | `ceteris scan` dari notebook atau CI; membaca laporan | R0 |
 | Sistem CI (GitHub Actions, GitLab CI) | Memanggil gate sebelum training atau deploy | R2 |
 | Kanal notifikasi (Slack, email) | Menerima peringatan gate | R2 |
-| Identity provider | Login pengguna (OIDC) | R2 |
+| Identity provider | Login pengguna (OIDC). R1 memakai akun lokal dan token API ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K4) | R2 |
 | Data engineer (P2) | Mendaftarkan koneksi, mengatur promotion gate | R3 |
 | Warehouse/lake (BigQuery, Snowflake, Postgres, S3/Parquet) | Sumber data yang dipindai, **read-only** | R3 |
 | Tools kualitas data (Soda, Great Expectations) | Sumber temuan yang diimpor | R3 |
@@ -185,7 +185,7 @@ Metadata wajib setiap artefak model: `profile_schema_version`, `learner_spec_ver
 
 ### 6.4 API
 
-Semua endpoint di bawah `/v1`, memakai bearer token (pengguna) atau token layanan (CI), dan mengembalikan galat dalam bentuk `{"error": {"code", "message", "details"}}`.
+Semua endpoint di bawah `/v1`, memakai bearer token (pengguna) atau token layanan (CI), tanpa alias endpoint draf awal ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K6), dan mengembalikan galat dalam bentuk `{"error": {"code", "message", "details"}}`.
 
 | Endpoint | Fungsi | Fitur | Rilis |
 | --- | --- | --- | --- |
@@ -287,7 +287,7 @@ Untuk R0 berlaku tambahan **reprodusibilitas**: seed turunan ([BR-84](business-r
 | Lokal | Paket `ceteris` (`pip` atau image Docker) | Satu-satunya bentuk di R0 | R0 |
 | Self-host kecil | Docker Compose di satu VM | Tim kecil dan uji coba | R1 |
 | Self-host produksi | Helm chart di Kubernetes | Worker diskalakan horizontal | R1 |
-| Hosted | Cluster yang dikelola tim produk | Demo dan pengguna individu; retensi ≤ 24 jam **[T]** | — |
+| Hosted | Cluster yang dikelola tim produk | Demo dan pengguna individu; retensi ≤ 24 jam. Tidak dibangun di R1 ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K2) | Ditinjau setelah R1 |
 
 | Lapisan | Pilihan |
 | --- | --- |
@@ -313,6 +313,8 @@ ceteris/            paket Python: corpus, corrupt, train, dqprofile, store,
 configs/            experiment.yaml, learner.yaml, corruption.yaml, e0.yaml
 notebooks/          NB00–NB10, dijalankan lewat papermill
 tests/              unit, properti, determinisme, kontrak, konsistensi jalur
+server/             API FastAPI dan worker (mulai Phase 7; ADR 0016 K1)
+web/                Web UI Next.js (mulai Phase 10, setelah G6)
 docs/               product.md, architecture.md, business-rules.md,
                     domain/glossary.md, diagrams/
 AGENTS.md, CLAUDE.md
@@ -322,10 +324,10 @@ AGENTS.md, CLAUDE.md
 
 | # | Hal terbuka **[T]** | Bagian terdampak | Diputuskan paling lambat |
 | --- | --- | --- | --- |
-| 1 | Satu repository atau dipisah (paket inti vs server) | 10 | Sebelum R1 |
+| 1 | **Ditutup [K]**: satu repository; `server/` dan `web/` di repository ini ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K1) | 10 | — |
 | 2 | **Ditutup [K]**: estimator label noise memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) | 4, 10 | — |
-| 3 | Apakah versi hosted dibangun di R1 | 10 | Sebelum R1 |
+| 3 | **Ditutup [K]**: tidak ada hosted di R1; lokal dan self-host saja ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K2) | 10 | — |
 | 4 | Perilaku gate saat layanan tidak tersedia (`fail_mode`) | 5.2, NFR-4 | Sebelum R2 |
-| 5 | Batas ukuran unggahan dan strategi sampling untuk data di atas 100.000 baris | 5.1, NFR-1 | Sebelum R1 |
-| 6 | Alias endpoint draft awal (`POST /scan`, `GET /report/{id}`) dipertahankan atau tidak | 6.4 | Sebelum R1 |
+| 5 | **Ditutup [K]**: batas tetap BR-10, data di luar rentang korpus diterima dengan peringatan `outside_corpus_range`, unggahan web ≤ 500 MB per berkas ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K5) | 5.1, NFR-1 | — |
+| 6 | **Ditutup [K]**: alias draf awal tidak dipertahankan ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K6) | 6.4 | — |
 | 7 | **Ditutup [K]**: mesin lokal 4 inti dengan runner yang bisa dilanjutkan; proyeksi pilot ≈ 68 jam CPU. Pindah ke VM awan bila waktu nyata lebih dari 2× proyeksi ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md) G2-6) | 5.1 | — |

@@ -26,7 +26,7 @@ Scan tidak boleh diam-diam menebak bentuk data. Setiap pelanggaran berakhir di *
 
 | ID | Aturan | Jika dilanggar |
 | --- | --- | --- |
-| BR-10 | Format CSV atau Parquet; ≤ 1.000.000 baris dan ≤ 500 kolom. | Ditolak |
+| BR-10 | Format CSV atau Parquet; ≤ 1.000.000 baris dan ≤ 500 kolom. Data di luar rentang korpus (2.000–50.000 baris setelah kontrak input) diterima dengan peringatan `outside_corpus_range` ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K5). | Ditolak |
 | BR-11 | Target satu kolom kategorikal, 2–20 kelas, tiap kelas ≥ 20 baris. | Ditolak |
 | BR-12 | Probe dan estimator label noise memakai sampel ≤ 100.000 baris dengan seed tetap; ukuran sampel dicatat. | Dicatat di laporan |
 | BR-13 | Kolom non-float (integer, string, kategorikal) dengan rasio nilai unik ≥ 0,95 terhadap jumlah baris dianggap kolom ID dan dikeluarkan sebelum probe. Kolom float tidak diperiksa. | Peringatan |
@@ -203,7 +203,7 @@ Keputusan gate untuk scan yang sama:
 | 4 | **Ditutup [K]**: kuantil conformal berbobot sama per dataset ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-22 | — |
 | 5 | **Ditutup [K]**: interval tidak dipotong di nol ([ADR 0011](decisions/0011-phase-3-dan-gate-g2.md)) | BR-22 | — |
 | 6 | **Ditutup [K]**: probe kebocoran memakai pohon `max_depth` 4, `min_samples_leaf` 0,01, dan ambang tetap 0,99 ([ADR 0010](decisions/0010-gate-g1.md)) | BR-15 | — |
-| 7 | Batas ukuran input vs rentang korpus | BR-10 | Sebelum R1 |
+| 7 | **Ditutup [K]**: data di luar rentang korpus (2.000–50.000 baris) diterima dalam batas BR-10 dengan peringatan `outside_corpus_range`; status mengikuti aturan biasa termasuk OOD ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md) K5) | BR-10 | — |
 | 8 | Keputusan gate untuk scan yang ditolak; `fail_mode` | BR-51 | Sebelum R2 |
 | 9 | Tabel effort per `issue_type` | BR-43 | Sebelum R2 |
 | 10 | **Ditutup [K]**: estimator label noise memakai cleanlab `>=2.8.0,<3` ([ADR 0009](decisions/0009-paket-keputusan-g1.md)) | — (fitur F-S05) | — |
