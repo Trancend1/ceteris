@@ -89,7 +89,11 @@ Profiling satu scan 100.000 × 100 (334 detik dengan profiler): noise floor esti
   - Semgrep `p/python`: 0 temuan dari 151 aturan di 28 berkas.
   - pip-audit: tidak ada kerentanan yang diketahui.
   - Tidak ada dependensi berlisensi GPL atau AGPL.
-  - Trivy dan job CI di GitHub belum dijalankan, karena CI baru aktif saat PR dibuka.
+  - **CI GitHub (PR #12):** job `test`, `security`, dan `image` lulus pada commit `9286497`.
+    - Run pertama Trivy menemukan 2 kerentanan HIGH di image dasar: `zlib1g` Debian, serta `jaraco.context` dan `wheel` milik Python sistem.
+    - Perbaikannya: pembaruan keamanan Debian dipasang saat build, dan setuptools serta wheel dihapus dari Python sistem, karena aplikasi berjalan dari `.venv`.
+    - Trivy lokal pada image hasil perbaikan juga bersih.
+    - Action Trivy dikunci ke SHA commit v0.36.0, karena tag rilis lama pernah dibuat ulang.
 - **NFR-1, pengukuran pertama: tidak lolos, tipis.** Tiga scan 100.000 × 100 memakan 331,4, 304,6, dan 293,9 detik; mediannya 304,6 detik, di atas batas 300 detik. Diukur di mesin pengembangan 4 inti yang sedang menjalankan layanan Docker lain.
 - **NFR-1, setelah optimasi (pilihan pemilik repo): lolos.**
   - Tiga scan memakan 264,1, 260,0, dan 260,7 detik; mediannya 260,7 detik, dengan sisa ruang sekitar 13%. Kondisi mesinnya sama.
