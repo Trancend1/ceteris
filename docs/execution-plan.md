@@ -179,6 +179,8 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 
 ### Phase 7 — API, worker, dan model registry
 
+**Status: implementasi selesai 14/11/2026; uji dengan Postgres, Redis, dan MinIO sungguhan menunggu daemon Docker** ([ADR 0018](decisions/0018-phase-7-api-worker-registry.md)). API `/v1`, worker, registry dengan gate BR-63, metadata store, object store, dan Docker Compose sudah ada. Uji AC-5, AC-6, schemathesis, dan NFR-2 indikatif lulus tanpa Docker. Yang belum dijalankan: `docker compose up` dan uji `integration`.
+
 | | |
 | --- | --- |
 | Scope | F-L01 REST API dan worker antrian, F-L04 model registry |

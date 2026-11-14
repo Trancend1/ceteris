@@ -43,7 +43,7 @@ Empat prinsip menurunkan semua keputusan di bawah:
 | Antrian | Redis Queue | Job scan dan job terjadwal | Menyimpan data mentah | R1 |
 | Metadata store | Postgres | Dataset, scan, temuan, estimasi, kebijakan, audit | Menyimpan data mentah yang dipindai | R1 |
 | Object store | S3-compatible (MinIO untuk self-host) | Snapshot Parquet data yang dipindai, laporan HTML | — | R1 |
-| Model registry | Bucket object store + manifest | Artefak meta-model, kalibrator, referensi OOD, laporan akurasi | Menerima artefak tanpa metadata wajib | R1 |
+| Model registry | Bucket object store + manifest ([ADR 0018](decisions/0018-phase-7-api-worker-registry.md)) | Artefak meta-model, kalibrator, referensi OOD, laporan akurasi; gate rilis BR-63 | Menerima artefak tanpa metadata wajib | R1 |
 | Web UI | Next.js + shadcn/ui (kerangka) + ECharts (grafik; [ADR 0003](decisions/0003-web-ui-shadcn.md)) | Laporan, dashboard, pengaturan kebijakan | Menghitung status sendiri | R1 |
 
 Pada **R0** hanya ada SDK/CLI. Model registry digantikan folder rilis, metadata store dan object store digantikan run store Parquet + DuckDB.
@@ -313,7 +313,7 @@ ceteris/            paket Python: corpus, corrupt, train, dqprofile, store,
 configs/            experiment.yaml, learner.yaml, corruption.yaml, e0.yaml
 notebooks/          NB00–NB10, dijalankan lewat papermill
 tests/              unit, properti, determinisme, kontrak, konsistensi jalur
-server/             API FastAPI dan worker (mulai Phase 7; ADR 0016 K1)
+server/             ceteris_server: API FastAPI, worker, registry (Phase 7; ADR 0016 K1, ADR 0018)
 web/                Web UI Next.js (mulai Phase 10, setelah G6)
 docs/               product.md, architecture.md, business-rules.md,
                     domain/glossary.md, diagrams/

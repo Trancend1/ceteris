@@ -43,6 +43,9 @@ SCHEMA_VERSION: Final = "1.0"
 CONDITION: Final = "dibanding model yang dilatih pada versi bersih dan dievaluasi pada data bersih"
 MIN_THRESHOLD = 0.01
 CSV_LOW_CARDINALITY = 20  # sama dengan batas kelas BR-11 (ADR 0014)
+# Rentang baris korpus setelah kontrak input (saringan Phase 1, ADR 0008; ADR 0016 K5).
+CORPUS_MIN_ROWS = 2000
+CORPUS_MAX_ROWS = 50000
 
 StatusValue = Literal["material", "tidak_material", "tidak_yakin"]
 
@@ -183,7 +186,11 @@ def scan(
             value=value, threshold=threshold, noise_floor_estimated=noise_floor, reasons=reasons
         ),
         findings=findings_for(data, target, profile.features, artifact),
-        input_warnings=[*profile.input_warnings, *extra_warnings],
+        input_warnings=[
+            *profile.input_warnings,
+            *corpus_range_warnings(profile.features["n_rows"]),
+            *extra_warnings,
+        ],
         condition=CONDITION,
     )
 
@@ -216,6 +223,18 @@ def read_table(path: Path) -> pd.DataFrame:
     if suffix in {".parquet", ".pq"}:
         return pd.read_parquet(path)
     raise InputContractError([f"BR-10 format_unsupported: {suffix or 'tanpa ekstensi'}"])
+
+
+def corpus_range_warnings(n_rows: float) -> list[str]:
+    """ADR 0016 K5: data di luar rentang baris korpus diterima, dengan peringatan.
+
+    Status tetap ditentukan aturan biasa, termasuk OOD (BR-33).
+    """
+    if CORPUS_MIN_ROWS <= n_rows <= CORPUS_MAX_ROWS:
+        return []
+    return [
+        f"outside_corpus_range: n_rows={int(n_rows)} di luar {CORPUS_MIN_ROWS}-{CORPUS_MAX_ROWS}"
+    ]
 
 
 def csv_type_warnings(frame: pd.DataFrame, target: str) -> list[str]:

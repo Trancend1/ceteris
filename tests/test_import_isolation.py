@@ -49,3 +49,32 @@ def test_ac3_scan_path_runtime_does_not_load_experiment_modules() -> None:
         [sys.executable, "-c", code], capture_output=True, text=True, check=True
     )
     assert result.stdout.strip() == "", f"modul eksperimen termuat: {result.stdout.strip()}"
+
+
+SERVER_DIR = PACKAGE_DIR.parent / "server" / "ceteris_server"
+
+
+def test_ac3_server_source_imports_only_the_scan_path() -> None:
+    """ADR 0016 K1: kode server hanya mengimpor jalur scan dan pemuat artefak (AC-3, AC-4)."""
+    forbidden = {f"ceteris.{name}" for name in EXPERIMENT}
+    modules = sorted(SERVER_DIR.glob("*.py"))
+    assert modules, "paket server tidak ditemukan"
+    for path in modules:
+        found = _imported_names(path) & forbidden
+        assert not found, f"ceteris_server.{path.stem} mengimpor kode eksperimen: {sorted(found)}"
+
+
+def test_ac3_server_runtime_does_not_load_experiment_modules() -> None:
+    names = [f"ceteris_server.{p.stem}" for p in sorted(SERVER_DIR.glob("*.py"))]
+    code = (
+        "import sys\n"
+        f"sys.path.insert(0, {str(SERVER_DIR.parent)!r})\n"
+        f"for m in {names!r}:\n"
+        "    __import__(m)\n"
+        f"loaded = [m for m in {EXPERIMENT!r} if f'ceteris.{{m}}' in sys.modules]\n"
+        "print(','.join(loaded))\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code], capture_output=True, text=True, check=True
+    )
+    assert result.stdout.strip() == "", f"modul eksperimen termuat: {result.stdout.strip()}"

@@ -24,6 +24,18 @@ dependencies = [
 [project.scripts]
 ceteris = "ceteris.scan:app"
 
+[project.optional-dependencies]
+server = [
+    "fastapi>=0.115",
+    "minio>=7.2",
+    "pg8000>=1.31",
+    "python-multipart>=0.0.9",
+    "redis>=5.0",
+    "rq>=2.0",
+    "sqlalchemy>=2.0",
+    "uvicorn>=0.30",
+]
+
 [dependency-groups]
 dev = [
     "pytest>=8.0",
@@ -31,6 +43,9 @@ dev = [
     "hypothesis>=6.100",
     "ruff>=0.6",
     "mypy>=1.11",
+    "httpx>=0.27",
+    "fakeredis>=2.23",
+    "schemathesis>=3.30",
 ]
 notebook = [
     "jupyterlab>=4.2",
@@ -44,13 +59,16 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["ceteris"]
+packages = ["ceteris", "server/ceteris_server"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
-addopts = "-ra --strict-markers -m 'not network'"
-markers = ["network: uji yang menghubungi OpenML; jalankan manual dengan -m network"]
+pythonpath = [".", "server"]
+addopts = "-ra --strict-markers -m 'not network and not integration'"
+markers = [
+    "network: uji yang menghubungi OpenML; jalankan manual dengan -m network",
+    "integration: uji dengan Postgres, Redis, dan MinIO sungguhan (Docker Compose)",
+]
 
 [tool.coverage.run]
 source = ["ceteris"]
@@ -70,12 +88,16 @@ line-ending = "lf"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["ceteris", "ceteris_server", "tests"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["ceteris"]
+files = ["ceteris", "server/ceteris_server"]
+mypy_path = "server"
 
 [[tool.mypy.overrides]]
 # Pustaka tanpa anotasi tipe; diperlakukan sebagai Any (ADR 0004).
-module = ["pandas.*", "sklearn.*", "lightgbm.*", "pyarrow.*", "yaml.*", "scipy.*", "cleanlab.*", "statsmodels.*"]
+module = ["pandas.*", "sklearn.*", "lightgbm.*", "pyarrow.*", "yaml.*", "scipy.*", "cleanlab.*", "statsmodels.*", "rq.*", "minio.*", "fakeredis.*", "schemathesis.*"]
 ignore_missing_imports = true

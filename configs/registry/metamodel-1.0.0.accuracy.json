@@ -1,0 +1,7 @@
+{
+  "regression_set": "openml-cc18:31:ca50952a4348",
+  "mae": 0.0035078478,
+  "coverage_in_range_share": 0.22580645161290322,
+  "n_datasets": 31,
+  "source": "runs/e1/report.json (methods.metamodel.mae, h3.share); epoch 0, LODO bersarang"
+}
