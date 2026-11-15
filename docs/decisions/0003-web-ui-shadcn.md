@@ -49,8 +49,8 @@ Pedoman ini turun dari prinsip "kejujuran sebagai fitur" dan baru mengikat setel
 4. Grafik yang direncanakan: interval plot temuan teratas dengan garis ambang `T` (`markLine`); tren ΔAUC antar-scan dengan pita interval; heatmap kolom × jenis temuan; reliability diagram meta-model.
 5. Dihindari: gauge, pie, radar, dan animasi berlebihan.
 6. Status tidak dibedakan hanya dengan warna merah/hijau; ikon dan teks wajib menyertai.
-7. **[T]** Label status gate di UI (usulan: Lolos / Ditahan / Tidak yakin) harus dipetakan ke keputusan `allow`/`warn`/`block` di BR-50 dan BR-51 sebelum dipakai.
-8. **[T]** Presisi ΔAUC di UI (usulan: tiga desimal, tanda +/− eksplisit, koma desimal pada antarmuka berbahasa Indonesia, tanggal DD/MM/YYYY) dipastikan bersama kalimat kondisi (BR-06) saat UI dibangun.
+7. **[K]** (15/11/2026) UI R1 hanya menampilkan status scan; label status gate dan pemetaannya ke `allow`/`warn`/`block` (BR-50, BR-51) diputuskan bersama F-L06 di R2. Lihat [ui-design.md](../design/ui-design.md) K-1.
+8. **[K]** (15/11/2026) Presisi ΔAUC di UI: tiga desimal, tanda +/− eksplisit, koma desimal, tanggal DD/MM/YYYY, selalu bersama kalimat kondisi (BR-06). Lihat [ui-design.md](../design/ui-design.md) K-2 dan bagian 6.
 
 ## Konsekuensi
 
