@@ -210,7 +210,7 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 | | |
 | --- | --- |
 | Scope | Desain F-L02 (unggah lewat web dan laporan HTML). **Tidak ada kode, instalasi, atau visual hi-fi.** |
-| Deliverable | Dokumen desain UI di `docs/design/ui-design.md`, dengan wireframe dari FigCraft bila syaratnya terpenuhi ([ADR 0017](decisions/0017-rencana-mcp-figcraft-untuk-wireframe.md)) (alur pengguna dari unggah sampai laporan; arsitektur informasi; wireframe low-fidelity; inventaris komponen shadcn/ui per layar sesuai ADR 0003; spesifikasi tiap grafik ECharts; keadaan kosong, memuat, galat, dan penolakan kontrak input; aturan tampil ketidakpastian dan status `tidak_yakin`; rencana aksesibilitas; rencana pengujian UI); ADR bila ada keputusan baru |
+| Deliverable | Dokumen desain UI di `docs/design/ui-design.md`, dengan wireframe yang digambar manual di Figma ([ADR 0020](decisions/0020-figma-manual-menggantikan-figcraft.md), menggantikan ADR 0017) (alur pengguna dari unggah sampai laporan; arsitektur informasi; wireframe low-fidelity; inventaris komponen shadcn/ui per layar sesuai ADR 0003; spesifikasi tiap grafik ECharts; keadaan kosong, memuat, galat, dan penolakan kontrak input; aturan tampil ketidakpastian dan status `tidak_yakin`; rencana aksesibilitas; rencana pengujian UI); ADR bila ada keputusan baru |
 | Keputusan yang harus ditutup | **[T]** label status UI terhadap BR-50/BR-51 dan presisi ΔAUC, tanda, koma desimal, format tanggal (ADR 0003, pedoman 7 dan 8); apakah tampilan histori (F-L03) masuk UI R1; kalimat kondisi (BR-06) dan label eksperimental (BR-35) selalu menyertai angka |
 | Kriteria selesai | Setiap layar punya daftar komponen dan keadaan; setiap grafik punya data masukan yang dipetakan ke field `ScanReport`; tidak ada kebutuhan UI yang menghitung status sendiri |
 | **Gerbang G6** | Lihat `product.md` 5.3. **Tanpa G6, Phase 10 dan 11 tidak dimulai** |
@@ -247,7 +247,7 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 | Validitas noise floor estimasi (BR #2); ambang OOD (BR #3) | **Ditutup di G3** (ADR 0012) |
 | Repository tunggal atau dipisah; hosted; batas unggahan; alias endpoint; model distribusi; login R1 vs OIDC | **Ditutup [K] 14/11/2026** ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md)) |
 | Batas fitur terbuka vs komersial (ADR 0016 K3) | Sebelum fitur komersial pertama (paling cepat R2) |
-| Label status UI, presisi angka, tampilan histori | Phase 9 (G6) |
+| Label status UI, presisi angka, tampilan histori | **Ditutup [K] 15/11/2026** ([ui-design.md](design/ui-design.md) bagian 1); desain keseluruhan tetap menunggu G6 |
 | Perilaku gate saat layanan mati (`fail_mode`), keputusan gate untuk scan ditolak (BR #8), tabel effort (BR #9) | Di luar rencana ini (sebelum R2) |
 
 ## 5. Risiko urutan
