@@ -1,6 +1,6 @@
 # ADR 0017: Rencana MCP FigCraft untuk wireframe Phase 9
 
-- **Status:** **Digantikan** oleh [ADR 0020](0020-figma-manual-menggantikan-figcraft.md) pada 15/11/2026. Rencana diterima **[K]** 14/11/2026 dan dicoba 15/11/2026 dengan rilis v0.18.1: syarat 1–4 terpenuhi, syarat 5 terpenuhi sebagian (perintah jaringan ditolak; uji tanpa jaringan tidak dijalankan) **[F]**. Pemilik repo membatalkannya karena MCP tidak stabil. Isi di bawah ini dipertahankan sebagai catatan historis.
+- **Status:** **Digantikan** oleh [ADR 0021](0021-figma-manual-menggantikan-figcraft.md) pada 15/11/2026. Rencana diterima **[K]** 14/11/2026 dan dicoba 15/11/2026 dengan rilis v0.18.1: syarat 1–4 terpenuhi, syarat 5 terpenuhi sebagian (perintah jaringan ditolak; uji tanpa jaringan tidak dijalankan) **[F]**. Pemilik repo membatalkannya karena MCP tidak stabil. Isi di bawah ini dipertahankan sebagai catatan historis.
 - **Tanggal:** 14/11/2026
 - **Rilis terdampak:** R1, Sprint D (Phase 9)
 - **Rujukan:** `execution-plan.md` prinsip 3 dan Phase 9; [ADR 0003](0003-web-ui-shadcn.md); AGENTS.md butir 12; [docs/design/README.md](../design/README.md)

@@ -1,6 +1,6 @@
 # Desain UI (Phase 9)
 
-Folder ini menampung desain Web UI R1 (F-L02). Phase 9 dimulai 15/11/2026 ([execution-plan.md](../execution-plan.md)); desain masih draf sampai G6. Perkakas dan aturan pakainya ada di [ADR 0020](../decisions/0020-figma-manual-menggantikan-figcraft.md), yang menggantikan ADR 0017 (FigCraft, dibatalkan).
+Folder ini menampung desain Web UI R1 (F-L02). Phase 9 dimulai 15/11/2026 ([execution-plan.md](../execution-plan.md)); desain masih draf sampai G6. Perkakas dan aturan pakainya ada di [ADR 0021](../decisions/0021-figma-manual-menggantikan-figcraft.md), yang menggantikan ADR 0017 (FigCraft, dibatalkan).
 
 ## Struktur
 
@@ -16,7 +16,7 @@ docs/design/
 ## Berkas Figma
 
 - **Tautan berkas:** belum ada **[T]**. Diisi pemilik repo setelah berkas dibuat.
-- **Kit shadcn/ui untuk Figma:** belum dipilih **[T]** (ADR 0020, hal terbuka 1).
+- **Kit shadcn/ui untuk Figma:** belum dipilih **[T]** (ADR 0021, hal terbuka 1).
 
 ## Cara kerja
 

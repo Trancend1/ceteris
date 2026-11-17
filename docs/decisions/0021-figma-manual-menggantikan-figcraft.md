@@ -1,4 +1,4 @@
-# ADR 0020: Figma manual menggantikan FigCraft untuk desain Phase 9
+# ADR 0021: Figma manual menggantikan FigCraft untuk desain Phase 9
 
 - **Status:** Diterima **[K]** (arahan pemilik repo, 15/11/2026). Menggantikan [ADR 0017](0017-rencana-mcp-figcraft-untuk-wireframe.md).
 - **Tanggal:** 15/11/2026

@@ -3,7 +3,7 @@
 - **Status:** Draf Phase 9, **belum disetujui (G6)**. Tidak ada kode UI, instalasi, atau visual hi-fi sebelum G6 (`execution-plan.md` prinsip 3).
 - **Tanggal:** 15/11/2026
 - **Scope:** F-L02 (unggah lewat web dan laporan HTML; US1.2, US1.3), ditambah layar masuk (F-L05, US8.1) dan daftar scan sederhana (bagian dari F-L03, keputusan K-3 di bawah).
-- **Rujukan:** [execution-plan.md](../execution-plan.md) Phase 9; [backlog/r1.md](../backlog/r1.md); [ADR 0003](../decisions/0003-web-ui-shadcn.md); [ADR 0020](../decisions/0020-figma-manual-menggantikan-figcraft.md); kontrak `tests/contracts/scan_report_1.0.schema.json` dan `tests/contracts/openapi_v1.json`.
+- **Rujukan:** [execution-plan.md](../execution-plan.md) Phase 9; [backlog/r1.md](../backlog/r1.md); [ADR 0003](../decisions/0003-web-ui-shadcn.md); [ADR 0021](../decisions/0021-figma-manual-menggantikan-figcraft.md); kontrak `tests/contracts/scan_report_1.0.schema.json` dan `tests/contracts/openapi_v1.json`.
 
 Dokumen ini adalah sumber kebenaran desain UI. Wireframe di `exports/` hanya lampiran. Aturan angka dan status tetap di `business-rules.md`; dokumen ini hanya mengatur cara menampilkannya.
 
@@ -298,7 +298,7 @@ Kontrak OpenAPI `/v1` dibekukan di G5. Hal berikut adalah kebutuhan UI yang belu
 
 ## 10. Wireframe
 
-Wireframe digambar pemilik repo secara manual di Figma ([ADR 0020](../decisions/0020-figma-manual-menggantikan-figcraft.md)); alur kerja, penamaan, dan daftar periksa ada di [README.md](README.md). Ekspor PNG dan SVG disimpan di `exports/` dan ditautkan di tabel ini setelah tersedia.
+Wireframe digambar pemilik repo secara manual di Figma ([ADR 0021](../decisions/0021-figma-manual-menggantikan-figcraft.md)); alur kerja, penamaan, dan daftar periksa ada di [README.md](README.md). Ekspor PNG dan SVG disimpan di `exports/` dan ditautkan di tabel ini setelah tersedia.
 
 | Layar | Ekspor Figma | *Frame* yang perlu digambar | Sketsa acuan |
 | --- | --- | --- | --- |

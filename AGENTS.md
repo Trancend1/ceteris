@@ -26,7 +26,7 @@ Setiap dokumen punya satu tanggung jawab. Baca yang relevan sebelum bekerja; jan
 | User story dan acceptance criteria per rilis | `docs/backlog/r1.md` (R1) |
 | Menjalankan self-host R1 (Docker Compose, TLS, akun, token) | `docs/self-host.md` |
 | Batas epoch eksperimen, arsip, manifest, dan dataset holdout | ADR 0013; arsip tiap epoch di `docs/epochs/epoch-N/` |
-| Desain Web UI dan wireframe (Phase 9), alur kerja Figma manual | `docs/design/` (README); ADR 0020 |
+| Desain Web UI dan wireframe (Phase 9), alur kerja Figma manual | `docs/design/` (README); ADR 0021 |
 | Penyusunan skripsi (workspace lokal, repository git terpisah, diabaikan repo ini) | `.skripsi/README.md`; kode, uji, dan dokumen repo ini tidak boleh merujuk ke sana |
 
 Urutan otoritas bila ada pertentangan: `business-rules.md` (angka dan keputusan) → `architecture.md` (struktur) → `product.md` (scope) → kode. Jika kode bertentangan dengan dokumen, laporkan; jangan diam-diam memilih salah satu.

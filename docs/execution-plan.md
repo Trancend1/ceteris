@@ -2,7 +2,7 @@
 
 Dokumen ini menurunkan roadmap di [product.md](product.md) bagian 5 menjadi **sprint dan phase** yang berurutan, lengkap dengan scope, deliverable, dan kriteria selesai. Ia tidak mengubah roadmap, aturan, atau arsitektur; bila bertentangan, dokumen sumber menang ([AGENTS.md](../AGENTS.md) bagian 2).
 
-Penanda: **[F]** fakta terverifikasi · **[K]** keputusan desain · **[T]** terbuka. **Status dokumen: disetujui pemilik repo pada 10/11/2026 [K].** Dua hal tetap **[T]**: mekanisme login R1 dan urutan G4 terhadap Sprint C (lihat Phase 6 dan bagian 5).
+Penanda: **[F]** fakta terverifikasi · **[K]** keputusan desain · **[T]** terbuka. **Status dokumen: disetujui pemilik repo pada 10/11/2026 [K].** Dua hal yang semula **[T]** sudah ditutup **[K]**: mekanisme login R1 ([ADR 0016](decisions/0016-paket-keputusan-pra-r1.md)) dan urutan G4 terhadap Sprint C ([ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [ADR 0015](decisions/0015-epoch-1-sejajar-sprint-c.md)).
 
 ## 1. Prinsip
 
@@ -17,18 +17,18 @@ Penanda: **[F]** fakta terverifikasi · **[K]** keputusan desain · **[T]** terb
 ```text
 Sprint A  Fondasi dan data riset
   Phase 0  Fondasi repo                      [selesai]
-  Phase 1  Data, korupsi, run store, learner
-  Phase 2  Profil kualitas data           ──► G1
+  Phase 1  Data, korupsi, run store, learner [selesai]
+  Phase 2  Profil kualitas data           ──► G1  [disetujui]
 Sprint B  Bukti ilmiah (R0)
-  Phase 3  Pilot dan scan eksperimental   ──► G2
-  Phase 4  Korpus penuh dan artefak v1    ──► G3
-  Phase 5  Validasi data kotor asli       ──► G4  ──► tinjauan H1
+  Phase 3  Pilot dan scan eksperimental   ──► G2  [disetujui]
+  Phase 4  Korpus penuh dan artefak v1    ──► G3  [disetujui]
+  Phase 5  Validasi data kotor asli       ──► G4  [disetujui] ──► tinjauan H1
 Sprint C  Platform R1
-  Phase 6  Keputusan pra-R1 dan backlog
-  Phase 7  API, worker, registry
-  Phase 8  Histori, login, self-host      ──► G5
+  Phase 6  Keputusan pra-R1 dan backlog      [selesai]
+  Phase 7  API, worker, registry             [selesai]
+  Phase 8  Histori, login, self-host      ──► G5  [disetujui]
 Sprint D  Web UI R1
-  Phase 9  Desain UI (dokumen saja)       ──► G6  (persetujuan pemilik repo)
+  Phase 9  Desain UI (dokumen saja)       ──► G6  (persetujuan pemilik repo) [draf]
   Phase 10 Fondasi UI
   Phase 11 Implementasi F-L02             ──► G7  (gerbang terakhir)
 ```
@@ -210,7 +210,7 @@ Rincian: [ADR 0014](decisions/0014-phase-5-e4-dan-holdout.md), [penutupan epoch 
 | | |
 | --- | --- |
 | Scope | Desain F-L02 (unggah lewat web dan laporan HTML). **Tidak ada kode, instalasi, atau visual hi-fi.** |
-| Deliverable | Dokumen desain UI di `docs/design/ui-design.md`, dengan wireframe yang digambar manual di Figma ([ADR 0020](decisions/0020-figma-manual-menggantikan-figcraft.md), menggantikan ADR 0017) (alur pengguna dari unggah sampai laporan; arsitektur informasi; wireframe low-fidelity; inventaris komponen shadcn/ui per layar sesuai ADR 0003; spesifikasi tiap grafik ECharts; keadaan kosong, memuat, galat, dan penolakan kontrak input; aturan tampil ketidakpastian dan status `tidak_yakin`; rencana aksesibilitas; rencana pengujian UI); ADR bila ada keputusan baru |
+| Deliverable | Dokumen desain UI di `docs/design/ui-design.md`, dengan wireframe yang digambar manual di Figma ([ADR 0021](decisions/0021-figma-manual-menggantikan-figcraft.md), menggantikan ADR 0017) (alur pengguna dari unggah sampai laporan; arsitektur informasi; wireframe low-fidelity; inventaris komponen shadcn/ui per layar sesuai ADR 0003; spesifikasi tiap grafik ECharts; keadaan kosong, memuat, galat, dan penolakan kontrak input; aturan tampil ketidakpastian dan status `tidak_yakin`; rencana aksesibilitas; rencana pengujian UI); ADR bila ada keputusan baru |
 | Keputusan yang harus ditutup | **[T]** label status UI terhadap BR-50/BR-51 dan presisi ΔAUC, tanda, koma desimal, format tanggal (ADR 0003, pedoman 7 dan 8); apakah tampilan histori (F-L03) masuk UI R1; kalimat kondisi (BR-06) dan label eksperimental (BR-35) selalu menyertai angka |
 | Kriteria selesai | Setiap layar punya daftar komponen dan keadaan; setiap grafik punya data masukan yang dipetakan ke field `ScanReport`; tidak ada kebutuhan UI yang menghitung status sendiri |
 | **Gerbang G6** | Lihat `product.md` 5.3. **Tanpa G6, Phase 10 dan 11 tidak dimulai** |
